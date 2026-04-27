@@ -137,6 +137,26 @@
         .pro-active #canvas-bottom-btns {display: none !important;}
         canvas, .game-canvas, .circuit-unit, .node, .gate-btn-v2 { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; } 
         .swap-active { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; height: 8px !important; z-index: 15 !important; opacity: 1 !important; border-top: none !important;}
+        .drag-target {
+            position: relative;
+        }
+        .drag-target::before {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: 10px;
+            bottom: 10px;
+            width: 4px;
+            background-color: #FFB7C5;
+            border-radius: 4px;
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        .drag-target.right::before {
+            left: auto;
+            right: -3px;
+        }
     </style>
 </head>
 <body id="body-root" class="mini-mode">
@@ -860,8 +880,13 @@
                     if (draggedIndex !== null && draggedIndex !== idx) {
                         const rect = u.getBoundingClientRect();
                         const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        u.style.borderLeft = isAfter ? '' : '4px solid #FFB7C5';
-                        u.style.borderRight = isAfter ? '4px solid #FFB7C5' : '';
+                        u.classList.remove('drag-target', 'right');
+
+                        if (!isAfter) {
+                            u.classList.add('drag-target');
+                        } else {
+                            u.classList.add('drag-target', 'right');
+                        }
                     }
                     
                     const rectWrap = wrapper.getBoundingClientRect();
@@ -878,14 +903,12 @@
                 });
                 
                 u.addEventListener('dragleave', () => { 
-                    u.style.borderLeft = ''; 
-                    u.style.borderRight = '';
+                    u.classList.remove('drag-target', 'right');
                 });
                 
                 u.addEventListener('drop', (e) => {
                     e.preventDefault(); 
-                    u.style.borderLeft = ''; 
-                    u.style.borderRight = '';
+                    u.classList.remove('drag-target', 'right');
                     scrollSpeed = 0;
                     
                     if (draggedIndex !== null && draggedIndex !== idx) {
