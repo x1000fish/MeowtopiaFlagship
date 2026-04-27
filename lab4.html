@@ -894,11 +894,13 @@
             return pairs;
         }
 
-        // --- 生成對應的 Mini Hypercube SVG ---
-        function getMiniHypercubeSVG(type) {
+        // --- 生成對應的 Mini Hypercube SVG (支援大紅點標示) ---
+        function getMiniHypercubeSVG(type, activeState = null) {
             let pairs = getHighlightPairsForGate(type);
             const miniNodes = nodePositions.map(n => ({ x: n.relX / 12, y: (n.t - baseOffsetY) / 12 }));
             let svg = `<svg viewBox="-10 -15 65 35" style="width:100%; height:100%; pointer-events:none;" preserveAspectRatio="xMidYMid meet">`;
+            
+            // 畫出所有的連線
             for(let i=0; i<16; i++) {
                 for(let b=0; b<4; b++) {
                     let j = i ^ (1<<b);
@@ -910,10 +912,20 @@
                     }
                 }
             }
+            
+            // 畫出所有的黑色基礎節點
             for(let i=0; i<16; i++) {
                 let n = miniNodes[i];
                 svg += `<circle cx="${n.x}" cy="${n.y}" r="1.5" fill="#463438"/>`;
             }
+
+            // === 新增：如果處於 Trace 模式，標示魚的當前位置 ===
+            if (activeState !== null) {
+                let n = miniNodes[activeState];
+                // 用比粉紅更紅的顏色 (#FF3366)，並加大半徑 (r="3.5")，加上白色外框讓它更立體
+                svg += `<circle cx="${n.x}" cy="${n.y}" r="2.5" fill="#f78790" stroke="#FFF9F0" stroke-width="1.5"/>`;
+            }
+
             svg += `</svg>`;
             return svg;
         }
@@ -1451,8 +1463,20 @@
                 
                 if (!isQuantumMode) {
                     const svgWrap = document.createElement('div');
-                    svgWrap.style.width = '100%'; svgWrap.style.height = '100%'; svgWrap.style.position = 'absolute'; svgWrap.style.zIndex = '4'; svgWrap.style.pointerEvents = 'none';
-                    svgWrap.innerHTML = getMiniHypercubeSVG(g);
+                    svgWrap.style.width = '100%';
+                    svgWrap.style.height = '100%';
+                    svgWrap.style.position = 'absolute';
+                    svgWrap.style.zIndex = '4';
+                    svgWrap.style.pointerEvents = 'none';
+                    
+                    // --- 新增：取得這隻魚在「進入這個 Gate 前」的具體位置 ---
+                    let currentFishPos = null;
+                    if (activeTraceInput !== null) {
+                        currentFishPos = states[idx]; 
+                    }
+                    
+                    // 傳入 currentFishPos 來繪製紅點
+                    svgWrap.innerHTML = getMiniHypercubeSVG(g, currentFishPos);
                     u.appendChild(svgWrap);
                 } else {
                     let controls = [], target = -1;
