@@ -118,10 +118,25 @@
         .swap-active { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; height: 8px !important; z-index: 15 !important; border-top: none !important; opacity: 1 !important; }
 	/* 縮小底部 Paths 區塊裡的 Hypercube 圖示並保持置中 */
         #circuit-content .circuit-unit svg {
-            width: 98% !important;
-            height: 98% !important;
+            width: 95% !important;
+            height: 95% !important;
             margin: auto;
+        } /* <--- 就是這裡原本少了一個大括號！ */
+
+        /* 獨立的拖移指示線 */
+        .drag-insert-left::before, .drag-insert-right::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            bottom: 5px;
+            width: 4px;
+            background-color: #FFB7C5;
+            border-radius: 4px;
+            z-index: 200;
+            pointer-events: none;
         }
+        .drag-insert-left::before { left: -3px; }
+        .drag-insert-right::after { right: -3px; }
     </style>
 </head>
 <body id="body-root" class="mini-mode">
@@ -854,134 +869,110 @@
         function recalculate() { fishAtNode = [8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7]; let h = [...gateHistory]; gateHistory = []; h.forEach(g => { executeLogic(g); gateHistory.push(g); }); steps = gateHistory.length; finishMove(); }
         function finishMove() { document.getElementById('step-count').innerText = steps; updateFishUI(); renderCircuit(); checkWin(); }
         function updateFishUI() { for (let nI = 0; nI < 16; nI++) { const f = document.getElementById(`fish-${fishAtNode[nI]}`), n = nodePositions[nI]; if (f && n) { f.style.top = (n.t + 27) + "px"; f.style.left = (n.l + 15) + "px"; } } }
+	// --- 新增：精準判斷拖曳插入點的計算器 ---
+        function getDropInfo(targetUnit, clientX) {
+            const type = targetUnit.dataset.type;
+            const rect = targetUnit.getBoundingClientRect();
+            const isAfter = (clientX - rect.left) > (rect.width / 2);
+            
+            let insertIdx;
+            let borderLeft = false;
+            let borderRight = false;
+            
+            if (type === 'start') {
+                insertIdx = 0;
+                borderRight = true;
+            } else if (type === 'end') {
+                insertIdx = gateHistory.length;
+                borderLeft = true;
+            } else {
+                const idx = parseInt(targetUnit.dataset.idx);
+                insertIdx = isAfter ? idx + 1 : idx;
+                borderLeft = !isAfter;
+                borderRight = isAfter;
+            }
+            
+            return { insertIdx, borderLeft, borderRight };
+        }
         
         function renderCircuit() {
             const c = document.getElementById('circuit-content');
             const wrapper = document.getElementById('circuit-content-wrapper');
             c.innerHTML = '';
+            
+            // --- 綁定放置目標的共用事件 (電腦版) ---
+            const bindDropEvents = (unit) => {
+                unit.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (draggedIndex === null) return;
+                    const type = unit.dataset.type;
+                    if (type === 'gate' && parseInt(unit.dataset.idx) === draggedIndex) return;
+
+                    // 清除所有舊的指示 class
+                    document.querySelectorAll('.circuit-unit').forEach(el => {
+                        el.classList.remove('drag-insert-left', 'drag-insert-right');
+                    });
+
+                    // 使用新的計算器加入 class
+                    const info = getDropInfo(unit, e.clientX);
+                    if (info.borderLeft) unit.classList.add('drag-insert-left');
+                    if (info.borderRight) unit.classList.add('drag-insert-right');
+                    
+                    if (typeof handleCircuitScroll === 'function') handleCircuitScroll(e);
+                });
+
+                unit.addEventListener('dragleave', () => {
+                    unit.classList.remove('drag-insert-left', 'drag-insert-right');
+                });
+
+                unit.addEventListener('drop', (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    unit.classList.remove('drag-insert-left', 'drag-insert-right');
+                    targetScrollSpeed = 0;
+
+                    if (draggedIndex === null) return;
+                    const type = unit.dataset.type;
+                    if (type === 'gate' && parseInt(unit.dataset.idx) === draggedIndex) return;
+
+                    const info = getDropInfo(unit, e.clientX);
+                    let finalIdx = info.insertIdx;
+                    if (draggedIndex < finalIdx) finalIdx--;
+
+                    if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
+
+                    const oldHistory = [...gateHistory];
+                    const movedItem = gateHistory.splice(draggedIndex, 1)[0];
+                    gateHistory.splice(finalIdx, 0, movedItem);
+
+                    actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
+                    draggedIndex = null;
+                    selectedIndices = [];
+                    recalculate();
+                });
+            };
+            
+            const startU = document.createElement('div');
+            startU.className = 'circuit-unit';
+            startU.style.minWidth = '30px';
+            startU.style.cursor = 'default';
+            startU.dataset.type = 'start';
+            bindDropEvents(startU);
+            c.appendChild(startU);
+            
             gateHistory.forEach((g, idx) => {
                 const u = document.createElement('div');
                 u.className = 'circuit-unit';
+                u.draggable = true;
+                u.dataset.type = 'gate';
+                u.dataset.idx = idx;
                 
                 const hex = getGateColorMap(g);
                 u.style.setProperty('--bg-hover', getRgba(hex, 0.35));
-		u.style.setProperty('--gate-color', hex);
+                u.style.setProperty('--gate-color', hex);
+
+                if (!isQuantumMode) u.style.minWidth = '280px';
                 if (selectedIndices.includes(idx)) u.classList.add('selected-gate');
                 
-                u.draggable = true;
-                u.addEventListener('dragstart', (e) => {
-                    if (isSolved || mobileDragging) return;
-                    draggedIndex = idx;
-                    u.classList.add('opacity-50');
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.dataTransfer.setData('text/plain', idx);
-                });
-                
-                // 【優化點】：減少 DOM 重排卡頓
-                u.addEventListener('dragover', (e) => { 
-                    e.preventDefault(); 
-                    if (draggedIndex !== null && draggedIndex !== idx) {
-                        const rect = u.getBoundingClientRect();
-                        const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        
-                        const newBorderLeft = isAfter ? '' : '4px solid #FFB7C5';
-                        const newBorderRight = isAfter ? '4px solid #FFB7C5' : '';
-                        
-                        if (u.style.borderLeft !== newBorderLeft) u.style.borderLeft = newBorderLeft;
-                        if (u.style.borderRight !== newBorderRight) u.style.borderRight = newBorderRight;
-                    }
-                    
-                    handleCircuitScroll(e);
-                });
-                
-                u.addEventListener('dragleave', () => { 
-                    u.style.borderLeft = ''; 
-                    u.style.borderRight = '';
-                });
-                
-                u.addEventListener('drop', (e) => {
-                    e.preventDefault(); 
-                    u.style.borderLeft = ''; 
-                    u.style.borderRight = '';
-                    targetScrollSpeed = 0; 
-                    
-                    if (draggedIndex !== null && draggedIndex !== idx) {
-                        const rect = u.getBoundingClientRect();
-                        const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        
-                        let targetIdx = idx;
-                        if (isAfter) targetIdx++;
-                        
-                        if (draggedIndex < targetIdx) targetIdx--;
-                        
-                        pop.currentTime = 0; pop.play();
-                        const movedGate = gateHistory.splice(draggedIndex, 1)[0];
-                        gateHistory.splice(targetIdx, 0, movedGate);
-                        actionStack.push({ type: 'replace', index: 0, oldGates: [], newGate: null });
-                        selectedIndices = []; recalculate();
-                    }
-                });
-                u.addEventListener('dragend', () => { 
-                    u.classList.remove('opacity-50'); 
-                    draggedIndex = null; 
-                    targetScrollSpeed = 0; 
-                    renderCircuit(); 
-                });
-
-                u.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (isSolved || mobileDragging || isTouchDevice) return; 
-                    pop.currentTime = 0; pop.play();
-                    const removed = gateHistory[idx];
-                    actionStack.push({ type: 'delete', index: idx, oldGates: [removed] });
-                    gateHistory.splice(idx, 1); 
-                    selectedIndices = []; 
-                    recalculate();
-                });
-
-                u.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    if (isSolved || mobileDragging) return;
-                    const sIdx = selectedIndices.indexOf(idx);
-                    if (sIdx > -1) selectedIndices.splice(sIdx, 1); else selectedIndices.push(idx);
-                    renderCircuit();
-                });
-                
-                u.onmouseenter = () => highlightByGate(g);
-                u.onmouseleave = () => clearHighlight();
-                
-                let touchTimer = null;
-                let startX, startY;
-                u.addEventListener('touchstart', (e) => {
-                    if (isSolved || e.touches.length > 1) return;
-                    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-                    touchTimer = setTimeout(() => { touchTimer = null; }, 400);
-                }, { passive: true });
-                
-                u.addEventListener('touchmove', (e) => {
-                    if (mobileDragging) {
-                    } else if (touchTimer !== null || startY !== undefined) {
-                        const dx = e.touches[0].clientX - startX, dy = e.touches[0].clientY - startY;
-                        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) { if(touchTimer) { clearTimeout(touchTimer); touchTimer = null; } }
-                        if (Math.abs(dy) > 30 && Math.abs(dy) > Math.abs(dx)) {
-                            if (e.cancelable) e.preventDefault();
-                            if (dy > 30) {
-                                const sIdx = selectedIndices.indexOf(idx);
-                                if (sIdx > -1) selectedIndices.splice(sIdx, 1); else selectedIndices.push(idx);
-                                renderCircuit(); startY = undefined; 
-                            } else if (dy < -30) {
-                                pop.currentTime = 0; pop.play();
-                                const removed = gateHistory[idx];
-                                actionStack.push({ type: 'delete', index: idx, oldGates: [removed] });
-                                gateHistory.splice(idx, 1);
-                                selectedIndices = []; recalculate(); startY = undefined;
-                            }
-                        }
-                    }
-                }, { passive: false });
-                
-                u.addEventListener('touchend', () => { if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } });
-
                 if (!isQuantumMode) {
                     u.innerHTML = getMiniHypercubeSVG(g);
                 } else {
@@ -995,18 +986,160 @@
                     else if (g.startsWith('TOF')) { controls.push({ line: parseInt(g[5]), type: parseInt(g[3]) }); controls.push({ line: parseInt(g[6]), type: parseInt(g[4]) }); target = parseInt(g[7]); }
                     if (target !== -1) {
                         let lines = [target, ...controls.map(ctrl => ctrl.line)]; let minQ = Math.min(...lines), maxQ = Math.max(...lines);
-                        const vLine = document.createElement('div'); vLine.className = 'connection-v-line'; vLine.style.cssText = `top:${30 + minQ * 40}px; height:${(maxQ - minQ) * 40}px;`; u.appendChild(vLine);
+                        const vLine = document.createElement('div'); vLine.className = 'connection-v-line'; vLine.style.cssText = `top:${30 + minQ * 40}px; height:${(maxQ - minQ) * 40}px; z-index: 5;`; u.appendChild(vLine);
                         controls.forEach(ctrl => {
-                            const dot = document.createElement('div'); dot.className = 'control-dot'; dot.style.top = (24 + ctrl.line * 40) + 'px';
+                            const dot = document.createElement('div'); dot.className = 'control-dot'; dot.style.top = (24 + ctrl.line * 40) + 'px'; dot.style.zIndex = '6';
                             if (ctrl.type === 0) { dot.style.background = '#fff'; dot.style.border = '2px solid #463438'; } u.appendChild(dot);
                         });
-                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.top = (32 + target * 40) + 'px'; u.appendChild(t);
+                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.top = (32 + target * 40) + 'px'; t.style.zIndex = '6'; u.appendChild(t);
                     }
                 }
+
+                bindDropEvents(u);
+
+                u.addEventListener('dragstart', (e) => {
+                    if (isSolved || mobileDragging) return;
+                    draggedIndex = idx;
+                    u.classList.add('opacity-50');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', idx);
+                });
+
+                u.addEventListener('dragend', (e) => {
+                    e.target.classList.remove('opacity-50');
+                    document.querySelectorAll('.circuit-unit').forEach(el => { el.classList.remove('drag-insert-left', 'drag-insert-right'); });
+                    draggedIndex = null; targetScrollSpeed = 0;
+                    renderCircuit();
+                });
+
+                u.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (isSolved || mobileDragging || isTouchDevice) return; 
+                    if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e => {}); }
+                    const removed = gateHistory[idx]; actionStack.push({ type: 'delete', index: idx, oldGates: [removed] });
+                    gateHistory.splice(idx, 1); selectedIndices = []; recalculate();
+                });
+
+                u.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    if (isSolved || mobileDragging) return;
+                    const sIdx = selectedIndices.indexOf(idx);
+                    if (sIdx > -1) selectedIndices.splice(sIdx, 1); else selectedIndices.push(idx);
+                    renderCircuit();
+                });
+                
+                u.onmouseenter = () => highlightByGate(g);
+                u.onmouseleave = () => clearHighlight();
+                
+                let touchTimer = null, startX, startY;
+                u.addEventListener('touchstart', (e) => {
+                    if (isSolved || e.touches.length > 1) return;
+                    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+                    touchTimer = setTimeout(() => { touchTimer = null; startMobileDrag(e.touches[0], u, idx); }, 400);
+                }, { passive: true });
+                
+                u.addEventListener('touchmove', (e) => {
+                    if (mobileDragging) {
+                        if (e.cancelable) e.preventDefault();
+                        moveMobileDrag(e.touches[0]);
+                        handleCircuitScroll(e.touches[0]);
+                        
+                        document.querySelectorAll('.circuit-unit').forEach(el => { el.classList.remove('drag-insert-left', 'drag-insert-right'); });
+                        
+                        const targetEl = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+                        if (targetEl) {
+                            const targetUnit = targetEl.closest('.circuit-unit');
+                            if (targetUnit) {
+                                const type = targetUnit.dataset.type;
+                                const isSelf = type === 'gate' && parseInt(targetUnit.dataset.idx) === idx;
+                                if (!isSelf) {
+                                    const info = getDropInfo(targetUnit, e.touches[0].clientX);
+                                    if (info.borderLeft) targetUnit.classList.add('drag-insert-left');
+                                    if (info.borderRight) targetUnit.classList.add('drag-insert-right');
+                                }
+                            }
+                        }
+                    } else if (touchTimer !== null || startY !== undefined) {
+                        const dx = e.touches[0].clientX - startX, dy = e.touches[0].clientY - startY;
+                        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) { if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } }
+                        if (Math.abs(dy) > 30 && Math.abs(dy) > Math.abs(dx)) {
+                            if (e.cancelable) e.preventDefault();
+                            if (dy > 30) {
+                                const sIdx = selectedIndices.indexOf(idx);
+                                if (sIdx > -1) selectedIndices.splice(sIdx, 1); else selectedIndices.push(idx);
+                                renderCircuit(); startY = undefined; 
+                            } else if (dy < -30) {
+                                if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
+                                const removed = gateHistory[idx]; actionStack.push({ type: 'delete', index: idx, oldGates: [removed] });
+                                gateHistory.splice(idx, 1); selectedIndices = []; recalculate(); startY = undefined;
+                            }
+                        }
+                    }
+                }, { passive: false });
+                
+                u.addEventListener('touchend', (e) => {
+                    if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+                    if (mobileDragging) { if (e.cancelable) e.preventDefault(); endMobileDrag(e.changedTouches[0]); }
+                });
+                
+                u.addEventListener('touchcancel', (e) => {
+                    if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+                    if (mobileDragging) { const touch = (e.changedTouches && e.changedTouches[0]) || (e.touches && e.touches[0]); if (touch) endMobileDrag(touch); }
+                });
+                
                 c.appendChild(u);
             });
+            
+            const endU = document.createElement('div');
+            endU.className = 'circuit-unit';
+            endU.style.minWidth = '50px';
+            endU.style.flexGrow = '1';
+            endU.style.cursor = 'default';
+            endU.dataset.type = 'end';
+            bindDropEvents(endU);
+            c.appendChild(endU);
+            
             updateUndoStatus();
-            if (selectedIndices.length === 0 && gateHistory.length > 0 && draggedIndex === null) { setTimeout(() => wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' }), 50); }
+            if (selectedIndices.length === 0 && gateHistory.length > 0 && draggedIndex === null) {
+                setTimeout(() => wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' }), 50);
+            }
+        }
+	function endMobileDrag(touch) {
+            let targetUnit = null;
+            const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (targetEl) {
+                targetUnit = targetEl.closest('.circuit-unit');
+            }
+            
+            if (dragGhost) { dragGhost.remove(); dragGhost = null; }
+            if (originalDragEl) { originalDragEl.style.opacity = '1'; originalDragEl = null; }
+            
+            document.querySelectorAll('.circuit-unit').forEach(el => {
+                el.style.opacity = '1'; el.style.visibility = '1';
+                el.classList.remove('drag-insert-left', 'drag-insert-right');
+            });
+            
+            if (targetUnit && mDragIndex !== null) {
+                const type = targetUnit.dataset.type;
+                const isSelf = type === 'gate' && parseInt(targetUnit.dataset.idx) === mDragIndex;
+                if (!isSelf) {
+                    const info = getDropInfo(targetUnit, touch.clientX);
+                    let finalIdx = info.insertIdx;
+                    if (mDragIndex < finalIdx) finalIdx--;
+                    
+                    if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
+                    
+                    const oldHistory = [...gateHistory];
+                    const movedItem = gateHistory.splice(mDragIndex, 1)[0];
+                    gateHistory.splice(finalIdx, 0, movedItem);
+                    
+                    actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
+                    recalculate();
+                }
+            }
+            mobileDragging = false;
+            mDragIndex = null;
+            targetScrollSpeed = 0;
         }
         
         function undo() { if (isSolved || actionStack.length === 0) return; pop.currentTime = 0; pop.play(); const action = actionStack.pop(); if (action.type === 'add') { gateHistory.splice(action.index, 1); } else if (action.type === 'delete') { gateHistory.splice(action.index, 0, ...action.oldGates); } else if (action.type === 'replace') { if (action.newGate === null) gateHistory = [...action.oldGates]; else gateHistory.splice(action.index, 1, ...action.oldGates); } selectedIndices = []; recalculate(); }
