@@ -902,8 +902,7 @@
                 
                 u.addEventListener('drop', (e) => {
                     e.preventDefault(); 
-                    u.style.borderLeft = ''; 
-                    u.style.borderRight = '';
+                    u.classList.remove('drag-target', 'right');
                     scrollSpeed = 0;
                     
                     if (draggedIndex !== null && draggedIndex !== idx) {
