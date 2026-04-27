@@ -814,13 +814,16 @@
         function endMobileDrag(touch) {
             const units = [...document.querySelectorAll('.circuit-unit')];
             let targetIndex = null;
+            let targetUnit = null;
+            
             const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
             if (targetEl) {
-                const targetUnit = targetEl.closest('.circuit-unit');
+                targetUnit = targetEl.closest('.circuit-unit');
                 if (targetUnit) {
                     targetIndex = units.indexOf(targetUnit);
                 }
             }
+            
             if (dragGhost) {
                 dragGhost.remove();
                 dragGhost = null;
@@ -829,14 +832,34 @@
                 originalDragEl.style.visibility = '1';
                 originalDragEl = null;
             }
-            document.querySelectorAll('.circuit-unit').forEach(el => {
+            
+            // 清除所有元素的邊框與透明度狀態
+            units.forEach(el => {
                 el.style.opacity = '1';
                 el.style.visibility = '1';
+                el.style.borderLeft = '';
+                el.style.borderRight = '';
             });
+            
             if (targetIndex !== null && mDragIndex !== null && targetIndex !== mDragIndex) {
+                // --- 手機版：判斷要插在目標的左邊還是右邊 ---
+                const rect = targetUnit.getBoundingClientRect();
+                const isAfter = (touch.clientX - rect.left) > (rect.width / 2);
+                
+                let actualTargetIdx = targetIndex;
+                if (isAfter) actualTargetIdx++;
+                
+                if (mDragIndex < actualTargetIdx) actualTargetIdx--;
+                
+                if (typeof pop !== 'undefined' && pop.play) { 
+                    pop.currentTime = 0; 
+                    pop.play().catch(e=>{}); 
+                }
+                
                 const oldHistory = [...gateHistory];
                 const movedItem = gateHistory.splice(mDragIndex, 1)[0];
-                gateHistory.splice(targetIndex, 0, movedItem);
+                gateHistory.splice(actualTargetIdx, 0, movedItem);
+                
                 actionStack.push({
                     type: 'replace',
                     index: 0,
@@ -1516,6 +1539,31 @@
                     if (mobileDragging) {
                         if (e.cancelable) e.preventDefault();
                         moveMobileDrag(e.touches[0]);
+                        
+                        // --- 1. 手機版：觸發邊緣自動捲動 ---
+                        handleCircuitScroll(e.touches[0]);
+                        
+                        // --- 2. 手機版：顯示粉紅色提示線 ---
+                        // 先清除所有元素的邊框
+                        document.querySelectorAll('.circuit-unit').forEach(unit => {
+                            unit.style.borderLeft = '';
+                            unit.style.borderRight = '';
+                        });
+                        
+                        // 找出手指目前指到的是哪個元素
+                        const targetEl = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+                        if (targetEl) {
+                            const targetUnit = targetEl.closest('.circuit-unit');
+                            const targetIdx = Array.from(document.querySelectorAll('.circuit-unit')).indexOf(targetUnit);
+                            
+                            if (targetUnit && targetIdx !== idx && targetIdx !== -1) {
+                                const rect = targetUnit.getBoundingClientRect();
+                                const isAfter = (e.touches[0].clientX - rect.left) > (rect.width / 2);
+                                
+                                targetUnit.style.borderLeft = isAfter ? '' : '4px solid #FFB7C5';
+                                targetUnit.style.borderRight = isAfter ? '4px solid #FFB7C5' : '';
+                            }
+                        }
                     } else if (touchTimer !== null || startY !== undefined) {
                         const dx = e.touches[0].clientX - startX;
                         const dy = e.touches[0].clientY - startY;
