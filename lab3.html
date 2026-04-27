@@ -58,7 +58,6 @@
         #ios-indicator.active { opacity: 1; transform: translate(-50%, -120%) scale(1); }
         .ind-fraction { color: #463438; font-size: 16px; font-weight: 900; }
         .ind-label { display: none; padding-left: 10px; margin-left: 10px; border-left: 2px solid #ccc; color: #463438; font-weight: bold; }
-        
         .gate-v-line { position: absolute; width: 1.5px; background: #463438; left: 50%; transform: translateX(-50%); z-index: 1; }
         .gate-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid #463438; left: 50%; transform: translate(-50%, -50%); z-index: 2; }
         .gate-dot.fill { background: #463438; }
@@ -96,32 +95,37 @@
         #shake-toast.show { opacity: 1; transform: translateX(-50%) scale(1); }
         @keyframes pulse-toast { 0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 20px rgba(153, 196, 77, 0.6), 0 8px 0 #463438; } 50% { transform: translateX(-50%) scale(1.1); box-shadow: 0 0 30px #99C44D, 0 8px 0 #463438; } }
         .toast-highlight { animation: pulse-toast 1s infinite !important; background: #99C44D !important; color: white !important; }
-
         .mode-toggle-fixed { position: fixed; top: 20px; right: 20px; width: 70px; height: 70px; background: #fff; border: 5px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; box-shadow: 0 4px 0 #463438; z-index: 500; transition: all 0.1s; }
         .mode-toggle-fixed:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #463438; }
         .mode-toggle-fixed:active { transform: translateY(2px); box-shadow: 0 2px 0 #463438; }
         #pro-panel {width: 280px !important; height: 628px !important;padding: 20px !important;border: 8px solid #463438;border-radius: 40px; box-shadow: 10px 10px 0px #99C44D;}
-        
-        /* 補上了 scroll-behavior: smooth */
         #gate-scroll-area { flex: 1; min-height: 0; padding: 10px !important; overflow-y: auto; scrollbar-width: none; scroll-behavior: smooth; }
         #gate-scroll-area::-webkit-scrollbar { display: none; }
-
-        /* Level 8 Gate Button Style Integration */
         .gate-btn-v2 { position: relative; height: 75px; width: 60px; display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid #463438; border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 6px rgba(0,0,0,0.1); background-size: 60% 1.5px; background-repeat: no-repeat; background-position: center 18px, center 36.5px, center 55px; margin: auto;}
         .gate-btn-v2:hover { background-color: #FFB7C5 !important; filter: brightness(1.05); transform: scale(1.05); z-index: 10; }
         .btn-highlight { transform: scale(1.15) !important; box-shadow: 0 0 10px rgba(0,0,0,0.3) !important; border: 4px solid #99C44D !important; z-index: 10; filter: brightness(1.1); background-color: #FFB7C5 !important; }
-
-        /* Level 8 Hyper-line Integration */
         .hyper-line { stroke: #463438; stroke-width: 0.6; opacity: 0.3; }
         .hyper-line-hi { stroke: #FFB7C5; stroke-width: 2.5; opacity: 1; transition: stroke 0.2s; }
         .gate-btn-v2 .hyper-line-hi { stroke: #f78790; }
         .gate-btn-v2:hover .hyper-line-hi { stroke: #ffffff !important; }
         .btn-highlight .hyper-line-hi { stroke: #ffffff !important; }
         .circuit-unit:hover .hyper-line-hi, .circuit-unit.selected-gate .hyper-line-hi { stroke: #99C44D !important; }
-
         .mini-mode .circuit-unit { min-width: 120px !important; width: 120px !important; max-width: 120px !important; flex: 0 0 120px !important; height: 140px; padding: 0 5px; }
         body:not(.mini-mode) #circuit-content { background-image: none !important; }
-        
+        /* 拖曳插入位置提示線 */
+        .drag-target::before {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: 10px;
+            bottom: 10px;
+            width: 6px;
+            background-color: #FFB7C5;
+            box-shadow: 0 0 12px #FFB7C5;
+            border-radius: 4px;
+            z-index: 200;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body id="body-root" class="mini-mode">
@@ -239,7 +243,29 @@
             Object.defineProperty(pos, 'l', { get: () => pos.relX + offsetPro });
             return pos;
         });
-
+        let autoScrollRAF = null;
+        let scrollDirection = 0;
+        let autoScrollWrapper = null;
+        let lastTouchX = 0;
+        let lastTouchY = 0;
+        function handleAutoScroll() {
+            if (!autoScrollWrapper || scrollDirection === 0) {
+                autoScrollRAF = null;
+                return;
+            }
+            autoScrollWrapper.scrollLeft += scrollDirection * 8; 
+            let targetEl = document.elementFromPoint(lastTouchX, lastTouchY);
+            let dropUnit = targetEl ? targetEl.closest('.circuit-unit') : null;
+            document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
+            if (dropUnit && dropUnit !== originalDragEl) {
+                let children = Array.from(document.getElementById('circuit-content').children);
+                let targetIndex = children.indexOf(dropUnit) - 1;
+                if (targetIndex >= 0 && targetIndex < gateHistory.length) {
+                    dropUnit.classList.add('drag-target');
+                }
+            }
+            autoScrollRAF = requestAnimationFrame(handleAutoScroll);
+        }
         function handleMotion(event) {
             const acc = event.accelerationIncludingGravity;
             if (!acc) return;
@@ -436,6 +462,7 @@
             if (dragGhost) { dragGhost.remove(); dragGhost = null; }
             document.querySelectorAll('.gate-visuals').forEach(v => v.style.opacity = '1');
             document.querySelectorAll('.circuit-unit').forEach(u => u.style.opacity = '1');
+            document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
             const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
             let dropUnit = targetEl ? targetEl.closest('.circuit-unit') : null;
             if (dropUnit) {
@@ -1265,10 +1292,20 @@
                     };
                     u.ondragover = (e) => { 
                         e.preventDefault(); 
-                        e.dataTransfer.dropEffect = 'move'; 
+                        e.dataTransfer.dropEffect = 'move';
+                        // 加入提示線
+                        document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
+                        if (draggedIndex !== null && draggedIndex !== idx) {
+                            u.classList.add('drag-target');
+                        }
                         return false; 
                     };
+                    u.ondragleave = (e) => {
+                        // 離開時移除提示線
+                        u.classList.remove('drag-target');
+                    };
                     u.ondrop = (e) => {
+                        u.classList.remove('drag-target'); // 放開時移除提示線
                         if (draggedIndex === null || draggedIndex === idx) return;
                         pop.currentTime = 0; pop.play();
                         const oldHistory = [...gateHistory];
@@ -1281,6 +1318,7 @@
                         if (dragClone && document.body.contains(dragClone)) dragClone.remove();
                         visuals.style.opacity = '1';
                         draggedIndex = null; 
+                        document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
                     };
                 }
                 let touchTimer = null;
@@ -1296,14 +1334,43 @@
                         startMobileDrag(e.touches[0], u, idx);
                     }, 300); 
                 }, {passive: true});
-
                 u.addEventListener('touchmove', (e) => {
                     let dx = e.touches[0].clientX - startX;
                     let dy = e.touches[0].clientY - startY;
-
+                    lastTouchX = e.touches[0].clientX;
+                    lastTouchY = e.touches[0].clientY;
                     if (mobileDragging) {
                         if (e.cancelable) e.preventDefault();
                         moveMobileDrag(e.touches[0]);
+                        const wrapper = document.getElementById('circuit-content-wrapper');
+                        const wrapperRect = wrapper.getBoundingClientRect();
+                        const threshold = 60; // 距離邊緣 60px 觸發捲動
+                        if (lastTouchX < wrapperRect.left + threshold) {
+                            scrollDirection = -1; // 靠左，往左捲動
+                            autoScrollWrapper = wrapper;
+                            if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(handleAutoScroll);
+                        } else if (lastTouchX > wrapperRect.right - threshold) {
+                            scrollDirection = 1;  // 靠右，往右捲動
+                            autoScrollWrapper = wrapper;
+                            if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(handleAutoScroll);
+                        } else {
+                            scrollDirection = 0;  // 不在邊界，停止捲動
+                            if (autoScrollRAF) {
+                                cancelAnimationFrame(autoScrollRAF);
+                                autoScrollRAF = null;
+                            }
+                        }
+                        let targetEl = document.elementFromPoint(lastTouchX, lastTouchY);
+                        let dropUnit = targetEl ? targetEl.closest('.circuit-unit') : null;
+                        document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
+                        if (dropUnit && dropUnit !== u) {
+                            let children = Array.from(document.getElementById('circuit-content').children);
+                            let targetIndex = children.indexOf(dropUnit) - 1;
+                            // 確保是有效的插入點
+                            if (targetIndex >= 0 && targetIndex < gateHistory.length) {
+                                dropUnit.classList.add('drag-target');
+                            }
+                        }
                     } else {
                         // 阻止垂直滑動時觸發瀏覽器預設的下拉更新或滾動，保留水平滑動(dx > dy)以利捲動卷軸
                         if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 5 && e.cancelable) {
@@ -1320,7 +1387,8 @@
 
                 u.addEventListener('touchend', (e) => {
                     if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
-                    
+                    scrollDirection = 0;
+                    if (autoScrollRAF) { cancelAnimationFrame(autoScrollRAF); autoScrollRAF = null; }
                     if (mobileDragging) {
                         if (e.cancelable) e.preventDefault();
                         endMobileDrag(e.changedTouches[0]);
@@ -1330,8 +1398,6 @@
                         let endY = e.changedTouches[0].clientY;
                         let dx = endX - startX;
                         let dy = endY - startY;
-
-                        // 設定滑動閾值大於 30px，且 Y 軸位移大於 X 軸位移才觸發
                         if (Math.abs(dy) > 30 && Math.abs(dy) > Math.abs(dx)) {
                             if (dy < 0) {
                                 // 往上滑：刪除
@@ -1343,7 +1409,6 @@
                                 recalculate();
                                 hideIndicator();
                             } else {
-                                // 往下滑：選取 / 取消選取
                                 const sIdx = selectedIndices.indexOf(idx);
                                 if (sIdx > -1) selectedIndices.splice(sIdx, 1);
                                 else selectedIndices.push(idx);
@@ -1351,12 +1416,13 @@
                             }
                         }
                     }
-
                     if (activeTraceInput === null) setTimeout(() => { u.draggable = true; }, 100);
                 });
-
                 u.addEventListener('touchcancel', (e) => {
                     if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+                    scrollDirection = 0;
+                    if (autoScrollRAF) { cancelAnimationFrame(autoScrollRAF); autoScrollRAF = null; }
+
                     if (mobileDragging) endMobileDrag(e.changedTouches[0]);
                     if (activeTraceInput === null) setTimeout(() => { u.draggable = true; }, 100);
                 });
