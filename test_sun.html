@@ -17,6 +17,7 @@
         .node img { width: 70px; height: auto; pointer-events: none; }
         .fixed-number { position: absolute; bottom: -2px; right: 24px; font-size: 16px; font-weight: 900; color: #463438; pointer-events: none; z-index: 25; }
         .connection-line { position: absolute; background: #463438; z-index: 10; cursor: pointer; transition: all 0.2s ease; opacity: 1; }
+        
         @media (hover: hover) {
             .connection-line:hover { background: var(--highlight-color) !important; box-shadow: 0 0 15px var(--highlight-color); height: 10px !important; z-index: 16; opacity: 1 !important; border-top: none !important; }
         }
@@ -53,10 +54,17 @@
         .view-btn { background: #3d6183; }
         .multi-toggle-btn.mode-5 { background: #ee9ac6; }
         
-        /* 完美對齊 Level 11 按鈕設計 */
         .gate-btn-v2 { position: relative; height: 75px; width: 50px; display: flex; align-items: center; justify-content: center; background-image: linear-gradient(#463438,#463438), linear-gradient(#463438,#463438), linear-gradient(#463438,#463438), linear-gradient(#463438,#463438); background-size: 60% 1.5px; background-repeat: no-repeat; background-position: center 15px, center 30px, center 45px, center 60px; padding: 0; border: 2px solid #463438; border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
-        .gate-btn-v2:hover { background-color: var(--gate-color, #FFF9F0) !important; filter: brightness(1.05); transform: scale(1.05); z-index: 10; }
         
+        /* 選單按鈕 粉紅底 綠色框 Level 11 對齊特效 */
+        .gate-btn-v2:hover, .btn-highlight { 
+            background-color: #FFB7C5 !important; 
+            border: 4px solid #99C44D !important; 
+            transform: scale(1.15); 
+            box-shadow: 0 0 10px rgba(0,0,0,0.3); 
+            z-index: 10; 
+        }
+
         .func-btn { width: 100%; margin-top: 5px; padding: 14px; border-radius: 35px; font-weight: 900; font-size: 16px; border: 2.5px solid #463438; cursor: pointer; box-shadow: 0 4px 0 rgba(70,52,56,0.1); }
         .btn-reset { background: #FFF9F0; color: #463438; }
         .btn-undo { background: #FFB7C5 !important; color: #fff !important; border: 2.5px solid #463438 !important; opacity: 0.6; cursor: not-allowed; pointer-events: none; }
@@ -77,7 +85,8 @@
         .circuit-target { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 2.5px solid #463438; left: 50%; transform: translate(-50%, -50%); z-index: 15; }
         .circuit-target::before { content: ""; position: absolute; width: 2.5px; height: 100%; background: #463438; left: 50%; transform: translateX(-50%); }
         .circuit-target::after { content: ""; position: absolute; width: 100%; height: 2.5px; background: #463438; top: 50%; transform: translateY(-50%); }
-        #gate-scroll-area { margin-top: 5px; max-height: 400px; overflow-y: auto; width: 100%; padding: 5px; scrollbar-width: none; }
+        #gate-scroll-area { margin-top: 5px; flex: 1; overflow-y: auto; width: 100%; padding: 5px; scrollbar-width: none; position: relative; }
+        #gate-scroll-area::-webkit-scrollbar { display: none; }
         #ios-indicator { position: absolute; top: 0; left: 0; transform: translate(-50%, -120%) scale(0.8); background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px); border-radius: 50px; padding: 6px 18px; display: flex; align-items: center; box-shadow: 0 8px 24px rgba(70,52,56,0.1); opacity: 0; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000; pointer-events: none; border: 1px solid rgba(70, 52, 56, 0.2); }
         #ios-indicator.active { opacity: 1; transform: translate(-50%, -120%) scale(1); }
         .ind-fraction { color: #463438; font-size: 16px; font-weight: 900; }
@@ -92,9 +101,12 @@
         
         /* Hypercube SVG Styles & Mode Toggle Styles */
         .hyper-line { stroke: #463438; stroke-width: 0.6; opacity: 0.3; }
-        .hyper-line-hi { stroke: var(--gate-color, #FFB7C5); stroke-width: 2.5; opacity: 1; transition: stroke 0.2s; }
+        .hyper-line-hi { stroke: #FFB7C5; stroke-width: 2.5; opacity: 1; transition: stroke 0.2s; }
+        .gate-btn-v2 .hyper-line-hi { stroke: #f78790; }
         .gate-btn-v2:hover .hyper-line-hi { stroke: #ffffff !important; }
-        .circuit-unit:hover .hyper-line-hi, .circuit-unit.selected-gate .hyper-line-hi { stroke: var(--gate-color, #99C44D) !important; filter: brightness(0.8); }
+        .btn-highlight .hyper-line-hi { stroke: #ffffff !important; }
+        .circuit-unit:hover .hyper-line-hi, .circuit-unit.selected-gate .hyper-line-hi { stroke: #99C44D !important; filter: none; }
+        
         .mini-mode .gate-btn-v2 { background-image: none !important; }
         .mini-mode .circuit-wire-bg { display: none !important; }
         .mode-toggle-fixed { position: fixed; width: 70px; height: 70px; background: #ffffff; border: 5px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 0 #463438; z-index: 500; transition: all 0.1s;}
@@ -125,15 +137,10 @@
         canvas, .game-canvas, .node { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
         .circuit-unit { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; transition: background 0.2s, box-shadow 0.2s; }
         .gate-btn-v2, .multi-toggle-btn, .func-btn, .game-btn, .btn-share { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
-        #shake-toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) scale(0.8); background: #99C44D; color: #463438; padding: 15px 40px; border-radius: 50px; font-weight: 900; font-size: 24px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; border: 4px solid #463438; box-shadow: 0 0 20px rgba(153, 196, 77, 0.6), 0 8px 0 #463438; }
-        #shake-toast.show { opacity: 1; transform: translateX(-50%) scale(1); }
-        @keyframes pulse-toast { 0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 20px rgba(153, 196, 77, 0.6), 0 8px 0 #463438; } 50% { transform: translateX(-50%) scale(1.1); box-shadow: 0 0 30px #99C44D, 0 8px 0 #463438; } }
-        .toast-highlight { animation: pulse-toast 1s infinite !important; background: #99C44D !important; color: white !important; }
         .swap-active { background: var(--highlight-color) !important; box-shadow: 0 0 15px var(--highlight-color) !important; height: 8px !important; z-index: 15 !important; border-top: none !important; opacity: 1 !important; }
     </style>
 </head>
 <body id="body-root" class="mini-mode">
-    <div id="shake-toast">Ctrl Mode: ON</div>
     <button onclick="navWithSound('lab2.html')" class="nav-fab" title="Go to 2-Bit">2</button>
     <div id="quantum-toggle" class="mode-toggle-fixed" onclick="toggleQuantumMode()" style="top: 110px; right: 25px; font-size: 26px;">🔮</div>
     
@@ -213,7 +220,7 @@
     <script>
         let initialFishAtNode = Array.from({ length: 16 }, (_, i) => i);
         let isTraceMode = false;
-        let isQuantumMode = false; // 預設為 Hypercube Paths
+        let isQuantumMode = false; 
         let activeTraceInput = null;
         let currentTraceStep = 0;
         let gateCount = 0, gateHistory = [];
@@ -222,15 +229,16 @@
         let lineMode = 1, hoverLine = null;
         let currentOptionIndex = 0, currentOptions = [], draggedIndex = null;
         let desktopDragGhost = null;
-        let isShakeCtrlActive = false;
-        let lastShakeTime = 0;
-        let shakePermissionRequested = false;
         let mobileDragging = false;
         let mDragIndex = null;
         let dragGhost = null;
         let originalDragEl = null;
         let isTouchDevice = false;
-        let activeMobileLine = null;
+        
+        // 鎖定模式的變數
+        let lockedLineId = null;
+        let hasScrolled = false;
+        
         let touchStartY = 0;
         let lastSwipeTime = 0;
         let lastTiltDirection = 0;
@@ -243,6 +251,15 @@
         const hyperOffset = 400;
         const offsetPro = 100;
         
+        // --- 自動捲動變數 ---
+        let targetGateScrollSpeed = 0;
+        let currentGateScrollSpeed = 0;
+        let gateAutoScrollRAF = null;
+
+        let targetScrollSpeed = 0;
+        let currentScrollSpeed = 0;
+        let autoScrollRAF = null;
+
         const nodePositions = Array.from({ length: 16 }, (_, i) => {
             let x = (i & 1) ? side : 0;
             let y = (i & 2) ? side : 0;
@@ -253,14 +270,12 @@
             return pos;
         });
 
-        // 取得顏色及 RGBA 的函式
         function getRgba(hex, alpha) {
             hex = hex.replace('#', '');
             const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
 
-        // 對應 Level 11 的按鈕顏色
         function getGateColorMap(type) {
             if (type.startsWith('SWAP')) return '#e2de6e';
             if (type.startsWith('TOF')) return '#629eed';
@@ -269,12 +284,118 @@
             return '#463438';
         }
 
+        // --- 自動捲動函數 (左側面板) ---
+        function gateScrollLoop() {
+            const gateScrollArea = document.getElementById('gate-scroll-area');
+            currentGateScrollSpeed += (targetGateScrollSpeed - currentGateScrollSpeed) * 0.15;
+            
+            if (Math.abs(currentGateScrollSpeed) > 0.1 || Math.abs(targetGateScrollSpeed) > 0) {
+                gateScrollArea.scrollTop += currentGateScrollSpeed;
+                gateAutoScrollRAF = requestAnimationFrame(gateScrollLoop);
+            } else {
+                currentGateScrollSpeed = 0;
+                gateAutoScrollRAF = null;
+            }
+        }
+
+        function handleGateScroll(e) {
+            const gateScrollArea = document.getElementById('gate-scroll-area');
+            const rect = gateScrollArea.getBoundingClientRect();
+            const edgeThreshold = 80;
+            const maxSpeed = 12;
+
+            if (gateScrollArea.scrollHeight > gateScrollArea.clientHeight) {
+                let distTop = e.clientY - rect.top;
+                let distBottom = rect.bottom - e.clientY;
+
+                if (distTop < edgeThreshold) {
+                    let ratio = Math.max(0, 1 - (distTop / edgeThreshold));
+                    targetGateScrollSpeed = -(ratio * maxSpeed);
+                    if (!gateAutoScrollRAF) gateAutoScrollRAF = requestAnimationFrame(gateScrollLoop);
+                } else if (distBottom < edgeThreshold) {
+                    let ratio = Math.max(0, 1 - (distBottom / edgeThreshold));
+                    targetGateScrollSpeed = (ratio * maxSpeed);
+                    if (!gateAutoScrollRAF) gateAutoScrollRAF = requestAnimationFrame(gateScrollLoop);
+                } else {
+                    targetGateScrollSpeed = 0;
+                }
+            }
+        }
+
+        // --- 自動捲動函數 (底部電路區塊) ---
+        function scrollLoop() {
+            const circuitWrapper = document.getElementById('circuit-content-wrapper');
+            currentScrollSpeed += (targetScrollSpeed - currentScrollSpeed) * 0.15;
+            
+            if (Math.abs(currentScrollSpeed) > 0.1 || Math.abs(targetScrollSpeed) > 0) {
+                circuitWrapper.scrollLeft += currentScrollSpeed;
+                autoScrollRAF = requestAnimationFrame(scrollLoop);
+            } else {
+                currentScrollSpeed = 0;
+                autoScrollRAF = null;
+            }
+        }
+
+        function handleCircuitScroll(e) {
+            const circuitWrapper = document.getElementById('circuit-content-wrapper');
+            const rect = circuitWrapper.getBoundingClientRect();
+            const edgeThreshold = 120;
+            const maxSpeed = 15;
+
+            let distLeft = e.clientX - rect.left;
+            let distRight = rect.right - e.clientX;
+
+            if (distLeft < edgeThreshold) {
+                let ratio = Math.max(0, 1 - (distLeft / edgeThreshold));
+                targetScrollSpeed = -(ratio * maxSpeed);
+                if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
+            } else if (distRight < edgeThreshold) {
+                let ratio = Math.max(0, 1 - (distRight / edgeThreshold));
+                targetScrollSpeed = (ratio * maxSpeed);
+                if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
+            } else {
+                targetScrollSpeed = 0;
+            }
+        }
+
         window.onload = () => {
             initLabData();
             initGameLayout();
             initGates();
             drawStaticLines();
             recalculate();
+            
+            // 綁定左側面板捲動事件
+            const gateScrollArea = document.getElementById('gate-scroll-area');
+            if(gateScrollArea) {
+                gateScrollArea.addEventListener('mousemove', handleGateScroll);
+                gateScrollArea.addEventListener('mouseleave', () => { targetGateScrollSpeed = 0; });
+            }
+
+            // 綁定底部電路區塊捲動事件
+            const circuitWrapper = document.getElementById('circuit-content-wrapper');
+            if(circuitWrapper) {
+                circuitWrapper.addEventListener('mousemove', (e) => {
+                    if (draggedIndex === null) handleCircuitScroll(e);
+                });
+                circuitWrapper.addEventListener('mouseleave', () => { targetScrollSpeed = 0; });
+                circuitWrapper.addEventListener('dragover', (e) => {
+                    if (draggedIndex !== null) {
+                        e.preventDefault();
+                        handleCircuitScroll(e);
+                    }
+                });
+                circuitWrapper.addEventListener('dragleave', () => { targetScrollSpeed = 0; });
+                circuitWrapper.addEventListener('drop', () => { targetScrollSpeed = 0; });
+                
+                circuitWrapper.addEventListener('wheel', (e) => {
+                    if (Math.abs(e.deltaY) > 0) {
+                        e.preventDefault();
+                        circuitWrapper.scrollLeft += e.deltaY;
+                    }
+                }, { passive: false });
+            }
+
             const requestGyroPermission = async () => {
                 if (!gyroPermissionGranted && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     try {
@@ -295,87 +416,82 @@
             };
             window.addEventListener('click', () => {
                 requestGyroPermission();
-                if (!shakePermissionRequested) {
-                    requestShakePermission();
-                    shakePermissionRequested = true;
-                }
             });
             window.addEventListener('touchstart', () => {
                 requestGyroPermission();
-                if (!shakePermissionRequested) {
-                    requestShakePermission();
-                    shakePermissionRequested = true;
-                }
             }, { once: true });
             const btnMode = document.getElementById('mode-btn');
             if (btnMode) {
                 btnMode.addEventListener('click', requestGyroPermission);
-                btnMode.addEventListener('click', () => {
-                    if (!shakePermissionRequested) {
-                        requestShakePermission();
-                        shakePermissionRequested = true;
-                    }
-                });
             }
-            document.getElementById('circuit-content-wrapper').addEventListener('wheel', (e) => {
-                e.preventDefault();
-                e.currentTarget.scrollLeft += e.deltaY;
-            });
+            
             document.addEventListener('wheel', (e) => {
-                if (!hoverLine || lineMode === 1 || lineMode === 8) return;
-                e.preventDefault();
-                if (e.deltaY > 0) currentOptionIndex = (currentOptionIndex + 1) % currentOptions.length;
-                else currentOptionIndex = (currentOptionIndex - 1 + currentOptions.length) % currentOptions.length;
-                showIndicator();
+                if (!lockedLineId || lineMode === 1 || lineMode === 8 || isTouchDevice) return;
+                const target = e.target;
+                if (!target.closest('#gate-scroll-area') && !target.closest('#circuit-content-wrapper')) {
+                    e.preventDefault();
+                    if (e.deltaY > 0) currentOptionIndex = (currentOptionIndex + 1) % currentOptions.length;
+                    else currentOptionIndex = (currentOptionIndex - 1 + currentOptions.length) % currentOptions.length;
+                    hasScrolled = true;
+                    showIndicatorScrolled();
+                }
             }, { passive: false });
+            
             window.addEventListener('touchstart', () => {
                 isTouchDevice = true;
             }, { once: true });
+            
             const canvas = document.getElementById('main-canvas');
             const indicator = document.getElementById('ios-indicator');
-            canvas.addEventListener('touchstart', (e) => {
-                if (!e.target.classList.contains('connection-line')) {
-                    activeMobileLine = null;
-                    hoverLine = null;
-                    hideIndicator();
-                }
-            });
-            canvas.addEventListener('touchstart', (e) => {
-                if (e.touches.length === 1 && activeMobileLine) {
-                    touchStartY = e.touches[0].clientY;
-                }
-            }, { passive: true });
-            canvas.addEventListener('touchmove', (e) => {
-                if (e.touches.length === 1 && activeMobileLine) {
-                    if (lineMode === 1 || lineMode === 8) return;
-                    if (e.cancelable) e.preventDefault();
-                    let currentY = e.touches[0].clientY;
-                    let diff = currentY - touchStartY;
-                    let now = Date.now();
-                    if (Math.abs(diff) > 25 && (now - lastSwipeTime > 250)) {
-                        if (diff > 0) currentOptionIndex = (currentOptionIndex + 1) % currentOptions.length;
-                        else currentOptionIndex = (currentOptionIndex - 1 + currentOptions.length) % currentOptions.length;
-                        showIndicator();
-                        if ('vibrate' in navigator) navigator.vibrate(20);
-                        touchStartY = currentY;
-                        lastSwipeTime = now;
+            
+            // 電腦版點擊背景取消鎖定
+            canvas.addEventListener('mousedown', (e) => {
+                if (lockedLineId && !isTouchDevice) {
+                    if (e.button === 0 && !e.target.classList.contains('connection-line')) { 
+                        cancelLock(); 
                     }
                 }
-            }, { passive: false });
-            canvas.addEventListener('touchend', () => {
-                touchStartY = 0;
             });
+
+            // 電腦版右鍵確認 Gate
+            canvas.addEventListener('contextmenu', (e) => {
+                if (lockedLineId && !isTouchDevice) {
+                    e.preventDefault(); 
+                    if (lineMode === 8 && hoverLine) applyGate(`X${3 - hoverLine.dim}`);
+                    else if (lineMode === 1 && hoverLine) applyGate(`SWAP_${hoverLine.i}_${hoverLine.j}`);
+                    else if (currentOptions[currentOptionIndex]) applyGate(currentOptions[currentOptionIndex].gateType);
+                }
+            });
+
+            // 手機版取消鎖定
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1 && lockedLineId) {
+                    if (!e.target.classList.contains('connection-line')) { cancelLock(); }
+                }
+            });
+
+            // 手機版雙指確認 Gate
+            window.addEventListener('touchstart', (e) => {
+                if (lockedLineId && e.touches.length >= 2) {
+                    e.preventDefault();
+                    if (lineMode === 8 && hoverLine) applyGate(`X${3 - hoverLine.dim}`);
+                    else if (lineMode === 1 && hoverLine) applyGate(`SWAP_${hoverLine.i}_${hoverLine.j}`);
+                    else if (hasScrolled && currentOptions[currentOptionIndex]) applyGate(currentOptions[currentOptionIndex].gateType);
+                }
+            }, { passive: false });
+
             canvas.addEventListener('mousemove', (e) => {
                 if (indicator.classList.contains('active') && !isTouchDevice) {
                     const rect = canvas.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
                     indicator.style.left = x + 'px';
-                    indicator.style.top = (y - 15) + 'px';
+                    indicator.style.top = (y - 25) + 'px';
                 }
             });
+            
             window.addEventListener('deviceorientation', (e) => {
-                if (!isTouchDevice || !activeMobileLine || lineMode === 1 || lineMode === 8) return;
+                if (!isTouchDevice || !lockedLineId || lineMode === 1 || lineMode === 8) return;
                 let orientation = window.orientation || (screen.orientation && screen.orientation.angle) || 0;
                 let tilt = 0;
                 if (orientation === 0) {
@@ -388,16 +504,24 @@
                     tilt = -e.gamma;
                 }
                 if (tilt === null) return;
+                
+                const now = Date.now();
+                if (now - lastSwipeTime < 400) return;
+
                 if (lastTiltDirection === 0) {
                     if (tilt > TILT_THRESHOLD) {
                         lastTiltDirection = 1;
+                        lastSwipeTime = now;
                         currentOptionIndex = (currentOptionIndex + 1) % currentOptions.length;
-                        showIndicator();
+                        hasScrolled = true;
+                        showIndicatorScrolled();
                         if ('vibrate' in navigator) navigator.vibrate(20);
                     } else if (tilt < -TILT_THRESHOLD) {
                         lastTiltDirection = -1;
+                        lastSwipeTime = now;
                         currentOptionIndex = (currentOptionIndex - 1 + currentOptions.length) % currentOptions.length;
-                        showIndicator();
+                        hasScrolled = true;
+                        showIndicatorScrolled();
                         if ('vibrate' in navigator) navigator.vibrate(20);
                     }
                 } else {
@@ -423,7 +547,6 @@
             }
         }
 
-        // --- 切換量子視圖或 Hypercube 視圖 ---
         function toggleQuantumMode() {
             if(typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
             isQuantumMode = !isQuantumMode;
@@ -632,46 +755,11 @@
                 desktopDragGhost = null;
             }
             if(typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
+            targetScrollSpeed = 0;
             recalculate();
             return false;
         }
-        function handleMotion(event) {
-            const acc = event.accelerationIncludingGravity;
-            if (!acc) return;
-            const threshold = 20;
-            const delta = Math.sqrt(acc.x ** 2 + acc.y ** 2 + acc.z ** 2);
-            if (delta > threshold) {
-                const now = Date.now();
-                if (now - lastShakeTime > 1000) {
-                    isShakeCtrlActive = !isShakeCtrlActive;
-                    lastShakeTime = now;
-                    if (navigator.vibrate) navigator.vibrate([100]);
-                    const toast = document.getElementById('shake-toast');
-                    if (toast) {
-                        toast.style.background = isShakeCtrlActive ? "#99C44D" : "#FFB7C5";
-                        toast.style.color = isShakeCtrlActive ? "white" : "#463438";
-                        toast.innerText = isShakeCtrlActive ? "CTRL MODE: ON" : "CTRL MODE: OFF";
-                        toast.style.opacity = "1";
-                        setTimeout(() => {
-                            toast.style.opacity = "0";
-                        }, 4000);
-                    }
-                }
-            }
-        }
-        function requestShakePermission() {
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                DeviceMotionEvent.requestPermission()
-                    .then(state => {
-                        if (state === 'granted') {
-                            window.addEventListener('devicemotion', handleMotion);
-                        }
-                    })
-                    .catch(console.error);
-            } else {
-                window.addEventListener('devicemotion', handleMotion);
-            }
-        }
+        
         function startMobileDrag(touch, el, index) {
             mobileDragging = true;
             mDragIndex = index;
@@ -744,6 +832,7 @@
             }
             mobileDragging = false;
             mDragIndex = null;
+            targetScrollSpeed = 0;
         }
         function initGameLayout() {
             const nL = document.getElementById('nodes-layer'), fL = document.getElementById('fishes-layer');
@@ -811,16 +900,34 @@
             return svg;
         }
         
-        // --- 設定高亮色彩與關聯路徑 ---
+        // --- 設定高亮色彩、關聯路徑，並觸發按鈕滾動 ---
+        function highlightGateButton(type) {
+            document.querySelectorAll('.gate-btn-v2').forEach(btn => btn.classList.remove('btn-highlight'));
+            if(type) {
+                const btn = document.getElementById(`gate-btn-${type}`);
+                if(btn) {
+                    btn.classList.add('btn-highlight');
+                    
+                    const container = document.getElementById('gate-scroll-area');
+                    const btnRect = btn.getBoundingClientRect();
+                    const containerRect = container.getBoundingClientRect();
+                    
+                    if (btnRect.top < containerRect.top) {
+                        container.scrollTop -= (containerRect.top - btnRect.top + 10);
+                    } else if (btnRect.bottom > containerRect.bottom) {
+                        container.scrollTop += (btnRect.bottom - containerRect.bottom + 10);
+                    }
+                }
+            }
+        }
+
         function highlightByGate(type) {
             clearHighlight();
-            const hex = getGateColorMap(type);
-            document.documentElement.style.setProperty('--highlight-color', hex); // 變換主圖線條顏色
             highlightPairs(getHighlightPairsForGate(type));
+            highlightGateButton(type);
         }
+
         function flashGateLines(type) {
-            const hex = getGateColorMap(type);
-            document.documentElement.style.setProperty('--highlight-color', hex);
             let pairs = getHighlightPairsForGate(type);
             pairs.forEach(([a, b]) => {
                 const el = document.getElementById(`line-${Math.min(a,b)}-${Math.max(a,b)}`);
@@ -871,7 +978,7 @@
                 const hex = getGateColorMap(type);
                 const rgbaLight = getRgba(hex, 0.35);
                 const bgImage = isQuantumMode ? `linear-gradient(#463438,#463438), linear-gradient(#463438,#463438), linear-gradient(#463438,#463438), linear-gradient(#463438,#463438)` : `none`;
-                return `<button class="gate-btn-v2" style="background-color: ${rgbaLight}; background-image: ${bgImage}; --gate-color: ${hex};" onmouseenter="highlightByGate('${type}')" onmouseleave="clearHighlight()" onclick="applyGate('${type}')">${getGateContent(type)}</button>`;
+                return `<button id="gate-btn-${type}" class="gate-btn-v2" style="background-color: ${rgbaLight}; background-image: ${bgImage};" onmouseenter="highlightByGate('${type}')" onmouseleave="clearHighlight()" onclick="applyGate('${type}')">${getGateContent(type)}</button>`;
             };
 
             for(let i=0; i<4; i++) html += wrapBtn(`X${i}`);
@@ -918,103 +1025,106 @@
             } else {
                 line.style.height='3px'; line.style.background='#463438';
             }
+            
             line.onmouseenter = () => {
-                if (isTouchDevice) return;
+                if (isTouchDevice || lockedLineId) return;
                 hoverLine = { i, j, dim };
                 
                 if (lineMode === 1) {
-                    highlightByGate(`SWAP_${i}_${j}`);
+                    highlightPairs([[i, j]]);
+                    highlightGateButton(`SWAP_${i}_${j}`);
                 } else if (lineMode === 8) {
-                    highlightByGate(`X${3 - dim}`);
+                    highlightPairs(getAllPairs(dim));
+                    highlightGateButton(`X${3 - dim}`);
                 } else {
-                    currentOptions = buildGateOptions(i, j, dim);
-                    currentOptionIndex = 0;
-                    showIndicator();
+                    highlightPairs([[i, j]]);
                 }
             };
             line.onmouseleave = () => {
-                if (isTouchDevice) return;
+                if (isTouchDevice || lockedLineId) return;
                 hoverLine = null;
-                hideIndicator();
+                clearHighlight();
             };
-            line.onclick = (e) => {
+           line.onclick = (e) => {
                 e.stopPropagation();
                 if (lineMode === 1) {
                     applyGate(`SWAP_${i}_${j}`);
                     return;
                 }
-                if (isTouchDevice) {
-                    const lineId = line.id;
-                    if (lineMode === 8) {
-                        if (activeMobileLine !== lineId) {
-                            activeMobileLine = lineId;
-                            hoverLine = { i, j, dim };
-                            highlightByGate(`X${3 - dim}`);
-                            return;
-                        } else {
-                            applyGate(`X${3 - dim}`);
-                            activeMobileLine = null;
-                            hideIndicator();
-                            return;
-                        }
-                    }
-                    if (activeMobileLine !== lineId) {
-                        activeMobileLine = lineId;
-                        hoverLine = { i, j, dim };
-                        currentOptions = buildGateOptions(i, j, dim);
-                        currentOptionIndex = 0;
-                        const canvasRect = document.getElementById('main-canvas').getBoundingClientRect();
-                        const indicator = document.getElementById('ios-indicator');
-                        indicator.style.left = (e.clientX - canvasRect.left) + 'px';
-                        indicator.style.top = (e.clientY - canvasRect.top - 25) + 'px';
-                        showIndicator();
-                        return;
-                    } else {
-                        if (currentOptions[currentOptionIndex]) {
-                            applyGate(currentOptions[currentOptionIndex].gateType);
-                        }
-                        activeMobileLine = null;
-                        hideIndicator();
-                        return;
-                    }
-                }
                 if (lineMode === 8) {
                     applyGate(`X${3 - dim}`);
                     return;
                 }
-                if (currentOptions[currentOptionIndex]) {
+                
+                // === 需要修改的區塊 ===
+                if (lockedLineId === line.id) {
+                    // 原本是 cancelLock(); 改成直接執行目前滾輪選中的選項
                     applyGate(currentOptions[currentOptionIndex].gateType);
+                    return;
                 }
+                // =======================
+
+                lockedLineId = line.id;
+                hoverLine = { i, j, dim };
+                currentOptions = buildGateOptions(i, j, dim);
+                currentOptionIndex = 0;
+                hasScrolled = false;
+
+                const canvasRect = document.getElementById('main-canvas').getBoundingClientRect();
+                const indicator = document.getElementById('ios-indicator');
+                indicator.style.left = (e.clientX - canvasRect.left) + 'px';
+                indicator.style.top = (e.clientY - canvasRect.top - 25) + 'px';
+
+                showIndicatorLockedPrompt();
             };
             document.getElementById('lines-layer').appendChild(line);
         }
+        
+        function cancelLock() {
+            lockedLineId = null;
+            hoverLine = null;
+            hasScrolled = false;
+            hideIndicator();
+            clearHighlight();
+        }
+
+        function showIndicatorLockedPrompt() {
+            const pill = document.getElementById('ios-indicator');
+            const frac = document.getElementById('ind-fraction');
+            frac.innerText = isTouchDevice ? `↔ TILT` : `↕ SCROLL & R-CLICK`;
+            pill.classList.add('active');
+            clearHighlight();
+            highlightPairs([[hoverLine.i, hoverLine.j]]);
+        }
+        
+        function showIndicatorScrolled() {
+            const pill = document.getElementById('ios-indicator');
+            const frac = document.getElementById('ind-fraction');
+            const opt = currentOptions[currentOptionIndex];
+            if (!opt) return;
+            frac.innerText = `${currentOptionIndex + 1} / ${currentOptions.length}`;
+            pill.classList.add('active');
+            clearHighlight();
+            highlightPairs(opt.highlightPairs);
+            highlightGateButton(opt.gateType);
+        }
+
         function cycleLineMode(){
             pop.currentTime = 0;
             pop.play();
-            if (!shakePermissionRequested) {
-                requestShakePermission();
-                shakePermissionRequested = true;
-            }
             const modes = [1, 2, 4, 8];
             lineMode = modes[(modes.indexOf(lineMode) + 1) % modes.length];
             const btn = document.getElementById('mode-btn');
             btn.innerText = `Mode: ${lineMode}`;
             btn.className = `multi-toggle-btn mode-${lineMode}`;
-            hideIndicator();
+            cancelLock();
         }
-        function showIndicator() {
-            const pill = document.getElementById('ios-indicator'), frac = document.getElementById('ind-fraction'), label = document.getElementById('ind-label');
-            const opt = currentOptions[currentOptionIndex];
-            if (!opt) return;
-            frac.innerText = `${currentOptionIndex + 1} / ${currentOptions.length}`;
-            label.innerText = opt.label;
-            pill.classList.add('active');
-            clearHighlight();
-            const hex = getGateColorMap(opt.gateType);
-            document.documentElement.style.setProperty('--highlight-color', hex);
-            highlightPairs(opt.highlightPairs);
+        
+        function hideIndicator() { 
+            document.getElementById('ios-indicator').classList.remove('active'); 
+            clearHighlight(); 
         }
-        function hideIndicator() { document.getElementById('ios-indicator').classList.remove('active'); clearHighlight(); }
+        
         function buildGateOptions(i, j, dim) {
             const targetQ = 3 - dim;
             const ctrlPool = [0,1,2,3].filter(q=>q!==targetQ);
@@ -1052,13 +1162,13 @@
                 if(el) el.classList.add('line-highlight');
             });
         }
-        function clearHighlight(){ document.querySelectorAll('.connection-line').forEach(l=>l.classList.remove('line-highlight')); }
+        function clearHighlight(){ 
+            document.querySelectorAll('.connection-line').forEach(l=>l.classList.remove('line-highlight')); 
+            document.querySelectorAll('.gate-btn-v2').forEach(b=>b.classList.remove('btn-highlight'));
+        }
         
         function applyGate(type) {
-            hideIndicator();
-            clearHighlight();
-            activeMobileLine = null;
-            hoverLine = null;
+            cancelLock();
             if (selectedIndices.length > 0) {
                 selectedIndices.sort((a, b) => a - b);
                 const start = selectedIndices[0];
@@ -1205,6 +1315,11 @@
                 u.style.setProperty('--bg-hover', getRgba(hex, 0.35));
                 u.style.setProperty('--gate-color', hex);
 
+                // 針對 Hypercube 路徑視圖放大單元區塊
+                if (!isQuantumMode) {
+                    u.style.minWidth = '280px';
+                }
+
                 if (selectedIndices.includes(idx)) u.classList.add('selected-gate');
                 
                 if (activeTraceInput !== null) {
@@ -1276,6 +1391,7 @@
                 u.onmouseleave = () => clearHighlight();
                 let touchTimer = null;
                 let startX, startY;
+                
                 u.addEventListener('touchstart', (e) => {
                     if (e.touches.length > 1) return;
                     startX = e.touches[0].clientX;
@@ -1285,19 +1401,39 @@
                         startMobileDrag(e.touches[0], u, idx);
                     }, 400);
                 }, { passive: true });
+                
                 u.addEventListener('touchmove', (e) => {
                     if (mobileDragging) {
                         if (e.cancelable) e.preventDefault();
                         moveMobileDrag(e.touches[0]);
-                    } else if (touchTimer) {
+                    } else if (touchTimer !== null || startY !== undefined) {
                         const dx = e.touches[0].clientX - startX;
                         const dy = e.touches[0].clientY - startY;
                         if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-                            clearTimeout(touchTimer);
-                            touchTimer = null;
+                            if (touchTimer) {
+                                clearTimeout(touchTimer);
+                                touchTimer = null;
+                            }
+                        }
+                        if (Math.abs(dy) > 30 && Math.abs(dy) > Math.abs(dx)) {
+                            if (e.cancelable) e.preventDefault();
+                            if (dy > 30) {
+                                // 向下滑動：選取（替換）
+                                const sIdx = selectedIndices.indexOf(idx);
+                                if (sIdx > -1) selectedIndices.splice(sIdx, 1); else selectedIndices.push(idx);
+                                renderCircuit(); startY = undefined; 
+                            } else if (dy < -30) {
+                                // 向上滑動：刪除
+                                if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
+                                const removed = gateHistory[idx];
+                                actionStack.push({ type: 'delete', index: idx, oldGates: [removed] });
+                                gateHistory.splice(idx, 1);
+                                selectedIndices = []; recalculate(); startY = undefined;
+                            }
                         }
                     }
                 }, { passive: false });
+                
                 u.addEventListener('touchend', (e) => {
                     if (touchTimer) {
                         clearTimeout(touchTimer);
@@ -1308,6 +1444,7 @@
                         endMobileDrag(e.changedTouches[0]);
                     }
                 });
+                
                 u.addEventListener('touchcancel', (e) => {
                     if (touchTimer) {
                         clearTimeout(touchTimer);
@@ -1318,25 +1455,31 @@
                         if (touch) endMobileDrag(touch);
                     }
                 });
-                u.onclick = (e) => {
-                    if (mobileDragging) return;
-                    if (e.ctrlKey || e.metaKey || isShakeCtrlActive) {
-                        const sIdx = selectedIndices.indexOf(idx);
-                        if (sIdx > -1) selectedIndices.splice(sIdx, 1);
-                        else selectedIndices.push(idx);
-                        renderCircuit();
-                    } else {
-                        if (typeof pop !== 'undefined' && pop.play) {
-                            pop.currentTime = 0;
-                            pop.play().catch(e => {});
-                        }
-                        const removed = gateHistory[idx];
-                        actionStack.push({ type: 'delete', index: idx, oldGates: [removed] });
-                        gateHistory.splice(idx, 1);
-                        selectedIndices = [];
-                        recalculate();
+                
+                // 左鍵：刪除
+                u.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (mobileDragging || isTouchDevice) return;
+                    if (typeof pop !== 'undefined' && pop.play) {
+                        pop.currentTime = 0;
+                        pop.play().catch(e => {});
                     }
-                };
+                    const removed = gateHistory[idx];
+                    actionStack.push({ type: 'delete', index: idx, oldGates: [removed] });
+                    gateHistory.splice(idx, 1);
+                    selectedIndices = [];
+                    recalculate();
+                });
+
+                // 右鍵：選取（用於替換）
+                u.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    if (mobileDragging) return;
+                    const sIdx = selectedIndices.indexOf(idx);
+                    if (sIdx > -1) selectedIndices.splice(sIdx, 1);
+                    else selectedIndices.push(idx);
+                    renderCircuit();
+                });
                 
                 c.appendChild(u);
             });
@@ -1367,6 +1510,7 @@
         function resetCircuit() {
             if(typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
             gateHistory = []; actionStack = []; selectedIndices = [];
+            targetScrollSpeed = 0;
             recalculate();
         }
         function updateUndoStatus() {
