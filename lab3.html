@@ -1285,6 +1285,7 @@
                 }
                 let touchTimer = null;
                 let startX, startY;
+
                 u.addEventListener('touchstart', (e) => {
                     if (activeTraceInput !== null || e.touches.length > 1) return;
                     u.draggable = false; 
@@ -1295,27 +1296,65 @@
                         startMobileDrag(e.touches[0], u, idx);
                     }, 300); 
                 }, {passive: true});
+
                 u.addEventListener('touchmove', (e) => {
+                    let dx = e.touches[0].clientX - startX;
+                    let dy = e.touches[0].clientY - startY;
+
                     if (mobileDragging) {
                         if (e.cancelable) e.preventDefault();
                         moveMobileDrag(e.touches[0]);
-                    } else if (touchTimer) {
-                        let dx = e.touches[0].clientX - startX;
-                        let dy = e.touches[0].clientY - startY;
-                        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-                            clearTimeout(touchTimer);
-                            touchTimer = null;
+                    } else {
+                        // 阻止垂直滑動時觸發瀏覽器預設的下拉更新或滾動，保留水平滑動(dx > dy)以利捲動卷軸
+                        if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 5 && e.cancelable) {
+                            e.preventDefault();
+                        }
+                        if (touchTimer) {
+                            if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                                clearTimeout(touchTimer);
+                                touchTimer = null;
+                            }
                         }
                     }
                 }, {passive: false});
+
                 u.addEventListener('touchend', (e) => {
                     if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+                    
                     if (mobileDragging) {
                         if (e.cancelable) e.preventDefault();
                         endMobileDrag(e.changedTouches[0]);
+                    } else if (activeTraceInput === null) {
+                        // 結算位移，判斷是否為滑動 (Swipe)
+                        let endX = e.changedTouches[0].clientX;
+                        let endY = e.changedTouches[0].clientY;
+                        let dx = endX - startX;
+                        let dy = endY - startY;
+
+                        // 設定滑動閾值大於 30px，且 Y 軸位移大於 X 軸位移才觸發
+                        if (Math.abs(dy) > 30 && Math.abs(dy) > Math.abs(dx)) {
+                            if (dy < 0) {
+                                // 往上滑：刪除
+                                if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(err => {}); }
+                                const removed = gateHistory[idx];
+                                actionStack.push({ type: 'delete', index: idx, oldGates: [removed] });
+                                gateHistory.splice(idx, 1);
+                                selectedIndices = []; // 刪除後清空現有選取狀態
+                                recalculate();
+                                hideIndicator();
+                            } else {
+                                // 往下滑：選取 / 取消選取
+                                const sIdx = selectedIndices.indexOf(idx);
+                                if (sIdx > -1) selectedIndices.splice(sIdx, 1);
+                                else selectedIndices.push(idx);
+                                renderCircuit();
+                            }
+                        }
                     }
+
                     if (activeTraceInput === null) setTimeout(() => { u.draggable = true; }, 100);
                 });
+
                 u.addEventListener('touchcancel', (e) => {
                     if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
                     if (mobileDragging) endMobileDrag(e.changedTouches[0]);
