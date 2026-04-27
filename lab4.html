@@ -143,6 +143,28 @@
         .swap-active { background: var(--highlight-color) !important; box-shadow: 0 0 15px var(--highlight-color) !important; height: 8px !important; z-index: 15 !important; border-top: none !important; opacity: 1 !important; }
 	/* Paths 模式下，當執行 Trace 時隱藏左右兩側的輸入/輸出數字 */
         .mini-mode.is-tracing .qubit-label { display: none !important; }
+	/* 獨立的拖移指示線 */
+	.drag-insert-left::before, .drag-insert-right::after {
+	    content: '';
+	    position: absolute;
+   	    top: 5px;       /* 距離頂部一點距離 */
+	    bottom: 5px;    /* 距離底部一點距離 */
+	    width: 4px;     /* 線的寬度 */
+	    background-color: #FFB7C5;
+	    border-radius: 4px; /* 圓角讓它看起來像獨立的一根槓槓 */
+	    z-index: 200;
+	    pointer-events: none; /* 確保線不會干擾滑鼠事件 */
+	}
+
+/* 定位在左側縫隙中間 */
+.drag-insert-left::before {
+    left: -3px; 
+}
+
+/* 定位在右側縫隙中間 */
+.drag-insert-right::after {
+    right: -3px;
+}
     </style>
 </head>
 <body id="body-root" class="mini-mode">
@@ -823,27 +845,21 @@
             
             document.querySelectorAll('.circuit-unit').forEach(el => {
                 el.style.opacity = '1'; el.style.visibility = '1';
-                el.style.borderLeft = ''; el.style.borderRight = '';
+                // 清理新版 class
+                el.classList.remove('drag-insert-left', 'drag-insert-right');
             });
             
             if (targetUnit && mDragIndex !== null) {
                 const type = targetUnit.dataset.type;
                 const isSelf = type === 'gate' && parseInt(targetUnit.dataset.idx) === mDragIndex;
-                
-                // 若不是拖曳到自己身上
                 if (!isSelf) {
                     const info = getDropInfo(targetUnit, touch.clientX);
                     let finalIdx = info.insertIdx;
-                    
-                    // 扣除原本的位置誤差
                     if (mDragIndex < finalIdx) finalIdx--;
-                    
                     if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
-                    
                     const oldHistory = [...gateHistory];
                     const movedItem = gateHistory.splice(mDragIndex, 1)[0];
                     gateHistory.splice(finalIdx, 0, movedItem);
-                    
                     actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
                     recalculate();
                 }
@@ -1379,7 +1395,7 @@
                 }
             };
 
-            // --- 綁定放置目標的共用事件 (供電腦版使用) ---
+            // --- 綁定放置目標的共用事件 (電腦版) ---
             const bindDropEvents = (unit) => {
                 unit.addEventListener('dragover', (e) => {
                     e.preventDefault();
@@ -1387,25 +1403,25 @@
                     const type = unit.dataset.type;
                     if (type === 'gate' && parseInt(unit.dataset.idx) === draggedIndex) return;
 
+                    // 清除所有舊的指示 class
                     document.querySelectorAll('.circuit-unit').forEach(el => {
-                        el.style.borderLeft = ''; el.style.borderRight = '';
+                        el.classList.remove('drag-insert-left', 'drag-insert-right');
                     });
 
                     const info = getDropInfo(unit, e.clientX);
-                    if (info.borderLeft) unit.style.borderLeft = '4px solid #FFB7C5';
-                    if (info.borderRight) unit.style.borderRight = '4px solid #FFB7C5';
+                    if (info.borderLeft) unit.classList.add('drag-insert-left');
+                    if (info.borderRight) unit.classList.add('drag-insert-right');
                     
                     if (typeof handleCircuitScroll === 'function') handleCircuitScroll(e);
                 });
 
                 unit.addEventListener('dragleave', () => {
-                    unit.style.borderLeft = '';
-                    unit.style.borderRight = '';
+                    unit.classList.remove('drag-insert-left', 'drag-insert-right');
                 });
 
                 unit.addEventListener('drop', (e) => {
                     e.preventDefault(); e.stopPropagation();
-                    unit.style.borderLeft = ''; unit.style.borderRight = '';
+                    unit.classList.remove('drag-insert-left', 'drag-insert-right');
                     targetScrollSpeed = 0;
 
                     if (draggedIndex === null) return;
@@ -1414,8 +1430,6 @@
 
                     const info = getDropInfo(unit, e.clientX);
                     let finalIdx = info.insertIdx;
-                    
-                    // 扣除掉原本被抽起來的自己，修正陣列誤差
                     if (draggedIndex < finalIdx) finalIdx--;
 
                     if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
@@ -1436,7 +1450,7 @@
             startU.className = 'circuit-unit';
             startU.style.minWidth = '30px';
             startU.style.cursor = 'default';
-            startU.dataset.type = 'start'; // 標記為最左側開頭
+            startU.dataset.type = 'start';
             drawWires(startU, 0);
             bindDropEvents(startU);
             c.appendChild(startU);
@@ -1445,8 +1459,8 @@
                 const u = document.createElement('div');
                 u.className = 'circuit-unit';
                 u.draggable = true;
-                u.dataset.type = 'gate'; // 標記為邏輯閘
-                u.dataset.idx = idx;     // 寫入真實的陣列索引
+                u.dataset.type = 'gate';
+                u.dataset.idx = idx;
                 
                 const hex = getGateColorMap(g);
                 u.style.setProperty('--bg-hover', getRgba(hex, 0.35));
@@ -1463,19 +1477,10 @@
                 
                 if (!isQuantumMode) {
                     const svgWrap = document.createElement('div');
-                    svgWrap.style.width = '100%';
-                    svgWrap.style.height = '100%';
-                    svgWrap.style.position = 'absolute';
-                    svgWrap.style.zIndex = '4';
-                    svgWrap.style.pointerEvents = 'none';
+                    svgWrap.style.width = '100%'; svgWrap.style.height = '100%'; svgWrap.style.position = 'absolute'; svgWrap.style.zIndex = '4'; svgWrap.style.pointerEvents = 'none';
                     
-                    // --- 新增：取得這隻魚在「進入這個 Gate 前」的具體位置 ---
                     let currentFishPos = null;
-                    if (activeTraceInput !== null) {
-                        currentFishPos = states[idx]; 
-                    }
-                    
-                    // 傳入 currentFishPos 來繪製紅點
+                    if (activeTraceInput !== null) { currentFishPos = states[idx]; }
                     svgWrap.innerHTML = getMiniHypercubeSVG(g, currentFishPos);
                     u.appendChild(svgWrap);
                 } else {
@@ -1498,12 +1503,11 @@
                     }
                 }
 
-                // 綁定電腦拖曳與自訂功能
                 bindDropEvents(u);
                 u.addEventListener('dragstart', (e) => handleDragStart(e, idx));
                 u.addEventListener('dragend', (e) => {
                     e.target.style.opacity = '1';
-                    document.querySelectorAll('.circuit-unit').forEach(el => { el.style.borderLeft = ''; el.style.borderRight = ''; });
+                    document.querySelectorAll('.circuit-unit').forEach(el => { el.classList.remove('drag-insert-left', 'drag-insert-right'); });
                     draggedIndex = null; targetScrollSpeed = 0;
                     if (desktopDragGhost) { desktopDragGhost.remove(); desktopDragGhost = null; }
                     renderCircuit();
@@ -1525,7 +1529,10 @@
                         moveMobileDrag(e.touches[0]);
                         handleCircuitScroll(e.touches[0]);
                         
-                        document.querySelectorAll('.circuit-unit').forEach(el => { el.style.borderLeft = ''; el.style.borderRight = ''; });
+                        // 清除所有舊標記
+                        document.querySelectorAll('.circuit-unit').forEach(el => {
+                            el.classList.remove('drag-insert-left', 'drag-insert-right');
+                        });
                         
                         const targetEl = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
                         if (targetEl) {
@@ -1535,8 +1542,8 @@
                                 const isSelf = type === 'gate' && parseInt(targetUnit.dataset.idx) === idx;
                                 if (!isSelf) {
                                     const info = getDropInfo(targetUnit, e.touches[0].clientX);
-                                    if (info.borderLeft) targetUnit.style.borderLeft = '4px solid #FFB7C5';
-                                    if (info.borderRight) targetUnit.style.borderRight = '4px solid #FFB7C5';
+                                    if (info.borderLeft) targetUnit.classList.add('drag-insert-left');
+                                    if (info.borderRight) targetUnit.classList.add('drag-insert-right');
                                 }
                             }
                         }
@@ -1592,7 +1599,7 @@
             endU.style.minWidth = '50px';
             endU.style.flexGrow = '1';
             endU.style.cursor = 'default';
-            endU.dataset.type = 'end'; // 標記為最右側結尾
+            endU.dataset.type = 'end';
             drawWires(endU, states.length > 0 ? states.length - 1 : 0);
             bindDropEvents(endU);
             c.appendChild(endU);
