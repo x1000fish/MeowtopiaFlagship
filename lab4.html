@@ -141,8 +141,8 @@
         .circuit-unit { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; transition: background 0.2s, box-shadow 0.2s; }
         .gate-btn-v2, .multi-toggle-btn, .func-btn, .game-btn, .btn-share { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
         .swap-active { background: var(--highlight-color) !important; box-shadow: 0 0 15px var(--highlight-color) !important; height: 8px !important; z-index: 15 !important; border-top: none !important; opacity: 1 !important; }
-	/* 隱藏 Paths 模式下的 input 與 output 標籤 */
-        .mini-mode .qubit-label { display: none !important; }
+	/* Paths 模式下，當執行 Trace 時隱藏左右兩側的輸入/輸出數字 */
+        .mini-mode.is-tracing .qubit-label { display: none !important; }
     </style>
 </head>
 <body id="body-root" class="mini-mode">
@@ -599,6 +599,10 @@
             if(typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
             activeTraceInput = inputIndex;
             currentTraceStep = 0;
+            
+            // === 新增：加上正在 Trace 的狀態 ===
+            document.body.classList.add('is-tracing');
+            
             document.getElementById('trace-controls').classList.remove('opacity-50', 'pointer-events-none');
             updateTruthTable();
             renderTraceStep();
@@ -613,9 +617,15 @@
         function exitTrace() {
             if(typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
             activeTraceInput = null;
+            
+            // === 新增：移除 Trace 的狀態 ===
+            document.body.classList.remove('is-tracing');
+            
             document.getElementById('trace-controls').classList.add('opacity-50', 'pointer-events-none');
             document.querySelectorAll('.trace-line-active').forEach(el => el.classList.remove('trace-line-active'));
             document.querySelectorAll('.trace-fish-active').forEach(el => el.classList.remove('trace-fish-active'));
+            
+            // 恢復顯示 d0~d3 / q0~q3 並隱藏右側的輸出數字
             for(let i=0; i<4; i++) {
                 document.getElementById(`q-in-${i}`).innerText = isQuantumMode ? `q${i}` : `d${i}`;
                 document.getElementById(`q-out-${i}`).classList.add('hidden-el');
