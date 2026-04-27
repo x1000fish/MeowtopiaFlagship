@@ -112,16 +112,15 @@
         .circuit-unit:hover .hyper-line-hi, .circuit-unit.selected-gate .hyper-line-hi { stroke: #99C44D !important; }
         .mini-mode .circuit-unit { min-width: 120px !important; width: 120px !important; max-width: 120px !important; flex: 0 0 120px !important; height: 140px; padding: 0 5px; }
         body:not(.mini-mode) #circuit-content { background-image: none !important; }
-        /* 拖曳插入位置提示線 */
+        .mini-mode .qubit-label { display: none !important; }
         .drag-target::before {
             content: '';
             position: absolute;
             left: -3px;
             top: 10px;
             bottom: 10px;
-            width: 6px;
+            width: 4px;
             background-color: #FFB7C5;
-            box-shadow: 0 0 12px #FFB7C5;
             border-radius: 4px;
             z-index: 200;
             pointer-events: none;
@@ -257,15 +256,49 @@
             let targetEl = document.elementFromPoint(lastTouchX, lastTouchY);
             let dropUnit = targetEl ? targetEl.closest('.circuit-unit') : null;
             document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
-            if (dropUnit && dropUnit !== originalDragEl) {
-                let children = Array.from(document.getElementById('circuit-content').children);
-                let targetIndex = children.indexOf(dropUnit) - 1;
-                if (targetIndex >= 0 && targetIndex < gateHistory.length) {
-                    dropUnit.classList.add('drag-target');
+            let isDraggedEl = false;
+            if (draggedIndex !== null && dropUnit && dropUnit.dataset.index !== undefined) {
+                if (parseInt(dropUnit.dataset.index) === draggedIndex) {
+                    isDraggedEl = true;
                 }
+            }
+            if (dropUnit && dropUnit !== originalDragEl && !isDraggedEl && dropUnit.dataset.index !== undefined) {
+                dropUnit.classList.add('drag-target');
             }
             autoScrollRAF = requestAnimationFrame(handleAutoScroll);
         }
+        document.addEventListener('dragover', (e) => {
+            if (draggedIndex === null) return; // 只有在拖曳 Gate 時才觸發
+            lastTouchX = e.clientX;
+            lastTouchY = e.clientY;
+            const wrapper = document.getElementById('circuit-content-wrapper');
+            if (!wrapper) return;
+            const wrapperRect = wrapper.getBoundingClientRect();
+            const threshold = 60; // 滑鼠距離邊緣 60px 觸發捲動
+            if (lastTouchX < wrapperRect.left + threshold) {
+                scrollDirection = -1; // 往左捲動
+                autoScrollWrapper = wrapper;
+                if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(handleAutoScroll);
+            } else if (lastTouchX > wrapperRect.right - threshold) {
+                scrollDirection = 1;  // 往右捲動
+                autoScrollWrapper = wrapper;
+                if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(handleAutoScroll);
+            } else {
+                scrollDirection = 0;  // 不在邊界時停止捲動
+                if (autoScrollRAF) {
+                    cancelAnimationFrame(autoScrollRAF);
+                    autoScrollRAF = null;
+                }
+            }
+        });
+        document.addEventListener('dragend', () => {
+            scrollDirection = 0;
+            if (autoScrollRAF) { cancelAnimationFrame(autoScrollRAF); autoScrollRAF = null; }
+        });
+        document.addEventListener('drop', () => {
+            scrollDirection = 0;
+            if (autoScrollRAF) { cancelAnimationFrame(autoScrollRAF); autoScrollRAF = null; }
+        });
         function handleMotion(event) {
             const acc = event.accelerationIncludingGravity;
             if (!acc) return;
@@ -463,16 +496,19 @@
             document.querySelectorAll('.gate-visuals').forEach(v => v.style.opacity = '1');
             document.querySelectorAll('.circuit-unit').forEach(u => u.style.opacity = '1');
             document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
+            
             const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
             let dropUnit = targetEl ? targetEl.closest('.circuit-unit') : null;
-            if (dropUnit) {
-                let children = Array.from(document.getElementById('circuit-content').children);
-                let targetIndex = children.indexOf(dropUnit) - 1;
-                if (targetIndex >= 0 && targetIndex < gateHistory.length && targetIndex !== mDragIndex) {
+            
+            if (dropUnit && dropUnit !== originalDragEl && dropUnit.dataset.index !== undefined) {
+                let targetIdx = parseInt(dropUnit.dataset.index);
+                if (targetIdx === -1) targetIdx = 0; // 若拖到頭部的感應區
+
+                if (targetIdx !== mDragIndex) {
                     if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e => {}); }
                     const oldHistory = [...gateHistory];
                     const movedItem = gateHistory.splice(mDragIndex, 1)[0];
-                    gateHistory.splice(targetIndex, 0, movedItem);
+                    gateHistory.splice(targetIdx, 0, movedItem);
                     actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
                     selectedIndices = []; recalculate();
                 }
@@ -694,7 +730,7 @@
             }
             return pairs;
         }
-        function getMiniHypercubeSVG(type) {
+        function getMiniHypercubeSVG(type, activeState = null) {
             const pairs = getHighlightPairsForGate(type);
             const xs = nodePositions.map(n => n.relX);
             const ys = nodePositions.map(n => n.t);
@@ -717,7 +753,12 @@
             }
             for (let i = 0; i < 8; i++) {
                 const n = miniNodes[i];
-                svg += `<circle cx="${n.x}" cy="${n.y}" r="3.5" fill="#463438"/>`;
+                const isActive = (i === activeState);
+                if (isActive) {
+                    svg += `<circle cx="${n.x}" cy="${n.y}" r="6" fill="#f78790" stroke="#ffffff" stroke-width="2"/>`;
+                } else {
+                    svg += `<circle cx="${n.x}" cy="${n.y}" r="3.5" fill="#463438"/>`;
+                }
             }
             svg += `</svg>`;
             return svg;
@@ -766,11 +807,13 @@
                 const btn = document.getElementById(`gate-btn-${type}`);
                 if(btn) {
                     btn.classList.add('btn-highlight');
-                    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    // 只允許電腦版自動捲動，手機版不捲動避免畫面亂跑
+                    if (!isTouchDevice) {
+                        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
                 }
             }
         }
-        
         function setQuantumMode(value) {
             isQuantumMode = value;
             document.getElementById('body-root').classList.toggle('mini-mode', !isQuantumMode);
@@ -1198,7 +1241,9 @@
                     states.push(curr);
                 }
             }
+
             const drawWires = (parentUnit, stepIdx) => {
+                if (!isQuantumMode) return; // Hypercube 模式不畫水平線條
                 for (let q = 0; q < 3; q++) {
                     let wire = document.createElement('div');
                     wire.className = 'horizontal-wire'; 
@@ -1228,21 +1273,64 @@
                     parentUnit.appendChild(wire);
                 }
             };
-            if (isQuantumMode || activeTraceInput !== null) {
-                const startU = document.createElement('div');
-                startU.className = 'circuit-unit';
-                startU.style.minWidth = '30px';
-                startU.style.cursor = 'default';
-                drawWires(startU, 0);
-                c.appendChild(startU);
+
+            // --- 建立頭部感應區 ---
+            const startU = document.createElement('div');
+            startU.className = 'circuit-unit';
+            startU.style.cursor = 'default';
+            startU.dataset.index = '-1'; 
+            
+            // 根據模式決定頭部空白的大小或隱藏
+            if (!isQuantumMode) {
+                if (activeTraceInput !== null) {
+                    startU.style.display = 'none'; // Trace模式完全隱藏
+                } else {
+                    startU.style.setProperty('min-width', '15px', 'important');
+                    startU.style.setProperty('width', '15px', 'important');
+                    startU.style.setProperty('max-width', '15px', 'important');
+                    startU.style.setProperty('flex', '0 0 15px', 'important');
+                    startU.style.padding = '0';
+                }
+            } else {
+                startU.style.setProperty('min-width', '30px', 'important');
+                startU.style.setProperty('width', '30px', 'important');
+                startU.style.setProperty('max-width', '30px', 'important');
+                startU.style.setProperty('flex', '0 0 30px', 'important');
             }
+            drawWires(startU, 0);
+
+            if (!isTouchDevice && activeTraceInput === null) {
+                startU.ondragover = (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
+                    if (draggedIndex !== null) startU.classList.add('drag-target');
+                    return false;
+                };
+                startU.ondragleave = () => startU.classList.remove('drag-target');
+                startU.ondrop = () => {
+                    startU.classList.remove('drag-target');
+                    if (draggedIndex === null) return;
+                    pop.currentTime = 0; pop.play();
+                    const oldHistory = [...gateHistory];
+                    const movedGate = gateHistory.splice(draggedIndex, 1)[0];
+                    gateHistory.splice(0, 0, movedGate); 
+                    actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
+                    selectedIndices = []; recalculate(); draggedIndex = null;
+                };
+            }
+            c.appendChild(startU);
+
+            // --- 迴圈渲染電路中的 Gate ---
             gateHistory.forEach((g, idx) => {
                 const u = document.createElement('div');
                 u.className = 'circuit-unit' + (selectedIndices.includes(idx) ? ' selected-gate' : '');
+                u.dataset.index = idx;
                 u.draggable = !isTouchDevice && activeTraceInput === null;
+
                 const hexColor = getGateColorMap(g);
                 u.style.setProperty('--gate-bg-color', getRgba(hexColor, 0.35));
                 u.style.setProperty('--gate-border-color', hexColor);
+                
                 u.oncontextmenu = (e) => { 
                     e.preventDefault(); 
                     if (mobileDragging || activeTraceInput !== null) return false;
@@ -1253,7 +1341,8 @@
                     return false;
                 };
 
-                if (isQuantumMode || activeTraceInput !== null) drawWires(u, idx + 1);
+                drawWires(u, idx + 1);
+
                 const visuals = document.createElement('div');
                 visuals.className = 'gate-visuals';
                 visuals.style.position = 'absolute';
@@ -1261,192 +1350,18 @@
                 visuals.style.width = '100%';
                 visuals.style.height = '100%';
                 visuals.style.pointerEvents = 'none'; 
+                
                 if (activeTraceInput !== null) {
                     if (idx === currentTraceStep - 1) u.classList.add('trace-active');
                     else if (idx >= currentTraceStep) visuals.style.opacity = '0.35';
                 }
-                u.appendChild(visuals);
-                if (!isTouchDevice && activeTraceInput === null) {
-                    let dragClone = null;
-                    u.ondragstart = (e) => { 
-                        draggedIndex = idx; 
-                        e.dataTransfer.effectAllowed = 'move'; 
-                        dragClone = u.cloneNode(true);
-                        dragClone.querySelectorAll('.horizontal-wire').forEach(w => w.remove());
-                        dragClone.style.position = 'absolute';
-                        dragClone.style.top = '-9999px';
-                        dragClone.style.left = '-9999px';
-                        dragClone.style.background = 'rgba(255, 183, 197, 0.4)';
-                        dragClone.style.borderRadius = '12px';
-                        dragClone.style.boxSizing = 'border-box';
-                        dragClone.style.border = 'none';
-                        document.body.appendChild(dragClone);
-                        const rect = u.getBoundingClientRect();
-                        const offsetX = e.clientX - rect.left;
-                        const offsetY = e.clientY - rect.top;
-                        e.dataTransfer.setDragImage(dragClone, offsetX, offsetY);
-                        setTimeout(() => {
-                            if (document.body.contains(dragClone)) dragClone.remove();
-                            visuals.style.opacity = '0.35';
-                        }, 0);
-                    };
-                    u.ondragover = (e) => { 
-                        e.preventDefault(); 
-                        e.dataTransfer.dropEffect = 'move';
-                        // 加入提示線
-                        document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
-                        if (draggedIndex !== null && draggedIndex !== idx) {
-                            u.classList.add('drag-target');
-                        }
-                        return false; 
-                    };
-                    u.ondragleave = (e) => {
-                        // 離開時移除提示線
-                        u.classList.remove('drag-target');
-                    };
-                    u.ondrop = (e) => {
-                        u.classList.remove('drag-target'); // 放開時移除提示線
-                        if (draggedIndex === null || draggedIndex === idx) return;
-                        pop.currentTime = 0; pop.play();
-                        const oldHistory = [...gateHistory];
-                        const movedGate = gateHistory.splice(draggedIndex, 1)[0];
-                        gateHistory.splice(idx, 0, movedGate);
-                        actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
-                        selectedIndices = []; recalculate(); draggedIndex = null;
-                    };
-                    u.ondragend = (e) => { 
-                        if (dragClone && document.body.contains(dragClone)) dragClone.remove();
-                        visuals.style.opacity = '1';
-                        draggedIndex = null; 
-                        document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
-                    };
-                }
-                let touchTimer = null;
-                let startX, startY;
 
-                u.addEventListener('touchstart', (e) => {
-                    if (activeTraceInput !== null || e.touches.length > 1) return;
-                    u.draggable = false; 
-                    startX = e.touches[0].clientX;
-                    startY = e.touches[0].clientY;
-                    touchTimer = setTimeout(() => {
-                        touchTimer = null;
-                        startMobileDrag(e.touches[0], u, idx);
-                    }, 300); 
-                }, {passive: true});
-                u.addEventListener('touchmove', (e) => {
-                    let dx = e.touches[0].clientX - startX;
-                    let dy = e.touches[0].clientY - startY;
-                    lastTouchX = e.touches[0].clientX;
-                    lastTouchY = e.touches[0].clientY;
-                    if (mobileDragging) {
-                        if (e.cancelable) e.preventDefault();
-                        moveMobileDrag(e.touches[0]);
-                        const wrapper = document.getElementById('circuit-content-wrapper');
-                        const wrapperRect = wrapper.getBoundingClientRect();
-                        const threshold = 60; // 距離邊緣 60px 觸發捲動
-                        if (lastTouchX < wrapperRect.left + threshold) {
-                            scrollDirection = -1; // 靠左，往左捲動
-                            autoScrollWrapper = wrapper;
-                            if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(handleAutoScroll);
-                        } else if (lastTouchX > wrapperRect.right - threshold) {
-                            scrollDirection = 1;  // 靠右，往右捲動
-                            autoScrollWrapper = wrapper;
-                            if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(handleAutoScroll);
-                        } else {
-                            scrollDirection = 0;  // 不在邊界，停止捲動
-                            if (autoScrollRAF) {
-                                cancelAnimationFrame(autoScrollRAF);
-                                autoScrollRAF = null;
-                            }
-                        }
-                        let targetEl = document.elementFromPoint(lastTouchX, lastTouchY);
-                        let dropUnit = targetEl ? targetEl.closest('.circuit-unit') : null;
-                        document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
-                        if (dropUnit && dropUnit !== u) {
-                            let children = Array.from(document.getElementById('circuit-content').children);
-                            let targetIndex = children.indexOf(dropUnit) - 1;
-                            // 確保是有效的插入點
-                            if (targetIndex >= 0 && targetIndex < gateHistory.length) {
-                                dropUnit.classList.add('drag-target');
-                            }
-                        }
-                    } else {
-                        // 阻止垂直滑動時觸發瀏覽器預設的下拉更新或滾動，保留水平滑動(dx > dy)以利捲動卷軸
-                        if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 5 && e.cancelable) {
-                            e.preventDefault();
-                        }
-                        if (touchTimer) {
-                            if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-                                clearTimeout(touchTimer);
-                                touchTimer = null;
-                            }
-                        }
+                if (!isQuantumMode) {
+                    let activeState = null;
+                    if (activeTraceInput !== null && idx < currentTraceStep) {
+                        activeState = states[idx + 1];
                     }
-                }, {passive: false});
-
-                u.addEventListener('touchend', (e) => {
-                    if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
-                    scrollDirection = 0;
-                    if (autoScrollRAF) { cancelAnimationFrame(autoScrollRAF); autoScrollRAF = null; }
-                    if (mobileDragging) {
-                        if (e.cancelable) e.preventDefault();
-                        endMobileDrag(e.changedTouches[0]);
-                    } else if (activeTraceInput === null) {
-                        // 結算位移，判斷是否為滑動 (Swipe)
-                        let endX = e.changedTouches[0].clientX;
-                        let endY = e.changedTouches[0].clientY;
-                        let dx = endX - startX;
-                        let dy = endY - startY;
-                        if (Math.abs(dy) > 30 && Math.abs(dy) > Math.abs(dx)) {
-                            if (dy < 0) {
-                                // 往上滑：刪除
-                                if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(err => {}); }
-                                const removed = gateHistory[idx];
-                                actionStack.push({ type: 'delete', index: idx, oldGates: [removed] });
-                                gateHistory.splice(idx, 1);
-                                selectedIndices = []; // 刪除後清空現有選取狀態
-                                recalculate();
-                                hideIndicator();
-                            } else {
-                                const sIdx = selectedIndices.indexOf(idx);
-                                if (sIdx > -1) selectedIndices.splice(sIdx, 1);
-                                else selectedIndices.push(idx);
-                                renderCircuit();
-                            }
-                        }
-                    }
-                    if (activeTraceInput === null) setTimeout(() => { u.draggable = true; }, 100);
-                });
-                u.addEventListener('touchcancel', (e) => {
-                    if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
-                    scrollDirection = 0;
-                    if (autoScrollRAF) { cancelAnimationFrame(autoScrollRAF); autoScrollRAF = null; }
-
-                    if (mobileDragging) endMobileDrag(e.changedTouches[0]);
-                    if (activeTraceInput === null) setTimeout(() => { u.draggable = true; }, 100);
-                });
-                u.onmouseenter = () => { if (typeof highlightByGate === 'function') highlightByGate(g); };
-                u.onmouseleave = () => { if (typeof clearHighlight === 'function') clearHighlight(); };
-                u.onclick = e => {
-                    if (mobileDragging || activeTraceInput !== null) return;
-                    if (e.ctrlKey || e.metaKey || isShakeCtrlActive) {
-                        const sIdx = selectedIndices.indexOf(idx);
-                        if (sIdx > -1) selectedIndices.splice(sIdx, 1);
-                        else selectedIndices.push(idx);
-                        renderCircuit();
-                    } else {
-                        if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e => {}); }
-                        const removed = gateHistory[idx];
-                        actionStack.push({ type: 'delete', index: idx, oldGates: [removed] });
-                        gateHistory.splice(idx, 1);
-                        selectedIndices = [];
-                        recalculate();
-                        hideIndicator();
-                    }
-                };
-                if (!isQuantumMode && activeTraceInput === null) {
-                    u.innerHTML = getMiniHypercubeSVG(g);
+                    u.innerHTML = getMiniHypercubeSVG(g, activeState);
                 } else {
                     const { ctrl, target, zero } = parseGateSpec(g);
                     if (ctrl.length > 0) {
@@ -1476,17 +1391,236 @@
                         visuals.appendChild(t);
                     }
                 }
+                
+                u.appendChild(visuals);
+
+                if (!isTouchDevice && activeTraceInput === null) {
+                    let dragClone = null;
+                    u.ondragstart = (e) => { 
+                        draggedIndex = idx; 
+                        e.dataTransfer.effectAllowed = 'move'; 
+                        dragClone = u.cloneNode(true);
+                        dragClone.querySelectorAll('.horizontal-wire').forEach(w => w.remove());
+                        dragClone.style.position = 'absolute';
+                        dragClone.style.top = '-9999px';
+                        dragClone.style.left = '-9999px';
+                        dragClone.style.background = 'rgba(255, 183, 197, 0.4)';
+                        dragClone.style.borderRadius = '12px';
+                        dragClone.style.boxSizing = 'border-box';
+                        dragClone.style.border = 'none';
+                        document.body.appendChild(dragClone);
+                        const rect = u.getBoundingClientRect();
+                        const offsetX = e.clientX - rect.left;
+                        const offsetY = e.clientY - rect.top;
+                        e.dataTransfer.setDragImage(dragClone, offsetX, offsetY);
+                        setTimeout(() => {
+                            if (document.body.contains(dragClone)) dragClone.remove();
+                            visuals.style.opacity = '0.35';
+                        }, 0);
+                    };
+                    u.ondragover = (e) => { 
+                        e.preventDefault(); 
+                        e.dataTransfer.dropEffect = 'move';
+                        document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
+                        if (draggedIndex !== null && draggedIndex !== idx) {
+                            u.classList.add('drag-target');
+                        }
+                        return false; 
+                    };
+                    u.ondragleave = (e) => { u.classList.remove('drag-target'); };
+                    u.ondrop = (e) => {
+                        u.classList.remove('drag-target');
+                        if (draggedIndex === null || draggedIndex === idx) return;
+                        pop.currentTime = 0; pop.play();
+                        const oldHistory = [...gateHistory];
+                        const movedGate = gateHistory.splice(draggedIndex, 1)[0];
+                        gateHistory.splice(idx, 0, movedGate);
+                        actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
+                        selectedIndices = []; recalculate(); draggedIndex = null;
+                    };
+                    u.ondragend = (e) => { 
+                        if (dragClone && document.body.contains(dragClone)) dragClone.remove();
+                        visuals.style.opacity = '1';
+                        draggedIndex = null; 
+                        document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
+                    };
+                }
+
+                let touchTimer = null;
+                let startX, startY;
+
+                u.addEventListener('touchstart', (e) => {
+                    if (activeTraceInput !== null || e.touches.length > 1) return;
+                    u.draggable = false; 
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                    touchTimer = setTimeout(() => {
+                        touchTimer = null;
+                        startMobileDrag(e.touches[0], u, idx);
+                    }, 300); 
+                }, {passive: true});
+
+                u.addEventListener('touchmove', (e) => {
+                    let dx = e.touches[0].clientX - startX;
+                    let dy = e.touches[0].clientY - startY;
+                    lastTouchX = e.touches[0].clientX;
+                    lastTouchY = e.touches[0].clientY;
+
+                    if (mobileDragging) {
+                        if (e.cancelable) e.preventDefault();
+                        moveMobileDrag(e.touches[0]);
+
+                        const wrapper = document.getElementById('circuit-content-wrapper');
+                        const wrapperRect = wrapper.getBoundingClientRect();
+                        const threshold = 60; 
+
+                        if (lastTouchX < wrapperRect.left + threshold) {
+                            scrollDirection = -1;
+                            autoScrollWrapper = wrapper;
+                            if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(handleAutoScroll);
+                        } else if (lastTouchX > wrapperRect.right - threshold) {
+                            scrollDirection = 1;  
+                            autoScrollWrapper = wrapper;
+                            if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(handleAutoScroll);
+                        } else {
+                            scrollDirection = 0;  
+                            if (autoScrollRAF) {
+                                cancelAnimationFrame(autoScrollRAF);
+                                autoScrollRAF = null;
+                            }
+                        }
+
+                        let targetEl = document.elementFromPoint(lastTouchX, lastTouchY);
+                        let dropUnit = targetEl ? targetEl.closest('.circuit-unit') : null;
+                        
+                        document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
+                        
+                        if (dropUnit && dropUnit !== u && dropUnit.dataset.index !== undefined) {
+                            dropUnit.classList.add('drag-target');
+                        }
+                    } else {
+                        if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 5 && e.cancelable) {
+                            e.preventDefault();
+                        }
+                        if (touchTimer) {
+                            if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                                clearTimeout(touchTimer);
+                                touchTimer = null;
+                            }
+                        }
+                    }
+                }, {passive: false});
+
+                u.addEventListener('touchend', (e) => {
+                    if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+                    
+                    scrollDirection = 0;
+                    if (autoScrollRAF) { cancelAnimationFrame(autoScrollRAF); autoScrollRAF = null; }
+
+                    if (mobileDragging) {
+                        if (e.cancelable) e.preventDefault();
+                        endMobileDrag(e.changedTouches[0]);
+                    } else if (activeTraceInput === null) {
+                        let endX = e.changedTouches[0].clientX;
+                        let endY = e.changedTouches[0].clientY;
+                        let dx = endX - startX;
+                        let dy = endY - startY;
+
+                        if (Math.abs(dy) > 30 && Math.abs(dy) > Math.abs(dx)) {
+                            if (dy < 0) {
+                                if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(err => {}); }
+                                const removed = gateHistory[idx];
+                                actionStack.push({ type: 'delete', index: idx, oldGates: [removed] });
+                                gateHistory.splice(idx, 1);
+                                selectedIndices = [];
+                                recalculate();
+                                hideIndicator();
+                            } else {
+                                const sIdx = selectedIndices.indexOf(idx);
+                                if (sIdx > -1) selectedIndices.splice(sIdx, 1);
+                                else selectedIndices.push(idx);
+                                renderCircuit();
+                            }
+                        }
+                    }
+
+                    if (activeTraceInput === null) setTimeout(() => { u.draggable = true; }, 100);
+                });
+
+                u.addEventListener('touchcancel', (e) => {
+                    if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+                    scrollDirection = 0;
+                    if (autoScrollRAF) { cancelAnimationFrame(autoScrollRAF); autoScrollRAF = null; }
+
+                    if (mobileDragging) endMobileDrag(e.changedTouches[0]);
+                    if (activeTraceInput === null) setTimeout(() => { u.draggable = true; }, 100);
+                });
+
+                u.onmouseenter = () => { if (typeof highlightByGate === 'function') highlightByGate(g); };
+                u.onmouseleave = () => { if (typeof clearHighlight === 'function') clearHighlight(); };
+                u.onclick = e => {
+                    if (mobileDragging || activeTraceInput !== null) return;
+                    if (e.ctrlKey || e.metaKey || isShakeCtrlActive) {
+                        const sIdx = selectedIndices.indexOf(idx);
+                        if (sIdx > -1) selectedIndices.splice(sIdx, 1);
+                        else selectedIndices.push(idx);
+                        renderCircuit();
+                    } else {
+                        if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e => {}); }
+                        const removed = gateHistory[idx];
+                        actionStack.push({ type: 'delete', index: idx, oldGates: [removed] });
+                        gateHistory.splice(idx, 1);
+                        selectedIndices = [];
+                        recalculate();
+                        hideIndicator();
+                    }
+                };
                 c.appendChild(u);
             });
-            if (isQuantumMode || activeTraceInput !== null) {
-                const endU = document.createElement('div');
-                endU.className = 'circuit-unit';
-                endU.style.minWidth = '50px';
-                endU.style.flexGrow = '1';
-                endU.style.cursor = 'default';
-                drawWires(endU, states.length > 0 ? states.length - 1 : 0);
-                c.appendChild(endU);
+
+            // --- 建立尾部感應區 ---
+            const endPad = document.createElement('div');
+            endPad.className = 'circuit-unit';
+            endPad.style.cursor = 'default';
+            endPad.dataset.index = gateHistory.length;
+            
+            // 根據模式決定尾部空白的大小或隱藏
+            if (!isQuantumMode) {
+                if (activeTraceInput !== null) {
+                    endPad.style.display = 'none'; // Trace模式完全隱藏
+                } else {
+                    endPad.style.setProperty('min-width', '20px', 'important');
+                    endPad.style.setProperty('flex-grow', '1', 'important');
+                }
+            } else {
+                endPad.style.setProperty('min-width', '50px', 'important');
+                endPad.style.setProperty('flex-grow', '1', 'important');
             }
+            drawWires(endPad, states.length > 0 ? states.length - 1 : 0);
+
+            if (!isTouchDevice && activeTraceInput === null) {
+                endPad.ondragover = (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
+                    if (draggedIndex !== null && draggedIndex !== gateHistory.length - 1) {
+                        endPad.classList.add('drag-target');
+                    }
+                    return false;
+                };
+                endPad.ondragleave = () => endPad.classList.remove('drag-target');
+                endPad.ondrop = () => {
+                    endPad.classList.remove('drag-target');
+                    if (draggedIndex === null || draggedIndex === gateHistory.length - 1) return;
+                    pop.currentTime = 0; pop.play();
+                    const oldHistory = [...gateHistory];
+                    const movedGate = gateHistory.splice(draggedIndex, 1)[0];
+                    gateHistory.splice(gateHistory.length, 0, movedGate); 
+                    actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
+                    selectedIndices = []; recalculate(); draggedIndex = null;
+                };
+            }
+            c.appendChild(endPad);
+
             updateUndoStatus();
             if ((selectedIndices.length === 0 && gateHistory.length > 0 && typeof draggedIndex === 'undefined') || draggedIndex === null) {
                 if (activeTraceInput === null) setTimeout(() => wrapper && wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' }), 50);
