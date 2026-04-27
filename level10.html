@@ -70,8 +70,8 @@
         
         .qubit-label { position: absolute; left: 19px; font-weight: 900; font-size: 16px; color: #463438; transition: all 0.3s; }
         .circuit-unit { min-width: 50px; height: 180px; display: flex; flex-direction: column; position: relative; cursor: pointer; transition: all 0.2s; background-color: transparent !important; }
-        .circuit-unit:hover, .circuit-unit.selected-gate { background-color: var(--bg-hover) !important; border-radius: 12px; }
-        
+        .circuit-unit:hover { background-color: var(--bg-hover, rgba(255, 183, 197, 0.3)) !important; border-radius: 12px; }
+        .circuit-unit.selected-gate { background-color: var(--bg-hover, rgba(255, 183, 197, 0.3)) !important; box-shadow: inset 0 0 0 3px var(--gate-color, #FFB7C5) !important; border-radius: 12px; }
         .control-dot { width: 14px; height: 14px; background: #463438; border-radius: 50%; position: absolute; left: 50%; transform: translateX(-50%); z-index: 5; }
         .connection-v-line { position: absolute; width: 2.5px; background: #463438; left: 50%; transform: translateX(-50%); z-index: 3; }
         .circuit-target { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 2.5px solid #463438; left: 50%; transform: translate(-50%, -50%); z-index: 15; }
@@ -115,11 +115,16 @@
         .pro-active #canvas-bottom-btns { display: none !important; }
         canvas, .game-canvas, .circuit-unit, .node, .gate-btn-v2 { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
         .swap-active { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; height: 8px !important; z-index: 15 !important; border-top: none !important; opacity: 1 !important; }
+	#circuit-content .circuit-unit svg {
+            width: 98% !important;
+            height: 98% !important;
+            margin: auto;
+        }
     </style>
 </head>
 <body id="body-root" class="mini-mode">
     <div id="mode-toggle" class="mode-toggle-fixed" onclick="togglePro()">👁️</div>
-    <div id="quantum-toggle" class="mode-toggle-fixed hidden" onclick="toggleQuantumMode()" style="top: 100px; font-size: 26px;">🔮</div>
+    <div id="quantum-toggle" class="mode-toggle-fixed hidden" onclick="toggleQuantumMode()" style="top: 100px; font-size: 26px;">⚛️</div>
     <div id="leaderboard-wrapper">
         <div class="side-leaderboard-content">
             <h2 class="text-xl font-black mb-3 text-center" style="color: #463438;">🏆 TOP CATS</h2>
@@ -566,7 +571,7 @@
         function toggleQuantumMode() {
             pop.currentTime = 0; pop.play();
             isQuantumMode = !isQuantumMode;
-            document.getElementById('quantum-toggle').innerText = isQuantumMode ? "⚛️" : "🔮";
+            document.getElementById('quantum-toggle').innerText = isQuantumMode ? "🧊" : "⚛️";
             document.getElementById('body-root').classList.toggle('mini-mode', !isQuantumMode);
             
             document.getElementById('circuit-diagram-title').innerText = isQuantumMode ? "Circuit Diagram" : "Paths";
@@ -599,35 +604,9 @@
             requestAnimationFrame(animateMove);
         }
 
-        function initGates() {
+       function initGates() {
             const grid = document.getElementById('gate-grid');
             let html = '';
-            
-            let gateOrder = [];
-            let added = new Set();
-            const addGate = (g) => { if(!added.has(g)) { gateOrder.push(g); added.add(g); } };
-
-            let edges = [];
-            for (let dim=0; dim<4; dim++) {
-                for (let i=0; i<16; i++) {
-                    let j = i ^ (1<<dim);
-                    if (i < j) edges.push({i, j, dim});
-                }
-            }
-
-            for(let dim=0; dim<4; dim++) addGate(`X${3-dim}`);
-            edges.forEach(edge => {
-                const targetQ = 3 - edge.dim; 
-                const ctrlPool = [0,1,2,3].filter(q=>q!==targetQ); 
-                ctrlPool.forEach(c => { const val = (edge.i >> (3-c)) & 1; addGate(`CX${val}${c}${targetQ}`); });
-            });
-            edges.forEach(edge => {
-                const targetQ = 3 - edge.dim; 
-                const ctrlPool = [0,1,2,3].filter(q=>q!==targetQ); 
-                const combos = [[ctrlPool[0],ctrlPool[1]], [ctrlPool[0],ctrlPool[2]], [ctrlPool[1],ctrlPool[2]]];
-                combos.forEach(([c0,c1]) => { const v0 = (edge.i>>(3-c0))&1, v1 = (edge.i>>(3-c1))&1; addGate(`TOF${v0}${v1}${c0}${c1}${targetQ}`); });
-            });
-            edges.forEach(edge => { addGate(`SWAP_${edge.i}_${edge.j}`); });
 
             const wrapBtn = (type) => {
                 const hex = getGateColorMap(type);
@@ -638,8 +617,46 @@
                     onmouseleave="clearHighlight()"
                     onclick="applyGate('${type}')">${getGateContent(type)}</button>`;
             };
-            
-            gateOrder.forEach(g => { html += wrapBtn(g); });
+
+            // 1. 單量子位元閘 (X Gate) - 按照 Target t (0~3) 分配到四個直欄
+            for (let t = 0; t < 4; t++) { html += wrapBtn(`X${t}`); }
+
+            // 2. 雙量子位元閘 (CX Gate)
+            for (let ctrlIdx = 0; ctrlIdx < 3; ctrlIdx++) {
+                for (let t = 0; t < 4; t++) {
+                    const pool = [0, 1, 2, 3].filter(q => q !== t);
+                    html += wrapBtn(`CX1${pool[ctrlIdx]}${t}`);
+                }
+                for (let t = 0; t < 4; t++) {
+                    const pool = [0, 1, 2, 3].filter(q => q !== t);
+                    html += wrapBtn(`CX0${pool[ctrlIdx]}${t}`);
+                }
+            }
+
+            // 3. 三量子位元閘 (Toffoli Gate)
+            const combos = [{ id: '11'}, { id: '00'}, { id: '01'}, { id: '10'}];
+            for (let pairIdx = 0; pairIdx < 3; pairIdx++) {
+                for (let cb of combos) {
+                    for (let t = 0; t < 4; t++) {
+                        const pool = [0, 1, 2, 3].filter(q => q !== t);
+                        const pairs = [ [pool[0], pool[1]], [pool[0], pool[2]], [pool[1], pool[2]] ];
+                        const c1 = pairs[pairIdx][0];
+                        const c2 = pairs[pairIdx][1];
+                        html += wrapBtn(`TOF${cb.id}${c1}${c2}${t}`);
+                    }
+                }
+            }
+
+            // 4. SWAP 閘 (Level 9 專屬保留)
+            let edges = [];
+            for (let dim = 0; dim < 4; dim++) {
+                for (let i = 0; i < 16; i++) {
+                    let j = i ^ (1 << dim);
+                    if (i < j) edges.push({i, j, dim});
+                }
+            }
+            edges.forEach(edge => { html += wrapBtn(`SWAP_${edge.i}_${edge.j}`); });
+
             grid.innerHTML = html;
         }
 
@@ -848,7 +865,7 @@
                 
                 const hex = getGateColorMap(g);
                 u.style.setProperty('--bg-hover', getRgba(hex, 0.35));
-
+		u.style.setProperty('--gate-color', hex);
                 if (selectedIndices.includes(idx)) u.classList.add('selected-gate');
                 
                 u.draggable = true;
