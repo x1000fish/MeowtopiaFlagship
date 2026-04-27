@@ -1288,6 +1288,7 @@
             const wrapper = document.getElementById('circuit-content-wrapper');
             c.innerHTML = '';
             let states = [];
+            
             if (activeTraceInput !== null) {
                 let curr = activeTraceInput;
                 states.push(curr);
@@ -1296,6 +1297,7 @@
                     states.push(curr);
                 }
             }
+            
             const drawWires = (parentUnit, stepIdx) => {
                 for (let q = 0; q < 4; q++) {
                     let wire = document.createElement('div');
@@ -1326,12 +1328,14 @@
                     parentUnit.appendChild(wire);
                 }
             };
+            
             const startU = document.createElement('div');
             startU.className = 'circuit-unit';
             startU.style.minWidth = '30px';
             startU.style.cursor = 'default';
             drawWires(startU, 0);
             c.appendChild(startU);
+            
             gateHistory.forEach((g, idx) => {
                 const u = document.createElement('div');
                 u.className = 'circuit-unit';
@@ -1340,7 +1344,7 @@
                 // 動態注入顏色及背景屬性
                 const hex = getGateColorMap(g);
                 u.style.setProperty('--bg-hover', getRgba(hex, 0.35));
-                u.style.setProperty('--gate-color', hex);
+                u.style.setProperty('--gate-color', hex); // 動態設定框線顏色
 
                 // 針對 Hypercube 路徑視圖放大單元區塊
                 if (!isQuantumMode) {
@@ -1403,19 +1407,88 @@
                     }
                 }
 
+                // =========================================
+                // 1. 電腦版拖曳事件 (Drag and Drop) - 已清理乾淨
+                // =========================================
                 u.addEventListener('dragstart', (e) => handleDragStart(e, idx));
-                u.addEventListener('dragover', (e) => handleDragOver(e));
-                u.addEventListener('drop', (e) => handleDrop(e, idx));
+                
+                u.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (draggedIndex !== null && draggedIndex !== idx) {
+                        const rect = u.getBoundingClientRect();
+                        // 判斷滑鼠是在這個元素的左半邊還是右半邊
+                        const isAfter = (e.clientX - rect.left) > (rect.width / 2);
+                        
+                        const newBorderLeft = isAfter ? '' : '4px solid #FFB7C5';
+                        const newBorderRight = isAfter ? '4px solid #FFB7C5' : '';
+                        
+                        if (u.style.borderLeft !== newBorderLeft) u.style.borderLeft = newBorderLeft;
+                        if (u.style.borderRight !== newBorderRight) u.style.borderRight = newBorderRight;
+                    }
+                    if (typeof handleCircuitScroll === 'function') handleCircuitScroll(e);
+                });
+                
+                u.addEventListener('dragleave', () => {
+                    u.style.borderLeft = '';
+                    u.style.borderRight = '';
+                });
+                
+                u.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    u.style.borderLeft = '';
+                    u.style.borderRight = '';
+                    targetScrollSpeed = 0;
+                    
+                    if (draggedIndex !== null && draggedIndex !== idx) {
+                        const rect = u.getBoundingClientRect();
+                        const isAfter = (e.clientX - rect.left) > (rect.width / 2);
+                        
+                        let targetIdx = idx;
+                        if (isAfter) targetIdx++;
+                        
+                        if (draggedIndex < targetIdx) targetIdx--;
+                        
+                        if (typeof pop !== 'undefined' && pop.play) { 
+                            pop.currentTime = 0; 
+                            pop.play().catch(e=>{}); 
+                        }
+                        
+                        const oldHistory = [...gateHistory];
+                        const movedItem = gateHistory.splice(draggedIndex, 1)[0];
+                        gateHistory.splice(targetIdx, 0, movedItem);
+                        
+                        actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
+                        
+                        draggedIndex = null;
+                        if (desktopDragGhost) {
+                            desktopDragGhost.remove();
+                            desktopDragGhost = null;
+                        }
+                        selectedIndices = [];
+                        recalculate();
+                    }
+                });
+
                 u.addEventListener('dragend', (e) => {
                     e.target.style.opacity = '1';
+                    u.style.borderLeft = '';
+                    u.style.borderRight = '';
                     draggedIndex = null;
+                    targetScrollSpeed = 0;
                     if (desktopDragGhost) {
                         desktopDragGhost.remove();
                         desktopDragGhost = null;
                     }
+                    renderCircuit();
                 });
+
+                // =========================================
+                // 2. 懸停、點擊與手機版事件 (Hover, Click, Touch)
+                // =========================================
                 u.onmouseenter = () => highlightByGate(g);
                 u.onmouseleave = () => clearHighlight();
+                
                 let touchTimer = null;
                 let startX, startY;
                 
@@ -1510,6 +1583,7 @@
                 
                 c.appendChild(u);
             });
+            
             const endU = document.createElement('div');
             endU.className = 'circuit-unit';
             endU.style.minWidth = '50px';
@@ -1517,7 +1591,9 @@
             endU.style.cursor = 'default';
             drawWires(endU, states.length > 0 ? states.length - 1 : 0);
             c.appendChild(endU);
+            
             updateUndoStatus();
+            
             if (selectedIndices.length === 0 && gateHistory.length > 0 && draggedIndex === null && activeTraceInput === null) {
                 setTimeout(() => wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' }), 50);
             }
