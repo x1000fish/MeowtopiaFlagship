@@ -18,7 +18,9 @@
         .connection-line:hover { background: #99C44D; box-shadow: 0 0 20px rgba(153, 196, 77, 0.8); }
         .cat-node { width: 160px; height: 160px; background: white; border: 6px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; box-shadow: 3px 3px 0 #463438; top: 50%; transform: translateY(-50%); z-index: 20; }
         #node-0 { left: 150px; } #node-1 { right: 150px; }
-        .fish-wrapper { position: absolute; width: 80px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; align-items: center; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .fish-wrapper { position: absolute; width: 80px; z-index: 30; pointer-events: none; display: none; flex-direction: column; align-items: center; }
+        .fish-ready { display: flex; }
+        .fish-ready.animate-move { transition: top 0.5s cubic-bezier(0.16, 1, 0.3, 1), left 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         .fish-wrapper img { width: 75px; height: auto; }
         .fish-label { background: rgba(70, 52, 56, 0.8); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; margin-bottom: -47px; z-index: 5; position: relative; top: -10px; }
         .fixed-number { position: absolute; bottom: -5px; right: 65px; font-size: 24px; font-weight: 900; color: #463438; pointer-events: none; z-index: 25; }
@@ -62,7 +64,18 @@
         let isGameOver = false;
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHimc4WS1FjvGEb2-gTBMhum8APQKfDHxc5wsiWRkNqkxJrocMOw/exec';
         const pop = new Audio('pop.m4a'), meow = new Audio('meow.m4a');
-        window.onload = () => { startTimer(); updateFishUI(); };
+        window.onload = () => { 
+            updateFishUI(); 
+            startTimer();
+            const fish0 = document.getElementById('fish-wrap-0');
+            const fish1 = document.getElementById('fish-wrap-1');
+            fish0.classList.add('fish-ready');
+            fish1.classList.add('fish-ready');
+            setTimeout(() => {
+                fish0.classList.add('animate-move');
+                fish1.classList.add('animate-move');
+            }, 50);
+        };
         function startTimer() {
             if (timerInterval) return;
             startTime = Date.now();
@@ -82,7 +95,10 @@
         function updateFishUI() {
             for(let i=0; i<2; i++) {
                 const f = document.getElementById(`fish-wrap-${i}`), n = document.getElementById(`node-${fishAtNode[i]}`);
-                f.style.top = (n.offsetTop + 21) + "px"; f.style.left = (n.offsetLeft + 35) + "px";
+                if(f && n) {
+                    f.style.top = (n.offsetTop + 21) + "px"; 
+                    f.style.left = (n.offsetLeft + 35) + "px";
+                }
             }
         }
         async function checkWin() {
