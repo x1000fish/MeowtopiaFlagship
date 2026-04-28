@@ -80,9 +80,9 @@
         .qubit-label.right-side { left: auto !important; right: 18px !important; color: rgb(255, 151, 172) !important; font-weight: 900; }
         .circuit-unit { min-width: 50px; height: 180px; display: flex; flex-direction: column; position: relative; cursor: pointer; transition: all 0.2s; background-color: transparent !important; }
        /* 滑鼠經過時只有背景色，沒有邊框 */
-	.circuit-unit:hover { background-color: var(--bg-hover, rgba(255, 183, 197, 0.3)) !important; border-radius: 12px; }
+	    .circuit-unit:hover { background-color: var(--bg-hover, rgba(255, 183, 197, 0.3)) !important; border-radius: 12px; }
 	/* 只有被右鍵選取時，才加上背景色與同色邊框 */
-	.circuit-unit.selected-gate { background-color: var(--bg-hover, rgba(255, 183, 197, 0.3)) !important; box-shadow: inset 0 0 0 3px var(--gate-color, #FFB7C5) !important; border-radius: 12px; }
+	    .circuit-unit.selected-gate { background-color: var(--bg-hover, rgba(255, 183, 197, 0.3)) !important; box-shadow: inset 0 0 0 3px var(--gate-color, #FFB7C5) !important; border-radius: 12px; }
         .circuit-unit.trace-active { background: #bdfc507a !important; box-shadow: inset 0 0 0 3px #99C44D; border-radius: 12px; z-index: 100 !important; }
         .control-dot { width: 14px; height: 14px; background: #463438; border-radius: 50%; position: absolute; left: 50%; transform: translateX(-50%); z-index: 5; }
         .connection-v-line { position: absolute; width: 2.5px; background: #463438; left: 50%; transform: translateX(-50%); z-index: 3; }
@@ -159,7 +159,6 @@
             pointer-events: none;
         }
         .drag-target.right::before { left: auto; right: -3px; }
-        .dragging-gate { background: rgba(255, 183, 197, 0.3) !important;border-radius: 12px;}
     </style>
 </head>
 <body id="body-root" class="mini-mode">
@@ -749,7 +748,9 @@
             }
             desktopDragGhost = dragEl.cloneNode(true);
             desktopDragGhost.querySelectorAll('.circuit-wire-bg').forEach(w => w.remove());
-            desktopDragGhost.style.background = isQuantumMode ? 'rgba(255, 183, 197, 0.3)' : 'transparent';
+            const style = getComputedStyle(dragEl);
+            const bg = style.getPropertyValue('--bg-hover');
+            desktopDragGhost.style.setProperty('background-color', bg, 'important');
             desktopDragGhost.style.borderRadius = '12px';
             desktopDragGhost.classList.remove('selected-gate', 'trace-active'); 
             desktopDragGhost.style.position = 'fixed';
@@ -800,7 +801,9 @@
             if (navigator.vibrate) navigator.vibrate(50);
             dragGhost = el.cloneNode(true);
             dragGhost.querySelectorAll('.circuit-wire-bg').forEach(w => w.remove());
-            dragGhost.style.background = isQuantumMode ? 'rgba(255, 183, 197, 0.3)' : 'transparent';
+            const style = getComputedStyle(el);
+            const bg = style.getPropertyValue('--bg-hover');
+            dragGhost.style.setProperty('background-color', bg, 'important');
             dragGhost.style.borderRadius = '12px';
             dragGhost.style.position = 'fixed';
             dragGhost.style.zIndex = '9999';
@@ -1388,24 +1391,19 @@
                     parentUnit.appendChild(wire);
                 }
             };
-
-            // --- 綁定放置目標的共用事件 (電腦版) ---
             const bindDropEvents = (unit) => {
                 unit.addEventListener('dragover', (e) => {
                     e.preventDefault();
                     if (draggedIndex === null) return;
+                    e.dataTransfer.dropEffect = 'move';
                     const type = unit.dataset.type;
                     if (type === 'gate' && parseInt(unit.dataset.idx) === draggedIndex) return;
-
-                    // 清除所有舊的指示 class
                     document.querySelectorAll('.circuit-unit').forEach(el => {
                         el.classList.remove('drag-target', 'right');
                     });
-
                     const info = getDropInfo(unit, e.clientX);
                     if (info.borderLeft) unit.classList.add('drag-target');
                     if (info.borderRight) unit.classList.add('right');
-                    
                     if (typeof handleCircuitScroll === 'function') handleCircuitScroll(e);
                 });
 
@@ -1414,7 +1412,10 @@
                 });
 
                 unit.addEventListener('drop', (e) => {
-                    e.preventDefault(); e.stopPropagation();
+                    // 3. 確保 drop 也有 preventDefault
+                    e.preventDefault(); 
+                    e.stopPropagation();
+                    
                     unit.classList.remove('drag-target', 'right');
                     targetScrollSpeed = 0;
 
