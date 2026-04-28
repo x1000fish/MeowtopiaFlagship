@@ -179,7 +179,7 @@
         let steps = 0, time = 0, isPro = false, isQuantumMode = false, timerInterval, gateHistory = [], isSolved = false;
         let selectedIndices = [];
         let actionStack = [];
-        let fishAtNode = [5, 4, 7, 6, 1, 0, 3, 2];    
+        let fishAtNode = [3, 6, 2, 5, 7, 1, 0, 4];    
         let lineMode = 1;
         let hoverLine = null;
         let currentOptionIndex = -1;
@@ -735,7 +735,7 @@
             fishAtNode = newFish;
         }
         function recalculate() { 
-            fishAtNode = [5, 4, 7, 6, 1, 0, 3, 2]; 
+            fishAtNode = [3, 6, 2, 5, 7, 1, 0, 4]; 
             let h = [...gateHistory]; gateHistory = []; h.forEach(g => { executeLogic(g); gateHistory.push(g); }); steps = gateHistory.length; finishMove(); 
         }
         function finishMove() { document.getElementById('step-count').innerText = steps; updateFishUI(); renderCircuit(); checkWin(); }
