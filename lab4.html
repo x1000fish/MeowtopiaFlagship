@@ -142,30 +142,24 @@
         .circuit-unit { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; transition: background 0.2s, box-shadow 0.2s; }
         .gate-btn-v2, .multi-toggle-btn, .func-btn, .game-btn, .btn-share { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
         .swap-active { background: var(--highlight-color) !important; box-shadow: 0 0 15px var(--highlight-color) !important; height: 8px !important; z-index: 15 !important; border-top: none !important; opacity: 1 !important; }
-	/* Paths 模式下，當執行 Trace 時隱藏左右兩側的輸入/輸出數字 */
         .mini-mode.is-tracing .qubit-label { display: none !important; }
-	/* 獨立的拖移指示線 */
-	.drag-insert-left::before, .drag-insert-right::after {
-	    content: '';
-	    position: absolute;
-   	    top: 5px;       /* 距離頂部一點距離 */
-	    bottom: 5px;    /* 距離底部一點距離 */
-	    width: 4px;     /* 線的寬度 */
-	    background-color: #FFB7C5;
-	    border-radius: 4px; /* 圓角讓它看起來像獨立的一根槓槓 */
-	    z-index: 200;
-	    pointer-events: none; /* 確保線不會干擾滑鼠事件 */
-	}
-
-/* 定位在左側縫隙中間 */
-.drag-insert-left::before {
-    left: -3px; 
-}
-
-/* 定位在右側縫隙中間 */
-.drag-insert-right::after {
-    right: -3px;
-}
+        .circuit-unit {transition: all 0.2s ease, margin 0.2s ease;}
+        .drag-target {margin-left: 25px; position: relative; }
+        .drag-target.right {margin-left: 0; margin-right: 25px;}
+        .drag-target::before {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: 10px;
+            bottom: 10px;
+            width: 4px;
+            background-color: #FFB7C5;
+            border-radius: 4px;
+            z-index: 200;
+            pointer-events: none;
+        }
+        .drag-target.right::before { left: auto; right: -3px; }
+        .dragging-gate { background: rgba(255, 183, 197, 0.3) !important;border-radius: 12px;}
     </style>
 </head>
 <body id="body-root" class="mini-mode">
@@ -748,6 +742,7 @@
             e.dataTransfer.effectAllowed = 'move';
             const dragEl = e.currentTarget;
             dragEl.style.opacity = '0.5';
+            dragEl.classList.add('dragging-gate');
             if (desktopDragGhost) {
                 desktopDragGhost.remove();
                 desktopDragGhost = null;
@@ -820,6 +815,7 @@
             dragGhost.style.willChange = 'left, top';
             dragGhost.style.boxShadow = 'none';
             el.style.opacity = '0.35';
+            el.classList.add('dragging-gate');
             dragGhost.querySelectorAll('*').forEach(node => {
                 node.style.transition = 'none';
                 node.style.animation = 'none';
@@ -840,14 +836,11 @@
             if (targetEl) {
                 targetUnit = targetEl.closest('.circuit-unit');
             }
-            
             if (dragGhost) { dragGhost.remove(); dragGhost = null; }
             if (originalDragEl) { originalDragEl.style.visibility = '1'; originalDragEl = null; }
-            
             document.querySelectorAll('.circuit-unit').forEach(el => {
-                el.style.opacity = '1'; el.style.visibility = '1';
-                // 清理新版 class
-                el.classList.remove('drag-insert-left', 'drag-insert-right');
+                el.style.opacity = '1'; el.classList.remove('dragging-gate');
+                el.classList.remove('drag-target', 'right');
             });
             
             if (targetUnit && mDragIndex !== null) {
@@ -1406,23 +1399,23 @@
 
                     // 清除所有舊的指示 class
                     document.querySelectorAll('.circuit-unit').forEach(el => {
-                        el.classList.remove('drag-insert-left', 'drag-insert-right');
+                        el.classList.remove('drag-target', 'right');
                     });
 
                     const info = getDropInfo(unit, e.clientX);
-                    if (info.borderLeft) unit.classList.add('drag-insert-left');
-                    if (info.borderRight) unit.classList.add('drag-insert-right');
+                    if (info.borderLeft) unit.classList.add('drag-target');
+                    if (info.borderRight) unit.classList.add('right');
                     
                     if (typeof handleCircuitScroll === 'function') handleCircuitScroll(e);
                 });
 
                 unit.addEventListener('dragleave', () => {
-                    unit.classList.remove('drag-insert-left', 'drag-insert-right');
+                    unit.classList.remove('drag-target', 'right');
                 });
 
                 unit.addEventListener('drop', (e) => {
                     e.preventDefault(); e.stopPropagation();
-                    unit.classList.remove('drag-insert-left', 'drag-insert-right');
+                    unit.classList.remove('drag-target', 'right');
                     targetScrollSpeed = 0;
 
                     if (draggedIndex === null) return;
@@ -1508,7 +1501,8 @@
                 u.addEventListener('dragstart', (e) => handleDragStart(e, idx));
                 u.addEventListener('dragend', (e) => {
                     e.target.style.opacity = '1';
-                    document.querySelectorAll('.circuit-unit').forEach(el => { el.classList.remove('drag-insert-left', 'drag-insert-right'); });
+                    e.target.classList.remove('dragging-gate');
+                    document.querySelectorAll('.circuit-unit').forEach(el => { el.classList.remove('drag-target', 'right'); });
                     draggedIndex = null; targetScrollSpeed = 0;
                     if (desktopDragGhost) { desktopDragGhost.remove(); desktopDragGhost = null; }
                     renderCircuit();
@@ -1529,12 +1523,9 @@
                         if (e.cancelable) e.preventDefault();
                         moveMobileDrag(e.touches[0]);
                         handleCircuitScroll(e.touches[0]);
-                        
-                        // 清除所有舊標記
                         document.querySelectorAll('.circuit-unit').forEach(el => {
-                            el.classList.remove('drag-insert-left', 'drag-insert-right');
+                            el.classList.remove('drag-target', 'right');
                         });
-                        
                         const targetEl = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
                         if (targetEl) {
                             const targetUnit = targetEl.closest('.circuit-unit');
@@ -1543,8 +1534,8 @@
                                 const isSelf = type === 'gate' && parseInt(targetUnit.dataset.idx) === idx;
                                 if (!isSelf) {
                                     const info = getDropInfo(targetUnit, e.touches[0].clientX);
-                                    if (info.borderLeft) targetUnit.classList.add('drag-insert-left');
-                                    if (info.borderRight) targetUnit.classList.add('drag-insert-right');
+                                    if (info.borderLeft) targetUnit.classList.add('drag-target');
+                                    if (info.borderRight) targetUnit.classList.add('right');
                                 }
                             }
                         }
