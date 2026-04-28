@@ -197,6 +197,11 @@
         .c4-mob-block { width: 24px; height: 24px; background: #fff9c4; border: 2.5px solid #463438; border-radius: 6px; position: absolute; top: 20px; animation: c4Rep 3s infinite; }
         .c4-mob-hand { font-size: 24px; position: absolute; z-index: 10; animation: c4MobHandDown 3s infinite; }
         @keyframes c4MobHandDown { 0%, 10% { transform: translate(0, -15px); opacity: 0; } 15% { transform: translate(0, -15px); opacity: 1; } 20%, 30% { transform: translate(0, 15px); opacity: 1; } 35%, 100% { transform: translate(0, 15px); opacity: 0; } }
+
+        .circuit-unit { min-width: 60px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: grab; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); touch-action: none; box-sizing: border-box; border: 3px solid transparent; border-radius: 12px; }
+        .circuit-unit:active { cursor: grabbing; }
+        .circuit-unit > * { position: absolute; left: 50% !important; transform: translateX(-50%); }
+        .circuit-target { left: 50% !important; transform: translate(-50%, -50%) !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4 mini-mode" id="body-root">
@@ -410,7 +415,7 @@
         let leaderboardData = [];
         let draggedIndex = null;
         let isTouchDevice = ('ontouchstart' in window || navigator.maxTouchPoints > 0);
-        let isQuantumMode = true;
+        let isQuantumMode = false;
         let tutorialShown = false;
         
         let autoScrollRAF = null;
@@ -805,8 +810,8 @@
                     if (draggedIndex !== null && draggedIndex !== idx) {
                         const rect = u.getBoundingClientRect();
                         const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        u.style.borderLeft = isAfter ? '' : '6px solid transparent';
-                        u.style.borderRight = isAfter ? '6px solid transparent' : '';
+                        u.style.borderLeft = isAfter ? '' : '4px solid transparent';
+                        u.style.borderRight = isAfter ? '4px solid transparent' : '';
                         if (isAfter) {
                             u.classList.add('drop-hint-right');
                             u.classList.remove('drop-hint-left');
@@ -905,7 +910,7 @@
                     } else {
                         const is01 = g.includes('01'), is0 = g.includes('C0'), cY = is01?20:60, tY = is01?60:20;
                         const v = document.createElement('div'); v.className = 'connection-v-line'; v.style.left = '23.5px'; v.style.top = Math.min(cY,tY)+'px'; v.style.height = '41px'; u.appendChild(v);
-                        const d = document.createElement('div'); d.className = 'control-dot'; d.style.left = '18px'; d.style.top = (cY-7)+'px'; if(is0){d.style.background='white'; d.style.border='2.5px solid #463438';} u.appendChild(d);
+                        const d = document.createElement('div'); d.className = 'control-dot'; d.style.left = '18px'; d.style.top = (cY-8)+'px'; if(is0){d.style.background='white'; d.style.border='2.5px solid #463438';} u.appendChild(d);
                         const t = document.createElement('div'); t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY-0.9)+'px'; u.appendChild(t);
                     }
                 }
