@@ -102,6 +102,8 @@
         .circuit-unit:hover { background-color: var(--bg-hover) !important; border-radius: 12px; }
         .circuit-unit.selected { background-color: var(--bg-hover) !important; border: 3px solid var(--bg-selected) !important; border-radius: 12px; }
         
+        .drag-target::before,.drag-target-right::after{content:'';position:absolute;top:10px;bottom:10px;width:4px;background-color:#FFB7C5;border-radius:4px;z-index:200;pointer-events:none;}.drag-target::before{left:-3px;}.drag-target-right::after{right:-3px;}
+
         .control-dot { width: 14px; height: 14px; background: #463438; border-radius: 50%; position: absolute; z-index: 5; }
         .connection-v-line { position: absolute; width: 2.5px; background: #463438; z-index: 3; }
         .circuit-target { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2.5px solid #463438; display: flex; align-items: center; justify-content: center; z-index: 15; transform: translate(-50%, -50%); }
@@ -585,25 +587,41 @@
                     if (draggedIndex !== null && draggedIndex !== idx) {
                         const rect = u.getBoundingClientRect();
                         const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        u.style.borderLeft = isAfter ? '' : '4px solid #FFB7C5';
-                        u.style.borderRight = isAfter ? '4px solid #FFB7C5' : '';
+                        u.style.borderLeft = isAfter ? '' : '4px solid transparent';
+                        u.style.borderRight = isAfter ? '4px solid transparent' : '';
+                        u.classList.remove('drag-target', 'drag-target-right');
+
+                        if (isAfter) {
+                            if (idx === gateHistory.length - 1) {
+                                u.classList.add('drag-target-right');
+                            } else {
+                                const nextEl = u.nextElementSibling;
+                                if (nextEl) nextEl.classList.add('drag-target');
+                            }
+                        } else {
+                            u.classList.add('drag-target');
+                        }
                     }
                     updateScrollSpeed(e.clientX);
                 };
+
                 u.ondragleave = () => {
-                    u.style.borderLeft = '';
-                    u.style.borderRight = '';
+                    u.classList.remove('drag-target', 'drag-target-right');
+                    if (u.nextElementSibling) u.nextElementSibling.classList.remove('drag-target');
                 };
+
                 u.ondrop = (e) => {
                     e.preventDefault();
-                    u.style.borderLeft = '';
-                    u.style.borderRight = '';
+                    u.classList.remove('drag-target', 'drag-target-right');
+                    if (u.nextElementSibling) u.nextElementSibling.classList.remove('drag-target');
+                    
                     scrollSpeed = 0;
                     if (isSolved || draggedIndex === null || draggedIndex === idx) return;
                     
                     const rect = u.getBoundingClientRect();
                     const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                    let targetIdx = idx;
+                    
+                    let targetIdx;
                     if (isAfter) {
                         targetIdx = draggedIndex < idx ? idx : idx + 1;
                     } else {
@@ -613,6 +631,7 @@
                     pop.currentTime = 0; pop.play();
                     const movedGate = gateHistory.splice(draggedIndex, 1)[0];
                     gateHistory.splice(targetIdx, 0, movedGate);
+                    
                     pushHistory();
                     selectedIndices = [];
                     recalculatePositions();
@@ -676,12 +695,12 @@
                 } else {
                     if(g.startsWith('X')) {
                         const tQ = g==='X0'?0:1, tY = tQ===0?20:60, t = document.createElement('div');
-                        t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY+1.2)+'px'; u.appendChild(t);
+                        t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY-0.9)+'px'; u.appendChild(t);
                     } else {
                         const is01 = g.includes('01'), is0 = g.includes('C0'), cY = is01?20:60, tY = is01?60:20;
                         const v = document.createElement('div'); v.className = 'connection-v-line'; v.style.left = '23.5px'; v.style.top = Math.min(cY,tY)+'px'; v.style.height = '41px'; u.appendChild(v);
                         const d = document.createElement('div'); d.className = 'control-dot'; d.style.left = '18px'; d.style.top = (cY-7)+'px'; if(is0){d.style.background='white'; d.style.border='2.5px solid #463438';} u.appendChild(d);
-                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY+1.2)+'px'; u.appendChild(t);
+                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY-0.9)+'px'; u.appendChild(t);
                     }
                 }
                 c.appendChild(u);
