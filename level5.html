@@ -63,31 +63,11 @@
 
         .qubit-label { position: absolute; left: 18px; font-weight: 900; font-size: 16px; color: #463438; transition: all 0.3s; }
         
-        .circuit-unit { 
-            min-width: 55px; 
-            width: 55px; 
-            max-width: 55px; 
-            flex: 0 0 55px; 
-            height: 140px; 
-            display: flex; 
-            flex-direction: column; 
-            position: relative; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            background-color: transparent !important; 
-        }
-
-        .mini-mode .circuit-unit { 
-            min-width: 120px; 
-            width: 120px; 
-            max-width: 120px; 
-            flex: 0 0 120px;
-            height: 140px; 
-            margin-top: 0px; 
-            padding: 0 5px;  
-        }
+        .circuit-unit{min-width:55px;width:55px;max-width:55px;flex:0 0 55px;height:140px;display:flex;flex-direction:column;position:relative;cursor:pointer;transition:all 0.2s ease, margin 0.2s ease;background-color:transparent !important;} 
+        .mini-mode .circuit-unit{min-width:120px;width:120px;max-width:120px;flex:0 0 120px;height:140px;margin-top:0px;padding:0 5px;}
         
-        .circuit-unit:hover, .circuit-unit.selected-gate { background-color: var(--bg-hover) !important; border-radius: 12px; }
+        .circuit-unit:hover { background-color: var(--bg-hover) !important; border-radius: 12px; }
+        .circuit-unit.selected-gate { background-color: var(--bg-hover) !important; border-radius: 12px; box-shadow: inset 0 0 0 3px var(--border-color) !important; }
         
         .control-dot { width: 14px; height: 14px; background: #463438; border-radius: 50%; position: absolute; left: 50%; transform: translateX(-50%); z-index: 5; }
         .connection-v-line { position: absolute; width: 2.5px; background: #463438; left: 50%; transform: translateX(-50%); z-index: 3; }
@@ -102,9 +82,49 @@
         :root { --cube-offset-x: 175px; }
         .pro-active { --cube-offset-x: 42px; }
         
-        .modal-overlay { position: fixed; inset: 0; background: rgba(70, 52, 56, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: #FFF9F0; border: 8px solid #463438; border-radius: 40px; padding: 30px; text-align: center; width: 380px; box-shadow: 0 10px 0 #FFB7C5; color: #463438;}
+        .modal-overlay { position: fixed; inset: 0; background: rgba(70, 52, 56, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.4s ease; }
+        .modal-content { background: #FFF9F0; border: 8px solid #463438; border-radius: 40px; padding: 30px; text-align: center; width: 380px; box-shadow: 0 10px 0 #FFB7C5; color: #463438; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(1) translate(0, 0); opacity: 1; }
+
+        /* 內建 CSS 教學動畫 */
+        .tut-anim-box { height: 110px; background: #fffaf5; border: 3px dashed #463438; border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; margin: 12px 0; }
+        .tut-anim-line { width: 80%; height: 6px; background: #99C44D; position: absolute; border-radius: 3px; }
         
+        /* PC 動畫 */
+        .anim-mouse { font-size: 35px; position: absolute; z-index: 3; animation: mouseAnim 3.5s infinite; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.2)); }
+        .anim-scroll { font-size: 24px; position: absolute; z-index: 2; margin-top: -40px; animation: scrollAnim 3.5s infinite; opacity: 0; }
+        @keyframes mouseAnim {
+            0% { transform: translate(40px, 40px); }
+            20% { transform: translate(0, 5px); } /* 點擊線段 */
+            25% { transform: translate(0, 5px) scale(0.9); }
+            30% { transform: translate(0, 5px) scale(1); }
+            45%, 65% { transform: translate(0, 5px); } /* 滾動中停頓 */
+            75% { transform: translate(0, 5px) scale(0.9); filter: drop-shadow(0 0 10px #FFB7C5); } /* 右鍵確認 */
+            85% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.2)); }
+            100% { transform: translate(40px, 40px); }
+        }
+        @keyframes scrollAnim {
+            0%, 35% { opacity: 0; transform: translateY(10px); }
+            45%, 60% { opacity: 1; transform: translateY(0); }
+            70%, 100% { opacity: 0; transform: translateY(-10px); }
+        }
+
+        /* 手機動畫 */
+        .anim-phone { font-size: 45px; position: absolute; z-index: 3; animation: phoneAnim 3.5s infinite; }
+        .anim-tap { width: 25px; height: 25px; background: rgba(255, 183, 197, 0.8); border: 2px solid #463438; border-radius: 50%; position: absolute; z-index: 4; opacity: 0; animation: tapAnim 3.5s infinite; }
+        .anim-tap.left { margin-left: -30px; margin-top: -10px; }
+        .anim-tap.right { margin-left: 30px; margin-top: 20px; }
+        @keyframes phoneAnim {
+            0%, 15% { transform: rotate(0deg) scale(0.8); }
+            25% { transform: rotate(-25deg) scale(1); } /* 往左傾 */
+            45% { transform: rotate(25deg) scale(1); }  /* 往右傾 */
+            65%, 100% { transform: rotate(0deg) scale(1); }
+        }
+        @keyframes tapAnim {
+            0%, 75% { opacity: 0; transform: scale(0.5); }
+            80% { opacity: 1; transform: scale(1.2); }
+            90%, 100% { opacity: 0; transform: scale(1.8); }
+        }
+
         #ios-indicator { position: absolute; top: 0; left: 0; transform: translate(-50%, -120%) scale(0.8); background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(15px); border-radius: 50px; padding: 6px 18px; display: flex; align-items: center; box-shadow: 0 8px 24px rgba(70,52,56,0.12); opacity: 0; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000; pointer-events: none; border: 1px solid rgba(70,52,56,0.35); }
         #ios-indicator.active { opacity: 1; transform: translate(-50%, -120%) scale(1); }
         .ind-fraction { color: #463438; font-size: 16px; font-weight: 900; }
@@ -133,32 +153,17 @@
         .pro-active #canvas-bottom-btns {display: none !important;}
         canvas, .game-canvas, .circuit-unit, .node, .gate-btn-v2 { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; } 
         .swap-active { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; height: 8px !important; z-index: 15 !important; opacity: 1 !important; border-top: none !important;}
-        .drag-target {
-            position: relative;
-        }
-
-        .drag-target::before {
-            content: '';
-            position: absolute;
-            left: -3px;
-            top: 10px;
-            bottom: 10px;
-            width: 4px;
-            background-color: #FFB7C5;
-            border-radius: 4px;
-            z-index: 200;
-            pointer-events: none;
-        }
-
-        .drag-target.right::before {
-            left: auto;
-            right: -3px;
-        }
+        
+        .drag-target{margin-left:25px;position:relative;}
+        .drag-target.right{margin-left:0;margin-right:25px;}
+        .drag-target::before{content:'';position:absolute;left:-14px;top:10px;bottom:10px;width:4px;background-color:#FFB7C5;border-radius:4px;z-index:200;pointer-events:none;}
+        .drag-target.right::before{left:auto;right:-14px;}
     </style>
 </head>
 <body id="body-root" class="mini-mode">
+
     <div id="mode-toggle" class="mode-toggle-fixed" onclick="togglePro()">👁️</div>
-    <div id="quantum-toggle" class="mode-toggle-fixed hidden" onclick="toggleQuantumMode()" style="top: 100px; font-size: 26px;">🔮</div>
+    <div id="quantum-toggle" class="mode-toggle-fixed hidden" onclick="toggleQuantumMode()" style="top: 100px; font-size: 26px;">⚛️</div>
     
     <div id="leaderboard-wrapper">
         <div class="side-leaderboard-content">
@@ -211,9 +216,9 @@
         </div>
         <div id="circuit-area" class="mx-auto">
             <div id="circuit-diagram-title" class="circuit-title font-black text-xl text-center" style="color: #463438;">Paths</div>
-            <div id="q0-label" class="qubit-label" style="top: 60px;">d0</div>
-            <div id="q1-label" class="qubit-label" style="top: 100px;">d1</div>
-            <div id="q2-label" class="qubit-label" style="top: 140px;">d2</div>
+            <div id="q0-label" class="qubit-label" style="top: 60px;">d1</div>
+            <div id="q1-label" class="qubit-label" style="top: 100px;">d2</div>
+            <div id="q2-label" class="qubit-label" style="top: 140px;">d3</div>
             <div id="circuit-content-wrapper"><div id="circuit-content"></div></div>
         </div>
         <div class="w-full text-center mt-6 mb-6">
@@ -221,6 +226,51 @@
         </div>
     </div>
     
+    <div id="tutorialModal" class="modal-overlay" style="display: flex;">
+        <div class="modal-content" style="width: 600px; max-width: 95vw; padding: 25px;">
+            <h2 class="text-2xl font-black mb-4" style="color: #463438;">How to Play Multi-Line Mode 🐾</h2>
+            
+            <div class="flex flex-col md:flex-row gap-4 mb-4 font-bold text-left">
+                <div class="flex-1 bg-white p-4 border-4 border-[#463438] rounded-2xl relative mt-4 md:mt-0">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#99C44D] text-white px-4 py-1 rounded-full border-4 border-[#463438] whitespace-nowrap">
+                        💻 Desktop
+                    </div>
+                    <div class="tut-anim-box">
+                        <div class="tut-anim-line"></div>
+                        <div class="anim-scroll">↕️</div>
+                        <div class="anim-mouse">🖱️</div>
+                    </div>
+                    <ol class="list-decimal pl-5 text-sm space-y-2" style="color: #463438;">
+                        <li><b>Click</b> a line to select.</li>
+                        <li><b>Scroll</b> mouse wheel to switch.</li>
+                        <li><b>Right-Click</b> to confirm.</li>
+                    </ol>
+                </div>
+                
+                <div class="flex-1 bg-white p-4 border-4 border-[#463438] rounded-2xl relative mt-6 md:mt-0">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#FFB7C5] text-white px-4 py-1 rounded-full border-4 border-[#463438] whitespace-nowrap">
+                        📱 Mobile
+                    </div>
+                    <div class="tut-anim-box">
+                        <div class="tut-anim-line"></div>
+                        <div class="anim-phone">📱</div>
+                        <div class="anim-tap left"></div>
+                        <div class="anim-tap right"></div>
+                    </div>
+                    <ol class="list-decimal pl-5 text-sm space-y-2" style="color: #463438;">
+                        <li><b>Tap</b> a line to select.</li>
+                        <li><b>Tilt</b> phone L/R to switch.</li>
+                        <li><b>2-Finger Tap</b> to confirm.</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <p class="text-sm font-black mb-5" style="color: #463438;">💡 TIP: You can also just use the Gate Buttons!</p>
+            
+            <button onclick="closeTutorial()" class="game-btn btn-green w-full">GOT IT!</button>
+        </div>
+    </div>
+
     <div id="victoryModal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="text-5xl font-black mb-4" style="color: #463438;">MEOW!</h2>
@@ -230,13 +280,18 @@
             <button onclick="viewInLab().style.display='none'" class="game-btn btn-red w-full">View Circuit</button>
         </div>
     </div>
+
     <script>
+        function closeTutorial() {
+            const modal = document.getElementById('tutorialModal');
+            modal.style.display = 'none';
+        }
+
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHimc4WS1FjvGEb2-gTBMhum8APQKfDHxc5wsiWRkNqkxJrocMOw/exec';
         let steps = 0, time = 0, isPro = false, isQuantumMode = false, timerInterval, gateHistory = [], isSolved = false;
         let selectedIndices = [];
         let actionStack = [];
         
-        // 第 5 關的初始位置
         let fishAtNode = [7, 6, 5, 4, 3, 2, 1, 0];    
         
         let lineMode = 1;
@@ -324,6 +379,7 @@
             circuitWrapper.addEventListener('dragover', (e) => {
                 if (draggedIndex !== null) {
                     e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
                     const rect = circuitWrapper.getBoundingClientRect();
                     const edgeThreshold = 80;
                     if (e.clientX - rect.left < edgeThreshold) {
@@ -338,7 +394,47 @@
                 }
             });
 
-            circuitWrapper.addEventListener('drop', () => { scrollSpeed = 0; });
+            circuitWrapper.addEventListener('dragenter', (e) => {
+                if (draggedIndex !== null) e.preventDefault();
+            });
+
+            circuitWrapper.addEventListener('drop', (e) => {
+                e.preventDefault();
+                scrollSpeed = 0;
+                if (draggedIndex === null) return;
+                
+                const units = Array.from(document.querySelectorAll('.circuit-unit'));
+                let targetIdx = gateHistory.length;
+                
+                for (let i = 0; i < units.length; i++) {
+                    const rect = units[i].getBoundingClientRect();
+                    if (e.clientX < rect.left + rect.width / 2) {
+                        targetIdx = i;
+                        break;
+                    }
+                }
+                
+                if (draggedIndex < targetIdx) targetIdx--;
+                
+                if (draggedIndex !== targetIdx && targetIdx >= 0 && targetIdx <= gateHistory.length) {
+                    pop.currentTime = 0; pop.play();
+                    const movedGate = gateHistory.splice(draggedIndex, 1)[0];
+                    gateHistory.splice(targetIdx, 0, movedGate);
+                    actionStack.push({ type: 'replace', index: 0, oldGates: [], newGate: null });
+                    selectedIndices = []; 
+                    recalculate();
+                } else {
+                    document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
+                }
+                draggedIndex = null;
+            });
+
+            circuitWrapper.addEventListener('dragleave', (e) => {
+                if (!circuitWrapper.contains(e.relatedTarget)) {
+                    document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
+                    scrollSpeed = 0;
+                }
+            });
 
             document.addEventListener('wheel', (e) => {
                 if (!lockedLineId || lineMode === 1 || lineMode === 4 || isTouchDevice) return;
@@ -483,9 +579,9 @@
             highlightGateButton(type);
         }
         function getGateColorMap(type) {
-            if (type.startsWith('SWAP')) return '#e2de6e'; // Mode 1
-            if (type.startsWith('CX')) return '#629eed';   // Mode 2
-            if (type.startsWith('X')) return '#b583e5';    // Mode 4
+            if (type.startsWith('SWAP')) return '#e2de6e'; 
+            if (type.startsWith('CX')) return '#629eed';   
+            if (type.startsWith('X')) return '#b583e5';    
             return '#fff';
         }
         function getMiniHypercubeSVG(type) {
@@ -528,7 +624,7 @@
                     for (let q = 0; q < 3; q++) if (q !== target) controls.push({ q: q, type: binary[q] });
                 }
                 let content = '';
-                const getY = (q) => 18 + q * 18.5;
+                const getY = (q) => 19 + q * 18.5;
                 if (controls.length > 0) {
                     const allQs = [target, ...controls.map(c => c.q)];
                     const minQ = Math.min(...allQs), maxQ = Math.max(...allQs);
@@ -545,13 +641,13 @@
         function toggleQuantumMode() {
             pop.currentTime = 0; pop.play();
             isQuantumMode = !isQuantumMode;
-            document.getElementById('quantum-toggle').innerText = isQuantumMode ? "⚛️" : "🔮";
+            document.getElementById('quantum-toggle').innerText = isQuantumMode ? "🧊" : "⚛️";
             document.getElementById('body-root').classList.toggle('mini-mode', !isQuantumMode);
             
             document.getElementById('circuit-diagram-title').innerText = isQuantumMode ? "Circuit Diagram" : "Paths";
             document.getElementById('panel-gate-title').innerText = isQuantumMode ? "Quantum Gates" : "Transformations";
             for(let i=0; i<3; i++) {
-                document.getElementById(`q${i}-label`).innerText = isQuantumMode ? `q${i}` : `d${i}`;
+                document.getElementById(`q${i}-label`).innerText = isQuantumMode ? `q${i}` : `d${i+1}`;
             }
 
             initGates();
@@ -831,7 +927,6 @@
         }
 
         function recalculate() { 
-            // 這裡設定為第 5 關的初始位置，讓 Undo / 重新計算時不會出錯
             fishAtNode = [7, 6, 5, 4, 3, 2, 1, 0]; 
             let h = [...gateHistory]; gateHistory = []; h.forEach(g => { executeLogic(g); gateHistory.push(g); }); steps = gateHistory.length; finishMove(); 
         }
@@ -858,74 +953,44 @@
                 
                 const hex = getGateColorMap(g);
                 u.style.setProperty('--bg-hover', getRgba(hex, 0.35));
+                u.style.setProperty('--border-color', hex);
 
                 if (selectedIndices.includes(idx)) u.classList.add('selected-gate');
                 
                 u.draggable = true;
+                
                 u.addEventListener('dragstart', (e) => {
                     if (isSolved || mobileDragging) return;
                     draggedIndex = idx;
-                    u.classList.add('opacity-50');
+
+                    setTimeout(() => u.classList.add('opacity-50'), 0);
                     e.dataTransfer.effectAllowed = 'move';
                     e.dataTransfer.setData('text/plain', idx);
                 });
                 
                 u.addEventListener('dragover', (e) => { 
                     e.preventDefault(); 
+                    e.dataTransfer.dropEffect = 'move';
+                    
                     if (draggedIndex !== null && draggedIndex !== idx) {
+
+                        document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
+                        
                         const rect = u.getBoundingClientRect();
                         const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        u.classList.remove('drag-target', 'right');
                         if (!isAfter) {
                             u.classList.add('drag-target');
                         } else {
                             u.classList.add('drag-target', 'right');
                         }
                     }
-                    
-                    const rectWrap = wrapper.getBoundingClientRect();
-                    const edgeThreshold = 80;
-                    if (e.clientX - rectWrap.left < edgeThreshold) {
-                        scrollSpeed = -8; 
-                        if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
-                    } else if (rectWrap.right - e.clientX < edgeThreshold) {
-                        scrollSpeed = 8; 
-                        if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
-                    } else {
-                        scrollSpeed = 0;
-                    }
                 });
                 
-                u.addEventListener('dragleave', () => { 
-                    u.classList.remove('drag-target', 'right');
-                });
-                
-                u.addEventListener('drop', (e) => {
-                    e.preventDefault(); 
-                    u.classList.remove('drag-target', 'right');
-                    scrollSpeed = 0;
-                    
-                    if (draggedIndex !== null && draggedIndex !== idx) {
-                        const rect = u.getBoundingClientRect();
-                        const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        
-                        let targetIdx = idx;
-                        if (isAfter) targetIdx++;
-                        
-                        if (draggedIndex < targetIdx) targetIdx--;
-                        
-                        pop.currentTime = 0; pop.play();
-                        const movedGate = gateHistory.splice(draggedIndex, 1)[0];
-                        gateHistory.splice(targetIdx, 0, movedGate);
-                        actionStack.push({ type: 'replace', index: 0, oldGates: [], newGate: null });
-                        selectedIndices = []; recalculate();
-                    }
-                });
                 u.addEventListener('dragend', () => { 
                     u.classList.remove('opacity-50'); 
                     draggedIndex = null; 
                     scrollSpeed = 0;
-                    renderCircuit(); 
+                    document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
                 });
 
                 u.addEventListener('click', (e) => {
@@ -1000,7 +1065,7 @@
                             const dot = document.createElement('div'); dot.className = 'control-dot'; dot.style.top = (24 + ctrl.line * 40) + 'px';
                             if (ctrl.type === 0) { dot.style.background = '#fff'; dot.style.border = '2px solid #463438'; } u.appendChild(dot);
                         });
-                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.top = (30 + target * 40) + 'px'; u.appendChild(t);
+                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.top = (31 + target * 40) + 'px'; u.appendChild(t);
                     }
                 }
                 c.appendChild(u);
@@ -1017,7 +1082,6 @@
             if (fishAtNode.every((pos, i) => pos === i)) {
                 isSolved = true; updateUndoStatus(); if (timerInterval) clearInterval(timerInterval);
                 const ft = time, st = steps, u = sessionStorage.getItem('currentUser'), savedLevel = parseInt(sessionStorage.getItem('currentLevel')) || 1;
-                // 過了第 5 關後解鎖第 6 關
                 if (savedLevel < 6) sessionStorage.setItem('currentLevel', 6);
                 setTimeout(() => {
                     if(typeof meow !== 'undefined') { meow.currentTime = 0; meow.play(); }
