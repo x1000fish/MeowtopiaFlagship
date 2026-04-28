@@ -29,12 +29,10 @@
         .connection-line { position: absolute; background: #463438; z-index: 10; cursor: pointer; transition: all 0.2s ease; opacity: 1; }
         @media (hover: hover) { .connection-line:hover { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8); height: 10px !important; z-index: 16; opacity: 1 !important; } }
         .line-highlight { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; height: 8px !important; z-index: 15; opacity: 1 !important; }
-        
         .fish-wrapper { position: absolute; width: 80px; height: 80px; pointer-events: none; z-index: 30; display: flex; justify-content: center; align-items: center; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         .fish-wrapper img.fish-img { width: 70px; height: auto; position: absolute; z-index: 2; top: 50%; transform: translateY(-50%); }
         .fish-wrapper img.fish-bg-shape { width: 70px; height: auto; position: absolute; z-index: 1; filter: brightness(0) invert(1); opacity: 1; top: 50%; transform: translateY(-50%); }
         .fish-label { background: rgba(70, 52, 56, 0.8); color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; z-index: 5; position: absolute; top: px; }
-        
         #pro-panel { width: 0; opacity: 0; height: 628px; overflow: hidden; background: #fff; border: 0px solid #463438; border-radius: 40px; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .pro-active #pro-panel { width: 650px; opacity: 1; border: 8px solid #463438; padding: 20px; box-shadow: 10px 10px 0px #99C44D;}
         .panel-section-title { font-weight: 900; font-size: 18px; margin: 10px 0 1px; color: #463438; text-align: center; white-space: nowrap; }
@@ -53,73 +51,41 @@
         .btn-undo.active { background: #FFB7C5 !important; border-color: #463438 !important; color: #fff !important; opacity: 1; cursor: pointer; box-shadow: 0 4px 0 #463438; }
         .btn-undo.active:hover { background-color: #ff9fb2 !important; transform: translateY(-2px); box-shadow: 0 6px 0 #463438; }
         .func-btn:hover { background-color: #FFB7C5 !important; color: #fff !important; border-color: #463438 !important; transform: translateY(-2px); box-shadow: 0 3px 0 #463438; }
-        
         #circuit-area { width: 1024px; height: 0; opacity: 0; background: #fff; border: 0px solid #463438; border-radius: 30px; margin-top: 20px; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; }
         .pro-active #circuit-area { height: 210px; opacity: 1; border: 8px solid #463438; padding: 15px; box-shadow: 10px 10px 0px #FFB7C5;}
         #circuit-content-wrapper { position: relative; height: 150px; overflow-x: auto; margin-left: 45px; -ms-overflow-style: none; scrollbar-width: none; }
         #circuit-content-wrapper::-webkit-scrollbar { display: none; }
         #circuit-content { display: flex; height: 100%; padding: 0 10px; min-width: 100%; width: max-content; position: relative; background-image: linear-gradient(#463438,#463438), linear-gradient(#463438,#463438), linear-gradient(#463438,#463438); background-size: 100% 3px; background-repeat: no-repeat; background-position: 0 30px, 0 70px, 0 110px; }
         .mini-mode #circuit-content { background-image: none !important; }
-
         .qubit-label { position: absolute; left: 18px; font-weight: 900; font-size: 16px; color: #463438; transition: all 0.3s; }
-        
-        .circuit-unit { 
-            min-width: 55px; 
-            width: 55px; 
-            max-width: 55px; 
-            flex: 0 0 55px; 
-            height: 140px; 
-            display: flex; 
-            flex-direction: column; 
-            position: relative; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            background-color: transparent !important; 
-        }
-
-        .mini-mode .circuit-unit { 
-            min-width: 120px; 
-            width: 120px; 
-            max-width: 120px; 
-            flex: 0 0 120px;
-            height: 140px; 
-            margin-top: 0px; 
-            padding: 0 5px;  
-        }
-        
-        .circuit-unit:hover, .circuit-unit.selected-gate { background-color: var(--bg-hover) !important; border-radius: 12px; }
-        
+        .circuit-unit{min-width:55px;width:55px;max-width:55px;flex:0 0 55px;height:140px;display:flex;flex-direction:column;position:relative;cursor:pointer;transition:all 0.2s ease, margin 0.2s ease;background-color:transparent !important;} 
+        .mini-mode .circuit-unit{min-width:120px;width:120px;max-width:120px;flex:0 0 120px;height:140px;margin-top:0px;padding:0 5px;}
+        .circuit-unit:hover { background-color: var(--bg-hover) !important; border-radius: 12px; }
+        .circuit-unit.selected-gate { background-color: var(--bg-hover) !important; border-radius: 12px; box-shadow: inset 0 0 0 3px var(--border-color) !important; }
         .control-dot { width: 14px; height: 14px; background: #463438; border-radius: 50%; position: absolute; left: 50%; transform: translateX(-50%); z-index: 5; }
         .connection-v-line { position: absolute; width: 2.5px; background: #463438; left: 50%; transform: translateX(-50%); z-index: 3; }
         .circuit-target { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 2.5px solid #463438; left: 50%; transform: translate(-50%, -50%); z-index: 15; }
         .circuit-target::before { content: ""; position: absolute; width: 2.5px; height: 100%; background: #463438; left: 50%; transform: translateX(-50%); }
         .circuit-target::after { content: ""; position: absolute; width: 100%; height: 2.5px; background: #463438; top: 50%; transform: translateY(-50%); }
         .mode-toggle-fixed { position: fixed; top: 20px; right: 20px; width: 70px; height: 70px; background: #fff; border: 5px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; box-shadow: 0 4px 0 #463438; z-index: 500; }
-        
         #gate-scroll-area { position: relative; margin-top: 5px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 10px; -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth;}
         #gate-scroll-area::-webkit-scrollbar { display: none; }
-        
         :root { --cube-offset-x: 175px; }
         .pro-active { --cube-offset-x: 42px; }
-        
         .modal-overlay { position: fixed; inset: 0; background: rgba(70, 52, 56, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: #FFF9F0; border: 8px solid #463438; border-radius: 40px; padding: 30px; text-align: center; width: 380px; box-shadow: 0 10px 0 #FFB7C5; color: #463438;}
-        
+        .modal-content { background: #FFF9F0; border: 8px solid #463438; border-radius: 40px; padding: 30px; text-align: center; width: 380px; box-shadow: 0 10px 0 #FFB7C5; color: #463438;}      
         #ios-indicator { position: absolute; top: 0; left: 0; transform: translate(-50%, -120%) scale(0.8); background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(15px); border-radius: 50px; padding: 6px 18px; display: flex; align-items: center; box-shadow: 0 8px 24px rgba(70,52,56,0.12); opacity: 0; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000; pointer-events: none; border: 1px solid rgba(70,52,56,0.35); }
         #ios-indicator.active { opacity: 1; transform: translate(-50%, -120%) scale(1); }
         .ind-fraction { color: #463438; font-size: 16px; font-weight: 900; }
-        
         .gate-btn-v2 { position: relative; height: 75px; width: 60px; display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid #463438; border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 6px rgba(0,0,0,0.1); background-size: 60% 1.5px; background-repeat: no-repeat; background-position: center 18px, center 36.5px, center 55px; margin: auto;}
         .gate-btn-v2:hover { background-color: #FFB7C5 !important; filter: brightness(1.05); transform: scale(1.05); z-index: 10; }
-        .btn-highlight { transform: scale(1.15); box-shadow: 0 0 10px rgba(0,0,0,0.3); border: 4px solid #99C44D !important; z-index: 10; filter: brightness(1.1); background-color: #FFB7C5 !important; }
-        
+        .btn-highlight { transform: scale(1.15); box-shadow: 0 0 10px rgba(0,0,0,0.3); border: 4px solid #99C44D !important; z-index: 10; filter: brightness(1.1); background-color: #FFB7C5 !important; }        
         .hyper-line { stroke: #463438; stroke-width: 0.6; opacity: 0.3; }
         .hyper-line-hi { stroke: #FFB7C5; stroke-width: 2.5; opacity: 1; transition: stroke 0.2s; }
         .gate-btn-v2 .hyper-line-hi { stroke: #f78790; }
         .gate-btn-v2:hover .hyper-line-hi { stroke: #ffffff !important; }
         .btn-highlight .hyper-line-hi { stroke: #ffffff !important; }
         .circuit-unit:hover .hyper-line-hi, .circuit-unit.selected-gate .hyper-line-hi { stroke: #99C44D !important; }
-
         .gate-v-line { position: absolute; width: 1.5px; background: #463438; left: 50%; transform: translateX(-50%); z-index: 1; }
         .gate-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid #463438; left: 50%; transform: translate(-50%, -50%); z-index: 2; }
         .gate-dot.fill { background: #463438; }
@@ -127,38 +93,20 @@
         .gate-target-circle { position: absolute; width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #463438; background: #fff; left: 50%; transform: translate(-50%, -50%); z-index: 3; }
         .gate-target-circle::before { content: ''; position: absolute; width: 100%; height: 1.5px; top: 50%; left: 0; transform: translateY(-50%); background: #463438; }
         .gate-target-circle::after { content: ''; position: absolute; height: 100%; width: 1.5px; left: 50%; top: 0; transform: translateX(-50%); background: #463438; }
-        
         #canvas-bottom-btns {position: absolute;bottom: 20px;right: 30px; display: flex;flex-direction: column; gap: 10px;z-index: 100;}
         #canvas-bottom-btns .func-btn { margin-top: 0; width: 90px; font-size: 14px;padding: 8px 5px; text-transform: uppercase; border-width: 3px;}
         .pro-active #canvas-bottom-btns {display: none !important;}
         canvas, .game-canvas, .circuit-unit, .node, .gate-btn-v2 { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; } 
         .swap-active { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; height: 8px !important; z-index: 15 !important; opacity: 1 !important; border-top: none !important;}
-        .drag-target {
-            position: relative;
-        }
-        .drag-target::before {
-            content: '';
-            position: absolute;
-            left: -3px;
-            top: 10px;
-            bottom: 10px;
-            width: 4px;
-            background-color: #FFB7C5;
-            border-radius: 4px;
-            z-index: 200;
-            pointer-events: none;
-        }
-
-        .drag-target.right::before {
-            left: auto;
-            right: -3px;
-        }
+        .drag-target{margin-left:25px;position:relative;}
+        .drag-target.right{margin-left:0;margin-right:25px;}
+        .drag-target::before{content:'';position:absolute;left:-14px;top:10px;bottom:10px;width:4px;background-color:#FFB7C5;border-radius:4px;z-index:200;pointer-events:none;}
+        .drag-target.right::before{left:auto;right:-14px;}
     </style>
 </head>
 <body id="body-root" class="mini-mode">
     <div id="mode-toggle" class="mode-toggle-fixed" onclick="togglePro()">👁️</div>
-    <div id="quantum-toggle" class="mode-toggle-fixed hidden" onclick="toggleQuantumMode()" style="top: 100px; font-size: 26px;">🔮</div>
-    
+    <div id="quantum-toggle" class="mode-toggle-fixed hidden" onclick="toggleQuantumMode()" style="top: 100px; font-size: 26px;">⚛️</div>
     <div id="leaderboard-wrapper">
         <div class="side-leaderboard-content">
             <h2 class="text-xl font-black mb-3 text-center" style="color: #463438;">🏆 TOP CATS</h2>
@@ -174,7 +122,6 @@
             <div class="bookmark-text">RANK</div>
         </div>
     </div>
-    
     <div class="w-full max-w-5xl">
         <div class="flex justify-between w-full px-4 mb-4 items-center mt-6">
             <div class="text-3xl font-black" style="color: #463438;">STEPS: <span id="step-count">0</span> | TIME: <span id="timer">0</span>s</div>
@@ -210,16 +157,15 @@
         </div>
         <div id="circuit-area" class="mx-auto">
             <div id="circuit-diagram-title" class="circuit-title font-black text-xl text-center" style="color: #463438;">Paths</div>
-            <div id="q0-label" class="qubit-label" style="top: 60px;">d0</div>
-            <div id="q1-label" class="qubit-label" style="top: 100px;">d1</div>
-            <div id="q2-label" class="qubit-label" style="top: 140px;">d2</div>
+            <div id="q0-label" class="qubit-label" style="top: 60px;">d1</div>
+            <div id="q1-label" class="qubit-label" style="top: 100px;">d2</div>
+            <div id="q2-label" class="qubit-label" style="top: 140px;">d3</div>
             <div id="circuit-content-wrapper"><div id="circuit-content"></div></div>
         </div>
         <div class="w-full text-center mt-6 mb-6">
             <a href="index.html" class="game-btn btn-red px-16">GIVE UP</a>
         </div>
     </div>
-    
     <div id="victoryModal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="text-5xl font-black mb-4" style="color: #463438;">MEOW!</h2>
@@ -234,10 +180,7 @@
         let steps = 0, time = 0, isPro = false, isQuantumMode = false, timerInterval, gateHistory = [], isSolved = false;
         let selectedIndices = [];
         let actionStack = [];
-        
-        // 第 6 關的初始位置
         let fishAtNode = [1, 0, 3, 2, 5, 7, 4, 6];    
-        
         let lineMode = 1;
         let hoverLine = null;
         let currentOptionIndex = -1;
@@ -245,23 +188,18 @@
         let draggedIndex = null;
         let leaderboardData;
         let mobileDragging = false;
-        
         let isTouchDevice = ('ontouchstart' in window || navigator.maxTouchPoints > 0);
         let lockedLineId = null;
         let hasScrolled = false;
-        
         let lastTiltDirection = 0;
         const TILT_THRESHOLD = 15;
         const RETURN_THRESHOLD = 10;
         let gyroPermissionGranted = false;
         let lastSwipeTime = 0;
-        
         let autoScrollRAF = null;
         let scrollSpeed = 0;
-
         const pop = new Audio('pop.m4a'), meow = new Audio('meow.m4a');
         const getDynamicOffset = () => parseInt(getComputedStyle(document.body).getPropertyValue('--cube-offset-x')) || 0;
-        
         const nodePositions = Array.from({ length: 8 }, (_, i) => {
             let t, l_rel;
             if (i === 0) { t = 150; l_rel = 135; }
@@ -276,7 +214,6 @@
             Object.defineProperty(pos, 'l', { get: () => pos.relX + getDynamicOffset() });
             return pos;
         });
-
         window.onload = () => {
             initGameLayout();
             initGates();
@@ -285,16 +222,13 @@
             updateUndoStatus();
             fetchLeaderboard();
             timerInterval = setInterval(() => { time++; document.getElementById('timer').innerText = time; }, 1000);
-            
             const circuitWrapper = document.getElementById('circuit-content-wrapper');
-            
             circuitWrapper.addEventListener('wheel', (e) => {
                 if (Math.abs(e.deltaY) > 0) {
                     e.preventDefault();
                     circuitWrapper.scrollLeft += e.deltaY;
                 }
             }, { passive: false });
-
             function scrollLoop() {
                 if (scrollSpeed !== 0) {
                     circuitWrapper.scrollLeft += scrollSpeed;
@@ -303,7 +237,6 @@
                     autoScrollRAF = null;
                 }
             }
-
             circuitWrapper.addEventListener('mousemove', (e) => {
                 const rect = circuitWrapper.getBoundingClientRect();
                 const edgeThreshold = 80;
@@ -317,12 +250,11 @@
                     scrollSpeed = 0;
                 }
             });
-
             circuitWrapper.addEventListener('mouseleave', () => { scrollSpeed = 0; });
-
             circuitWrapper.addEventListener('dragover', (e) => {
                 if (draggedIndex !== null) {
                     e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move'; 
                     const rect = circuitWrapper.getBoundingClientRect();
                     const edgeThreshold = 80;
                     if (e.clientX - rect.left < edgeThreshold) {
@@ -336,9 +268,42 @@
                     }
                 }
             });
-
-            circuitWrapper.addEventListener('drop', () => { scrollSpeed = 0; });
-
+            circuitWrapper.addEventListener('dragenter', (e) => {
+                if (draggedIndex !== null) e.preventDefault();
+            });
+            circuitWrapper.addEventListener('drop', (e) => {
+                e.preventDefault();
+                scrollSpeed = 0;
+                if (draggedIndex === null) return;               
+                const units = Array.from(document.querySelectorAll('.circuit-unit'));
+                let targetIdx = gateHistory.length;             
+                for (let i = 0; i < units.length; i++) {
+                    const rect = units[i].getBoundingClientRect();
+                    if (e.clientX < rect.left + rect.width / 2) {
+                        targetIdx = i;
+                        break;
+                    }
+                }       
+                if (draggedIndex < targetIdx) targetIdx--;
+                
+                if (draggedIndex !== targetIdx && targetIdx >= 0 && targetIdx <= gateHistory.length) {
+                    pop.currentTime = 0; pop.play();
+                    const movedGate = gateHistory.splice(draggedIndex, 1)[0];
+                    gateHistory.splice(targetIdx, 0, movedGate);
+                    actionStack.push({ type: 'replace', index: 0, oldGates: [], newGate: null });
+                    selectedIndices = []; 
+                    recalculate();
+                } else {
+                    document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
+                }
+                draggedIndex = null;
+            });
+            circuitWrapper.addEventListener('dragleave', (e) => {
+                if (!circuitWrapper.contains(e.relatedTarget)) {
+                    document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
+                    scrollSpeed = 0;
+                }
+            });
             document.addEventListener('wheel', (e) => {
                 if (!lockedLineId || lineMode === 1 || lineMode === 4 || isTouchDevice) return;
                 const target = e.target;
@@ -350,18 +315,15 @@
                     showIndicatorScrolled();
                 }
             }, { passive: false });
-
             const canvas = document.getElementById('main-canvas');
-            const indicator = document.getElementById('ios-indicator');
-            
+            const indicator = document.getElementById('ios-indicator'); 
             canvas.addEventListener('mousedown', (e) => {
                 if (lockedLineId && !isTouchDevice) {
                     if (e.button === 0 && !e.target.classList.contains('connection-line')) { 
                         cancelLock(); 
                     }
                 }
-            });
-            
+            }); 
             canvas.addEventListener('contextmenu', (e) => {
                 if (lockedLineId && !isTouchDevice) {
                     e.preventDefault(); 
@@ -370,7 +332,6 @@
                     else if (currentOptions[currentOptionIndex]) applyGate(currentOptions[currentOptionIndex].gateType);
                 }
             });
-
             window.addEventListener('touchstart', (e) => {
                 if (lockedLineId && e.touches.length >= 2) {
                     e.preventDefault();
@@ -379,13 +340,11 @@
                     else if (hasScrolled && currentOptions[currentOptionIndex]) applyGate(currentOptions[currentOptionIndex].gateType);
                 }
             }, { passive: false });
-
             canvas.addEventListener('touchstart', (e) => {
                 if (e.touches.length === 1 && lockedLineId) {
                     if (!e.target.classList.contains('connection-line')) { cancelLock(); }
                 }
             });
-
             canvas.addEventListener('mousemove', (e) => {
                 if (indicator.classList.contains('active') && !isTouchDevice) {
                     const rect = canvas.getBoundingClientRect();
@@ -394,13 +353,10 @@
                 }
             });
         };
-
         function handleOrientation(event) {
             if (!lockedLineId || lineMode === 1 || lineMode === 4) return;
-            
             let tilt = event.gamma; 
             const orientation = (screen.orientation || {}).type || window.orientation;
-            
             if (orientation === 90 || orientation === "landscape-primary") {
                 tilt = event.beta;
             } else if (orientation === -90 || orientation === "landscape-secondary") {
@@ -408,10 +364,8 @@
             } else if (orientation === 180 || orientation === "portrait-secondary") {
                 tilt = -event.gamma;
             }
-
             const now = Date.now();
             if (now - lastSwipeTime < 400) return;
-
             if (tilt > TILT_THRESHOLD && lastTiltDirection <= 0) {
                 currentOptionIndex = (currentOptionIndex + 1) % currentOptions.length;
                 lastTiltDirection = 1;
@@ -430,13 +384,11 @@
                 lastTiltDirection = 0;
             }
         }
-
         function getRgba(hex, alpha) {
             hex = hex.replace('#', '');
             const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
-
         function getHighlightPairsForGate(type) {
             let pairs = [];
             if (type.startsWith('X')) {
@@ -453,19 +405,16 @@
             }
             return pairs;
         }
-
         window.clearHighlight = function() { 
             document.querySelectorAll('.connection-line').forEach(l=>l.classList.remove('line-highlight')); 
             document.querySelectorAll('.gate-btn-v2').forEach(b=>b.classList.remove('btn-highlight'));
         }
-
         function highlightGateButton(type) {
             document.querySelectorAll('.gate-btn-v2').forEach(btn => btn.classList.remove('btn-highlight'));
             if(type) {
                 const btn = document.getElementById(`gate-btn-${type}`);
                 if(btn) {
                     btn.classList.add('btn-highlight');
-                    
                     const container = document.getElementById('gate-scroll-area');
                     const btnRect = btn.getBoundingClientRect();
                     const containerRect = container.getBoundingClientRect();
@@ -478,19 +427,16 @@
                 }
             }
         }
-
         window.highlightByGate = function(type) {
             highlightPairs(getHighlightPairsForGate(type));
             highlightGateButton(type);
         }
-
         function getGateColorMap(type) {
-            if (type.startsWith('SWAP')) return '#e2de6e'; // Mode 1
-            if (type.startsWith('CX')) return '#629eed';   // Mode 2
-            if (type.startsWith('X')) return '#b583e5';    // Mode 4
+            if (type.startsWith('SWAP')) return '#e2de6e'; 
+            if (type.startsWith('CX')) return '#629eed';   
+            if (type.startsWith('X')) return '#b583e5';    
             return '#fff';
         }
-
         function getMiniHypercubeSVG(type) {
             let pairs = getHighlightPairsForGate(type);
             
@@ -498,9 +444,7 @@
                 x: (n.relX + 10) / 520 * 70 + 15, 
                 y: (n.t - 20) / 440 * 70 + 15 
             }));
-            
             let svg = `<svg viewBox="0 0 100 100" style="width:100%; height:100%; pointer-events:none; display: block;" preserveAspectRatio="xMidYMid meet">`;
-            
             for(let i=0; i<8; i++) {
                 for(let b=0; b<3; b++) {
                     let j = i ^ (1<<b);
@@ -520,7 +464,6 @@
             svg += `</svg>`;
             return svg;
         }
-
         function getGateContent(type) {
             if (isQuantumMode) {
                 let controls = [], target = -1;
@@ -533,7 +476,7 @@
                     for (let q = 0; q < 3; q++) if (q !== target) controls.push({ q: q, type: binary[q] });
                 }
                 let content = '';
-                const getY = (q) => 18 + q * 18.5;
+                const getY = (q) => 19 + q * 18.5;
                 if (controls.length > 0) {
                     const allQs = [target, ...controls.map(c => c.q)];
                     const minQ = Math.min(...allQs), maxQ = Math.max(...allQs);
@@ -546,23 +489,19 @@
                 return getMiniHypercubeSVG(type);
             }
         }
-
         function toggleQuantumMode() {
             pop.currentTime = 0; pop.play();
             isQuantumMode = !isQuantumMode;
-            document.getElementById('quantum-toggle').innerText = isQuantumMode ? "⚛️" : "🔮";
+            document.getElementById('quantum-toggle').innerText = isQuantumMode ? "🧊" : "⚛️";
             document.getElementById('body-root').classList.toggle('mini-mode', !isQuantumMode);
-            
             document.getElementById('circuit-diagram-title').innerText = isQuantumMode ? "Circuit Diagram" : "Paths";
             document.getElementById('panel-gate-title').innerText = isQuantumMode ? "Quantum Gates" : "Transformations";
             for(let i=0; i<3; i++) {
-                document.getElementById(`q${i}-label`).innerText = isQuantumMode ? `q${i}` : `d${i}`;
+                document.getElementById(`q${i}-label`).innerText = isQuantumMode ? `q${i}` : `d${i+1}`;
             }
-
             initGates();
             renderCircuit();
         }
-
         function togglePro() {
             pop.currentTime = 0; pop.play();
             isPro = !isPro;
@@ -582,16 +521,13 @@
             };
             requestAnimationFrame(animateMove);
         }
-
         function initGates() {
             const grid = document.getElementById('gate-grid');
             let html = '';
-            
             let gateOrderX = [];
             let gateOrderCX = [];
             let gateOrderSWAP = [];
             let added = new Set();
-
             let edges = [];
             for (let dim=0; dim<3; dim++) {
                 for (let i=0; i<8; i++) {
@@ -599,12 +535,10 @@
                     if (i < j) edges.push({i, j, dim});
                 }
             }
-
             for(let dim=0; dim<3; dim++) {
                 let g = `X${2-dim}`;
                 if(!added.has(g)) { gateOrderX.push(g); added.add(g); }
             }
-            
             edges.forEach(edge => {
                 const targetQ = 2 - edge.dim; 
                 const ctrlPool = [0,1,2].filter(q=>q!==targetQ); 
@@ -614,12 +548,10 @@
                     if(!added.has(g)) { gateOrderCX.push(g); added.add(g); }
                 });
             });
-            
             edges.forEach(edge => { 
                 let g = `SWAP_${edge.i}_${edge.j}`;
                 if(!added.has(g)) { gateOrderSWAP.push(g); added.add(g); }
             });
-
             const wrapBtn = (type) => {
                 const hex = getGateColorMap(type);
                 const rgbaLight = getRgba(hex, 0.35); 
@@ -629,22 +561,17 @@
                     onmouseleave="clearHighlight()"
                     onclick="applyGate('${type}')">${getGateContent(type)}</button>`;
             };
-            
             html += `<div class="flex flex-wrap justify-center gap-2 w-full">`;
             gateOrderX.forEach(g => { html += wrapBtn(g); });
             html += `</div>`;
-
             html += `<div class="flex flex-wrap justify-center gap-2 w-full">`;
             gateOrderCX.forEach(g => { html += wrapBtn(g); });
             html += `</div>`;
-
             html += `<div class="flex flex-wrap justify-center gap-2 w-full">`;
             gateOrderSWAP.forEach(g => { html += wrapBtn(g); });
             html += `</div>`;
-            
             grid.innerHTML = html;
         }
-
         function flashGateLines(type) {
             let pairs = getHighlightPairsForGate(type);
             pairs.forEach(([a, b]) => {
@@ -659,7 +586,6 @@
                 clearHighlight();
             }, 500);
         }
-
         function drawStaticLines() {
             const layer = document.getElementById('lines-layer');
             layer.innerHTML = '';
@@ -670,7 +596,6 @@
                 }
             }
         }
-
         function createLine(i, j, dim) {
             const n1 = nodePositions[i], n2 = nodePositions[j];
             const x1 = n1.l + 65, y1 = n1.t + 65, x2 = n2.l + 65, y2 = n2.t + 65;
@@ -680,9 +605,7 @@
             line.className = 'connection-line';
             line.id = `line-${Math.min(i,j)}-${Math.max(i,j)}`;
             line.style.cssText = `width:${len}px; left:${x1}px; top:${y1}px; transform:rotate(${ang}deg); transform-origin:0 50%;`;
-            
-            line.style.height='3px'; line.style.background='#463438';
-            
+            line.style.height='3px'; line.style.background='#463438';    
             line.onmouseenter = () => {
                 if (isTouchDevice || lockedLineId) return;
                 hoverLine = { i, j, dim };
@@ -701,7 +624,6 @@
             line.onclick = (e) => {
                 e.stopPropagation();
                 if (isSolved) return;
-                
                 if (isTouchDevice && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     if (!gyroPermissionGranted) {
                         DeviceOrientationEvent.requestPermission().then(state => {
@@ -715,31 +637,25 @@
                     gyroPermissionGranted = true;
                     window.addEventListener('deviceorientation', handleOrientation);
                 }
-
                 if (lineMode === 1) { applyGate(`SWAP_${i}_${j}`); return; }
                 if (lineMode === 4) { applyGate(`X${2 - dim}`); return; }
-
                 if (lockedLineId === line.id) {
                     cancelLock();
                     return;
                 }
-
                 lockedLineId = line.id;
                 hoverLine = { i, j, dim };
                 currentOptions = buildGateOptions(i, j, dim);
                 currentOptionIndex = 0;
                 hasScrolled = false;
-
                 const canvasRect = document.getElementById('main-canvas').getBoundingClientRect();
                 const indicator = document.getElementById('ios-indicator');
                 indicator.style.left = (e.clientX - canvasRect.left) + 'px';
                 indicator.style.top = (e.clientY - canvasRect.top - 25) + 'px';
-
                 showIndicatorLockedPrompt();
             };
             document.getElementById('lines-layer').appendChild(line);
         }
-
         function cancelLock() {
             lockedLineId = null;
             hoverLine = null;
@@ -747,7 +663,6 @@
             hideIndicator();
             clearHighlight();
         }
-
         function cycleLineMode(){ 
             pop.currentTime = 0; pop.play(); 
             const modes = [1, 2, 4]; 
@@ -756,7 +671,6 @@
             btn.innerText = `Mode: ${lineMode}`; btn.className = `multi-toggle-btn mode-${lineMode}`; 
             cancelLock();
         }
-
         function showIndicatorLockedPrompt() {
             const pill = document.getElementById('ios-indicator');
             const frac = document.getElementById('ind-fraction');
@@ -765,7 +679,6 @@
             clearHighlight();
             highlightPairs([[hoverLine.i, hoverLine.j]]);
         }
-
         function showIndicatorScrolled() { 
             const pill = document.getElementById('ios-indicator'); 
             const frac = document.getElementById('ind-fraction'); 
@@ -776,9 +689,7 @@
             highlightPairs(opt.highlightPairs); 
             highlightGateButton(opt.gateType);
         }
-
         function hideIndicator() { document.getElementById('ios-indicator').classList.remove('active'); clearHighlight(); }
-
         function buildGateOptions(i, j, dim) {
             const targetQ = 2 - dim; const ctrlPool = [0,1,2].filter(q=>q!==targetQ); const bit = 1 << dim; const options = [];
             if(lineMode === 2) {
@@ -792,14 +703,11 @@
             }
             return options;
         }
-
         function getAllPairs(dim){ const bit=1<<dim, pairs=[]; for(let k=0;k<8;k++) if((k&bit)===0) pairs.push([k,k^bit]); return pairs; }
-
         function highlightPairs(pairs){ 
             clearHighlight(); 
             pairs.forEach(([a,b])=>{ const el=document.getElementById(`line-${Math.min(a,b)}-${Math.max(a,b)}`); if(el) el.classList.add('line-highlight'); }); 
         }
-        
         function applyGate(type) {
             if (isSolved) return;
             cancelLock();
@@ -820,7 +728,6 @@
                 finishMove();
             }
         }
-
         function executeLogic(type) {
             pop.currentTime = 0; pop.play();
             if (type.startsWith('SWAP_')) { let p = type.split('_'), iA = parseInt(p[1]), iB = parseInt(p[2]); [fishAtNode[iA], fishAtNode[iB]] = [fishAtNode[iB], fishAtNode[iA]]; return; }
@@ -834,14 +741,11 @@
             for (let i = 0; i < 8; i++) newFish[pm[i]] = fishAtNode[i];
             fishAtNode = newFish;
         }
-
         function recalculate() { 
-            // 這裡同樣設定為第 6 關的初始位置，讓 Undo / 重新計算時不會出錯
             fishAtNode = [1, 0, 3, 2, 5, 7, 4, 6]; 
             let h = [...gateHistory]; gateHistory = []; h.forEach(g => { executeLogic(g); gateHistory.push(g); }); steps = gateHistory.length; finishMove(); 
         }
         function finishMove() { document.getElementById('step-count').innerText = steps; updateFishUI(); renderCircuit(); checkWin(); }
-        
         function updateFishUI() { 
             for (let nI = 0; nI < 8; nI++) { 
                 const f = document.getElementById(`fish-${fishAtNode[nI]}`);
@@ -852,87 +756,47 @@
                 } 
             } 
         }
-        
         function renderCircuit() {
             const c = document.getElementById('circuit-content');
             const wrapper = document.getElementById('circuit-content-wrapper');
             c.innerHTML = '';
             gateHistory.forEach((g, idx) => {
                 const u = document.createElement('div');
-                u.className = 'circuit-unit';
-                
+                u.className = 'circuit-unit';  
                 const hex = getGateColorMap(g);
                 u.style.setProperty('--bg-hover', getRgba(hex, 0.35));
-
+                u.style.setProperty('--border-color', hex);
                 if (selectedIndices.includes(idx)) u.classList.add('selected-gate');
-                
                 u.draggable = true;
                 u.addEventListener('dragstart', (e) => {
                     if (isSolved || mobileDragging) return;
                     draggedIndex = idx;
-                    u.classList.add('opacity-50');
+                    setTimeout(() => u.classList.add('opacity-50'), 0);
                     e.dataTransfer.effectAllowed = 'move';
                     e.dataTransfer.setData('text/plain', idx);
-                });
-                
+                }); 
                 u.addEventListener('dragover', (e) => { 
                     e.preventDefault(); 
+                    e.dataTransfer.dropEffect = 'move'; 
+                    
                     if (draggedIndex !== null && draggedIndex !== idx) {
+                        document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
+                        
                         const rect = u.getBoundingClientRect();
                         const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        u.classList.remove('drag-target', 'right');
                         if (!isAfter) {
                             u.classList.add('drag-target');
                         } else {
                             u.classList.add('drag-target', 'right');
                         }
                     }
-                    
-                    const rectWrap = wrapper.getBoundingClientRect();
-                    const edgeThreshold = 80;
-                    if (e.clientX - rectWrap.left < edgeThreshold) {
-                        scrollSpeed = -8; 
-                        if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
-                    } else if (rectWrap.right - e.clientX < edgeThreshold) {
-                        scrollSpeed = 8; 
-                        if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
-                    } else {
-                        scrollSpeed = 0;
-                    }
-                });
-                
-                u.addEventListener('dragleave', () => { 
-                    u.classList.remove('drag-target', 'right');
-                });
-                
-                u.addEventListener('drop', (e) => {
-                    e.preventDefault(); 
-                    u.classList.remove('drag-target', 'right');
-                    scrollSpeed = 0;
-                    
-                    if (draggedIndex !== null && draggedIndex !== idx) {
-                        const rect = u.getBoundingClientRect();
-                        const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        
-                        let targetIdx = idx;
-                        if (isAfter) targetIdx++;
-                        
-                        if (draggedIndex < targetIdx) targetIdx--;
-                        
-                        pop.currentTime = 0; pop.play();
-                        const movedGate = gateHistory.splice(draggedIndex, 1)[0];
-                        gateHistory.splice(targetIdx, 0, movedGate);
-                        actionStack.push({ type: 'replace', index: 0, oldGates: [], newGate: null });
-                        selectedIndices = []; recalculate();
-                    }
                 });
                 u.addEventListener('dragend', () => { 
                     u.classList.remove('opacity-50'); 
                     draggedIndex = null; 
                     scrollSpeed = 0;
-                    renderCircuit(); 
+                    document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
                 });
-
                 u.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (isSolved || mobileDragging || isTouchDevice) return; 
@@ -943,7 +807,6 @@
                     selectedIndices = []; 
                     recalculate();
                 });
-
                 u.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
                     if (isSolved || mobileDragging) return;
@@ -951,10 +814,8 @@
                     if (sIdx > -1) selectedIndices.splice(sIdx, 1); else selectedIndices.push(idx);
                     renderCircuit();
                 });
-                
                 u.onmouseenter = () => highlightByGate(g);
                 u.onmouseleave = () => clearHighlight();
-                
                 let touchTimer = null;
                 let startX, startY;
                 u.addEventListener('touchstart', (e) => {
@@ -962,7 +823,6 @@
                     startX = e.touches[0].clientX; startY = e.touches[0].clientY;
                     touchTimer = setTimeout(() => { touchTimer = null; }, 400);
                 }, { passive: true });
-                
                 u.addEventListener('touchmove', (e) => {
                     if (mobileDragging) {
                     } else if (touchTimer !== null || startY !== undefined) {
@@ -983,10 +843,8 @@
                             }
                         }
                     }
-                }, { passive: false });
-                
+                }, { passive: false }); 
                 u.addEventListener('touchend', () => { if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } });
-
                 if (!isQuantumMode) {
                     u.innerHTML = getMiniHypercubeSVG(g);
                 } else {
@@ -1005,24 +863,21 @@
                             const dot = document.createElement('div'); dot.className = 'control-dot'; dot.style.top = (24 + ctrl.line * 40) + 'px';
                             if (ctrl.type === 0) { dot.style.background = '#fff'; dot.style.border = '2px solid #463438'; } u.appendChild(dot);
                         });
-                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.top = (30 + target * 40) + 'px'; u.appendChild(t);
+                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.top = (31 + target * 40) + 'px'; u.appendChild(t);
                     }
                 }
                 c.appendChild(u);
             });
             updateUndoStatus();
             if (selectedIndices.length === 0 && gateHistory.length > 0 && draggedIndex === null) { setTimeout(() => wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' }), 50); }
-        }
-        
+        }       
         function undo() { if (isSolved || actionStack.length === 0) return; pop.currentTime = 0; pop.play(); const action = actionStack.pop(); if (action.type === 'add') { gateHistory.splice(action.index, 1); } else if (action.type === 'delete') { gateHistory.splice(action.index, 0, ...action.oldGates); } else if (action.type === 'replace') { if (action.newGate === null) gateHistory = [...action.oldGates]; else gateHistory.splice(action.index, 1, ...action.oldGates); } selectedIndices = []; recalculate(); }
         function resetCircuit() { if (isSolved) return; pop.currentTime = 0; pop.play(); gateHistory = []; actionStack = []; selectedIndices = []; recalculate(); }
-        function updateUndoStatus() { const isActive = actionStack.length > 0 && !isSolved; const topUndo = document.getElementById('undo-btn'); if(topUndo) topUndo.classList.toggle('active', isActive); const bottomUndo = document.getElementById('undo-btn-bottom'); if(bottomUndo) bottomUndo.classList.toggle('active', isActive); }
-        
+        function updateUndoStatus() { const isActive = actionStack.length > 0 && !isSolved; const topUndo = document.getElementById('undo-btn'); if(topUndo) topUndo.classList.toggle('active', isActive); const bottomUndo = document.getElementById('undo-btn-bottom'); if(bottomUndo) bottomUndo.classList.toggle('active', isActive); }        
         async function checkWin() {
             if (fishAtNode.every((pos, i) => pos === i)) {
                 isSolved = true; updateUndoStatus(); if (timerInterval) clearInterval(timerInterval);
                 const ft = time, st = steps, u = sessionStorage.getItem('currentUser'), savedLevel = parseInt(sessionStorage.getItem('currentLevel')) || 1;
-                // 過了第 6 關後解鎖第 7 關
                 if (savedLevel < 7) sessionStorage.setItem('currentLevel', 7);
                 setTimeout(() => {
                     if(typeof meow !== 'undefined') { meow.currentTime = 0; meow.play(); }
@@ -1046,8 +901,7 @@
                     });
                 }
             }
-        }
-        
+        }   
         function viewInLab() { if (gateHistory.length === 0) { alert("Current circuit is empty!"); return; } window.location.href = `lab3.html?circuit=${encodeURIComponent(gateHistory.join(','))}`; }
         function toggleLeaderboard() { document.getElementById('leaderboard-wrapper').classList.toggle('expanded'); }
         async function fetchLeaderboard() { const listArea = document.getElementById('rankList'); try { const response = await fetch(`${SCRIPT_URL}?action=getLeaderboard&level=6`); const data = await response.json(); if (data && Array.isArray(data) && data.length > 0) { leaderboardData = data; renderRank('steps'); } else { listArea.innerHTML = '<p class="text-center italic text-gray-400 mt-10 text-sm">No records yet</p>'; } } catch (e) { listArea.innerHTML = '<p class="text-center italic text-red-400 mt-10 text-sm">Load Error</p>'; } }
