@@ -121,6 +121,16 @@
         #canvas-bottom-btns { position: absolute; bottom: 20px; right: 30px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
         #canvas-bottom-btns .func-btn { margin-top: 0; width: 90px; font-size: 14px; padding: 8px 5px; text-transform: uppercase; border-width: 3px; }
         .pro-active #canvas-bottom-btns { display: none !important; }
+        .dragging #circuit-content {
+            background-image: none !important;
+        }
+        /* 拖移時強制保持背景顏色，並隱藏十字的橫線 */
+        .circuit-unit.is-dragging {
+            background-color: var(--bg-hover) !important;
+        }
+        .circuit-unit.is-dragging .circuit-target::after {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4 mini-mode" id="body-root">
@@ -312,10 +322,44 @@
         
         function handleDragStart(e, index, el) {
             if (isSolved) return;
+            el.classList.add('is-dragging');
             draggedIndex = index;
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', index.toString());
-            setTimeout(() => { el.style.opacity = '0.5'; }, 0);
+            
+            const dragGhost = el.cloneNode(true);
+
+            dragGhost.style.position = 'absolute';
+            dragGhost.style.top = '-9999px';
+            dragGhost.style.left = '-9999px';
+            dragGhost.style.width = el.offsetWidth + 'px';
+            dragGhost.style.height = el.offsetHeight + 'px';
+
+            dragGhost.style.backgroundColor = 'rgba(98, 158, 237, 0.25)';
+            dragGhost.style.borderRadius = '12px';
+            dragGhost.style.border = 'none';
+            dragGhost.style.boxShadow = 'none';
+            dragGhost.style.opacity = '1';
+
+            dragGhost.style.backgroundImage = 'none';
+
+            dragGhost.querySelectorAll('*').forEach(child => {
+                child.style.transition = 'none';
+                child.style.animation = 'none';
+            });
+
+            document.body.appendChild(dragGhost);
+
+            e.dataTransfer.setDragImage(
+                dragGhost,
+                dragGhost.offsetWidth / 2,
+                dragGhost.offsetHeight / 2
+            );
+
+            setTimeout(() => {
+                el.style.opacity = '0.5';
+                dragGhost.remove();
+            }, 0);
         }
 
         async function fetchLeaderboard() {
@@ -638,7 +682,7 @@
                     finishMove();
                     draggedIndex = null;
                 };
-                u.ondragend = (e) => { e.target.style.opacity = '1'; draggedIndex = null; scrollSpeed = 0; };
+                u.ondragend = (e) => { e.target.style.opacity = '1'; e.target.classList.remove('is-dragging'); draggedIndex = null; scrollSpeed = 0; document.body.classList.remove('dragging');};
                 
                 u.onmouseover = () => syncGateHighlight(g, true);
                 u.onmouseout = () => syncGateHighlight(g, false);
@@ -695,12 +739,37 @@
                 } else {
                     if(g.startsWith('X')) {
                         const tQ = g==='X0'?0:1, tY = tQ===0?20:60, t = document.createElement('div');
-                        t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY-0.9)+'px'; u.appendChild(t);
+                        t.className = 'circuit-target'; 
+                        t.style.left = '50%'; // 改為 50%
+                        t.style.top = (tY-0.9)+'px'; 
+                        u.appendChild(t);
                     } else {
                         const is01 = g.includes('01'), is0 = g.includes('C0'), cY = is01?20:60, tY = is01?60:20;
-                        const v = document.createElement('div'); v.className = 'connection-v-line'; v.style.left = '23.5px'; v.style.top = Math.min(cY,tY)+'px'; v.style.height = '41px'; u.appendChild(v);
-                        const d = document.createElement('div'); d.className = 'control-dot'; d.style.left = '18px'; d.style.top = (cY-7)+'px'; if(is0){d.style.background='white'; d.style.border='2.5px solid #463438';} u.appendChild(d);
-                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY-0.9)+'px'; u.appendChild(t);
+                        
+                        // 中間的直線
+                        const v = document.createElement('div'); 
+                        v.className = 'connection-v-line'; 
+                        v.style.left = '50%'; // 改為 50%
+                        v.style.transform = 'translateX(-50%)'; // 確保線條本身置中
+                        v.style.top = Math.min(cY,tY)+'px'; 
+                        v.style.height = '41px'; 
+                        u.appendChild(v);
+                        
+                        // 控制點 (實心或空心圓)
+                        const d = document.createElement('div'); 
+                        d.className = 'control-dot'; 
+                        d.style.left = '50%'; // 改為 50%
+                        d.style.transform = 'translate(-50%, -50%)'; // X軸與Y軸都置中
+                        d.style.top = cY+'px'; // 因為加了 transform，原本的 (cY-7) 恢復成 cY 即可
+                        if(is0){d.style.background='white'; d.style.border='2.5px solid #463438';} 
+                        u.appendChild(d);
+                        
+                        // 目標端 (包含十字的圓)
+                        const t = document.createElement('div'); 
+                        t.className = 'circuit-target'; 
+                        t.style.left = '50%'; // 改為 50%
+                        t.style.top = (tY-0.9)+'px'; 
+                        u.appendChild(t);
                     }
                 }
                 c.appendChild(u);
@@ -778,7 +847,6 @@
                 }
             }
         }
-        
         function viewInLab() {
             if (gateHistory.length === 0) {
                 alert("Current circuit is empty!");
