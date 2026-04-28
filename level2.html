@@ -12,7 +12,6 @@
         body, canvas, .game-canvas, .node, .gate-btn-v2, #circuit-content { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
         body { font-family: 'Arial', sans-serif; background-color: #FFF9F0; background-image: linear-gradient(45deg, #fce4ec 25%, transparent 25%, transparent 50%, #fce4ec 50%, #fce4ec 75%, transparent 75%, transparent); background-size: 100px 100px; color: #463438; min-height: 100vh; position: relative;}
         
-        /* Pro 模式背景專注遮罩 */
         #pro-focus-mask { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65); z-index: 1; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; backdrop-filter: blur(2px); }
         .pro-active #pro-focus-mask { opacity: 1; pointer-events: auto; }
         .game-wrapper { position: relative; z-index: 10; width: 100%; max-width: 56rem; display: flex; flex-direction: column; align-items: center; margin: 0 auto;}
@@ -40,7 +39,6 @@
         .line-h { height: 8px; width: 300px; }
         .line-v { width: 8px; height: 250px; }
         
-        /* 初始化無動畫且隱藏，確保定位後才顯示 */
         .fish-wrapper { position: absolute; width: 80px; pointer-events: none; z-index: 30; display: flex; flex-direction: column; align-items: center; transition: none; visibility: hidden; }
         .fish-ready { visibility: visible; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         
@@ -102,13 +100,11 @@
 
         .qubit-label { position: absolute; left: 12px; font-weight: 900; font-size: 16px; color: #463438; z-index: 5; }
         
-        /* 3px 實心邊框與選取狀態 */
         .circuit-unit { min-width: 48px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: grab; transition: all 0.2s; touch-action: none; background-color: transparent !important; box-sizing: border-box; border: 3px solid transparent; border-radius: 12px;}
         .circuit-unit:active { cursor: grabbing; }
         .circuit-unit:hover { background-color: var(--bg-hover) !important; }
         .circuit-unit.selected { background-color: var(--bg-hover) !important; border-color: var(--border-color) !important; }
         
-        /* 拖曳提示細線 (微圓角、淡灰白 #e7e5dc) */
         .drop-hint-left::before { content: ''; position: absolute; left: -3px; top: 10px; bottom: 10px; width: 4px; background-color: #f78790; border-radius: 4px; z-index: 200; pointer-events: none; }
         .drop-hint-right::after { content: ''; position: absolute; right: -3px; top: 10px; bottom: 10px; width: 4px; background-color: #f78790; border-radius: 4px; z-index: 200; pointer-events: none; }
 
@@ -117,12 +113,10 @@
         .circuit-target { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2.5px solid #463438; display: flex; align-items: center; justify-content: center; z-index: 15; transform: translate(-50%, -50%); }
         .circuit-target::before { content: ""; position: absolute; width: 2.5px; height: 100%; background-color: #463438; }
         .circuit-target::after { content: ""; position: absolute; width: 100%; height: 2.5px; background-color: #463438; }
-        
-        /* 教學彈窗遮罩 */
+
         .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 2000; pointer-events: auto; }
         .modal-content { background: #FFF9F0; border: 8px solid #463438; border-radius: 40px; padding: 30px; text-align: center; width: 750px; box-shadow: 0 10px 0 #FFB7C5; color: #463438; z-index: 2001; }
         
-        /* 初始化強制點擊黑幕 */
         #initial-mask { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 490; pointer-events: auto; }
         
         .no-fish-anim .fish-wrapper, .no-fish-anim .node { transition: none !important; }
@@ -144,7 +138,6 @@
         #canvas-bottom-btns .func-btn { margin-top: 0; width: 90px; font-size: 14px; padding: 8px 5px; text-transform: uppercase; border-width: 3px; }
         .pro-active #canvas-bottom-btns { display: none !important; }
 
-        /* --- 教學動畫 CSS --- */
         .tut-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .tut-card { background: white; border: 3px solid #463438; border-radius: 16px; padding: 10px; display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0 #FFB7C5; position: relative; }
         .tut-anim-area { width: 100%; height: 100px; position: relative; display: flex; align-items: center; justify-content: space-evenly; overflow: hidden; margin-bottom: 8px; background: #fffaf5; border-radius: 10px; border: 2px dashed #ccc; }
@@ -160,7 +153,6 @@
         .m-r-click { position: absolute; top: 0; right: 0; width: 7px; height: 9px; background: #99C44D; border-top-right-radius: 7px; opacity: 0; animation: mClick 3s infinite; }
         @keyframes mClick { 0%, 15% { opacity: 0; } 20%, 30% { opacity: 1; } 35%, 100% { opacity: 0; } }
 
-        /* 1. Add (Mode & Real Button) Animations */
         .tut-btn-cube { width: 44px; height: 44px; border: 2.5px solid #463438; border-radius: 8px; background: rgba(226, 222, 110, 0.35); display: flex; align-items: center; justify-content: center; position: relative; animation: c1Btn 3s infinite; }
         .tut-sq-small { width: 22px; height: 22px; position: relative; }
         .ts-dot { width: 5px; height: 5px; background: #463438; border-radius: 50%; position: absolute; }
@@ -186,13 +178,11 @@
         .ts-line-h { animation: c1Hl 3s infinite; }
         .t-line-h.hl { animation: c1Hl 3s infinite; }
 
-        /* 2. Drag 同步 */
         .c2-block { width: 28px; height: 28px; background: #fff9c4; border: 2.5px solid #463438; border-radius: 6px; position: absolute; animation: c2Drag 3s infinite; }
         .c2-hand { font-size: 24px; position: absolute; z-index: 10; animation: c2Hand 3s infinite; }
         @keyframes c2Drag { 0%, 10% { transform: translateX(-30px); opacity: 0; } 15%, 20% { transform: translateX(-30px); opacity: 1; } 40%, 60% { transform: translateX(30px); opacity: 1; } 65%, 100% { transform: translateX(30px); opacity: 0; } }
         @keyframes c2Hand { 0%, 10% { transform: translate(-30px, 15px) scale(1); opacity: 0; } 15% { transform: translate(-30px, 15px) scale(1); opacity: 1; } 20% { transform: translate(-30px, 15px) scale(0.8); opacity: 1; } 40%, 60% { transform: translate(30px, 15px) scale(0.8); opacity: 1; } 65%, 100% { transform: translate(30px, 15px) scale(1); opacity: 0; } }
 
-        /* 3. Delete 同步 (方塊先消失) */
         .c3-pc-block { width: 24px; height: 24px; background: #fff9c4; border: 2.5px solid #463438; border-radius: 6px; position: absolute; top: 20px; animation: c3PcDel 3s infinite; }
         @keyframes c3PcDel { 0%, 20% { opacity: 1; transform: scale(1); } 25%, 80% { opacity: 0; transform: scale(0.5); } 90%, 100% { opacity: 1; transform: scale(1); } }
 
@@ -201,7 +191,6 @@
         @keyframes c3MobDel { 0%, 15% { opacity: 1; transform: translateY(0); } 20% { opacity: 0; transform: translateY(-25px); } 21%, 100% { opacity: 0; transform: translateY(-25px); } }
         @keyframes c3MobHand { 0%, 10% { transform: translate(0, 20px); opacity: 0; } 15% { transform: translate(0, 20px); opacity: 1; } 20%, 30% { transform: translate(0, -25px); opacity: 1; } 35%, 100% { transform: translate(0, -25px); opacity: 0; } }
 
-        /* 4. Replace 同步 */
         .c4-pc-block { width: 24px; height: 24px; background: #fff9c4; border: 2.5px solid #463438; border-radius: 6px; position: absolute; top: 20px; animation: c4Rep 3s infinite; }
         @keyframes c4Rep { 0%, 20% { background: #fff9c4; box-shadow: none; border-color: #463438; } 25%, 80% { background: #e3f2fd; box-shadow: inset 0 0 0 3px #629eed; border-color: #629eed; } 90%, 100% { background: #fff9c4; box-shadow: none; border-color: #463438; } }
 
@@ -421,7 +410,7 @@
         let leaderboardData = [];
         let draggedIndex = null;
         let isTouchDevice = ('ontouchstart' in window || navigator.maxTouchPoints > 0);
-        let isQuantumMode = true; // 預設為量子模式
+        let isQuantumMode = true;
         let tutorialShown = false;
         
         let autoScrollRAF = null;
@@ -747,10 +736,10 @@
         function getMiniSquareSVG(type) {
             let pairs = getHighlightPairsForGate(type);
             const miniNodes = [
-                { x: 20, y: 20 }, // 00
-                { x: 80, y: 20 }, // 01
-                { x: 20, y: 80 }, // 10
-                { x: 80, y: 80 }  // 11
+                { x: 20, y: 20 },
+                { x: 80, y: 20 },
+                { x: 20, y: 80 },
+                { x: 80, y: 80 }
             ];
             let svg = `<svg viewBox="0 0 100 100" style="width:100%; height:100%; pointer-events:none; display: block;" preserveAspectRatio="xMidYMid meet">`;
             const edges = [ [0, 1], [0, 2], [1, 3], [2, 3] ];
