@@ -79,7 +79,7 @@
         #tt-view-container .panel-section-title { margin-bottom: 10px; }
         #circuit-content { padding-right: 40px; }
         #trace-controls { display: flex; align-items: center; justify-content: space-between; background: #e7e5dc; border-radius: 40px; padding: 10px 4px; gap: 4px; margin-top: 8px; margin-bottom: 15px; border: 2.5px solid #463438; }
-        #trace-controls .func-btn { margin: 0; padding: 15px 13px; font-size: 16px; border-radius: 50px; background: #e7e5dc; color: white; }
+        #trace-controls .func-btn { margin: 0; padding: 8px 10px; font-size: 16px; border-radius: 50px; background: #e7e5dc; color: white; }
         #trace-controls .btn-red { background: #FFB7C5; border-color: #463438; }
         #trace-step-text { color: #463438; font-family: 'Courier New', monospace; font-size: 24px; }
         #trace-controls span.text-green-700 { color: #99C44D; font-size: 14px; }
@@ -88,7 +88,7 @@
         .nav-fab { position: fixed; top: 25px; right: 25px; width: 65px; height: 65px; background: #89CFF0; border: 5px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; color: white; cursor: pointer; box-shadow: 0 4px 0 #463438; z-index: 1000; transition: all 0.1s; text-shadow: 2px 2px 0 #463438; }
         .nav-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #463438; }
         .nav-fab:active { transform: translateY(4px); box-shadow: 0 0 0 #463438; }
-        .game-canvas, .node, .gate-btn-v2 { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
+        .game-canvas, .node, .gate-btn-v2 { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation;transition: all 0.2s ease, margin 0.2s ease; }
         .circuit-unit { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; }
         .swap-active { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; height: 8px !important; z-index: 15 !important; border-top: none !important; opacity: 1 !important; }
         #shake-toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) scale(0.8); background: #99C44D; color: #463438; padding: 15px 40px; border-radius: 50px; font-weight: 900; font-size: 24px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; border: 4px solid #463438; box-shadow: 0 0 20px rgba(153, 196, 77, 0.6), 0 8px 0 #463438; }
@@ -112,7 +112,11 @@
         .circuit-unit:hover .hyper-line-hi, .circuit-unit.selected-gate .hyper-line-hi { stroke: #99C44D !important; }
         .mini-mode .circuit-unit { min-width: 120px !important; width: 120px !important; max-width: 120px !important; flex: 0 0 120px !important; height: 140px; padding: 0 5px; }
         body:not(.mini-mode) #circuit-content { background-image: none !important; }
-        .mini-mode .qubit-label { display: none !important; }
+        body.mini-mode.is-tracing #q-in-0, 
+        body.mini-mode.is-tracing #q-in-1, 
+        body.mini-mode.is-tracing #q-in-2 { 
+            display: none !important; 
+        }
         .drag-target::before {
             content: '';
             position: absolute;
@@ -124,6 +128,14 @@
             border-radius: 4px;
             z-index: 200;
             pointer-events: none;
+        }
+        .drag-target {
+            margin-left: 25px;
+            position: relative;
+        }
+        .drag-target.right {
+            margin-left: 0;
+            margin-right: 25px;
         }
     </style>
 </head>
@@ -187,9 +199,9 @@
         </div>
         <div id="circuit-area" class="mx-auto">
             <div id="circuit-diagram-title" class="circuit-title font-black text-xl text-center">Paths</div>
-            <div id="q-in-0" class="qubit-label" style="top: 60px;">q0</div>
-            <div id="q-in-1" class="qubit-label" style="top: 100px;">q1</div>
-            <div id="q-in-2" class="qubit-label" style="top: 140px;">q2</div>
+            <div id="q-in-0" class="qubit-label" style="top: 60px;">d1</div>
+            <div id="q-in-1" class="qubit-label" style="top: 100px;">d2</div>
+            <div id="q-in-2" class="qubit-label" style="top: 140px;">d3</div>
             <div id="q-out-0" class="qubit-label right-side hidden-el" style="top: 60px;"></div>
             <div id="q-out-1" class="qubit-label right-side hidden-el" style="top: 100px;"></div>
             <div id="q-out-2" class="qubit-label right-side hidden-el" style="top: 140px;"></div>
@@ -539,7 +551,7 @@
             const tView = document.getElementById('tt-view-container');
             const tCtrl = document.getElementById('trace-controls');
             if (isTraceMode) {
-                if (!isQuantumMode) setQuantumMode(true);
+                document.body.classList.add('is-tracing');
                 btn.innerText = 'Trace: ON';
                 btn.classList.add('mode-3');
                 gView.classList.add('hidden-el');
@@ -547,6 +559,7 @@
                 tCtrl.classList.remove('hidden-el', 'opacity-50', 'pointer-events-none');
                 updateTruthTable();
             } else {
+                document.body.classList.remove('is-tracing');
                 btn.innerText = 'Trace: OFF';
                 btn.classList.remove('mode-3');
                 gView.classList.remove('hidden-el');
@@ -580,7 +593,7 @@
             for (let i = 0; i < 3; i++) {
                 const labelIn = document.getElementById(`q-in-${i}`);
                 const labelOut = document.getElementById(`q-out-${i}`);
-                if (labelIn) labelIn.innerText = `q${i}`;
+                if (labelIn) labelIn.innerText = isQuantumMode ? `q${i}` : `d${i+1}`;
                 if (labelOut) labelOut.classList.add('hidden-el');
             }
             updateTruthTable();
@@ -620,7 +633,11 @@
                 if (qIn) qIn.innerText = inBin[i];
                 if (qOut) {
                     qOut.innerText = outBin[i];
-                    qOut.classList.remove('hidden-el');
+                    if (isQuantumMode) {
+                        qOut.classList.remove('hidden-el');
+                    } else {
+                        qOut.classList.add('hidden-el');
+                    }
                 }
             }
             document.getElementById('trace-step-text').innerText = currentTraceStep;
@@ -785,7 +802,7 @@
                 if (cv2 === 0) zero.push(c2);
             }
             let content = '';
-            const getY = q => 18 + q * 18.5;
+            const getY = q => 19 + q * 18.5;
             if (ctrl.length > 0) {
                 const allQs = [target, ...ctrl];
                 const minQ = Math.min(...allQs), maxQ = Math.max(...allQs);
@@ -825,7 +842,7 @@
             if (cTitle) cTitle.innerText = isQuantumMode ? 'Circuit Diagram' : 'Paths';
             for (let i = 0; i < 3; i++) {
                 const q = document.getElementById(`q-in-${i}`);
-                if (q && activeTraceInput === null) q.innerText = isQuantumMode ? `q${i}` : `d${i}`;
+                if (q && activeTraceInput === null) q.innerText = isQuantumMode ? `q${i}` : `d${i+1}`;
             }
             initGates();
             renderCircuit();
@@ -1273,14 +1290,10 @@
                     parentUnit.appendChild(wire);
                 }
             };
-
-            // --- 建立頭部感應區 ---
             const startU = document.createElement('div');
             startU.className = 'circuit-unit';
             startU.style.cursor = 'default';
             startU.dataset.index = '-1'; 
-            
-            // 根據模式決定頭部空白的大小或隱藏
             if (!isQuantumMode) {
                 if (activeTraceInput !== null) {
                     startU.style.display = 'none'; // Trace模式完全隱藏
@@ -1319,18 +1332,14 @@
                 };
             }
             c.appendChild(startU);
-
-            // --- 迴圈渲染電路中的 Gate ---
             gateHistory.forEach((g, idx) => {
                 const u = document.createElement('div');
                 u.className = 'circuit-unit' + (selectedIndices.includes(idx) ? ' selected-gate' : '');
                 u.dataset.index = idx;
                 u.draggable = !isTouchDevice && activeTraceInput === null;
-
                 const hexColor = getGateColorMap(g);
                 u.style.setProperty('--gate-bg-color', getRgba(hexColor, 0.35));
                 u.style.setProperty('--gate-border-color', hexColor);
-                
                 u.oncontextmenu = (e) => { 
                     e.preventDefault(); 
                     if (mobileDragging || activeTraceInput !== null) return false;
@@ -1340,9 +1349,7 @@
                     renderCircuit();
                     return false;
                 };
-
                 drawWires(u, idx + 1);
-
                 const visuals = document.createElement('div');
                 visuals.className = 'gate-visuals';
                 visuals.style.position = 'absolute';
@@ -1350,18 +1357,16 @@
                 visuals.style.width = '100%';
                 visuals.style.height = '100%';
                 visuals.style.pointerEvents = 'none'; 
-                
                 if (activeTraceInput !== null) {
                     if (idx === currentTraceStep - 1) u.classList.add('trace-active');
                     else if (idx >= currentTraceStep) visuals.style.opacity = '0.35';
                 }
-
                 if (!isQuantumMode) {
                     let activeState = null;
                     if (activeTraceInput !== null && idx < currentTraceStep) {
                         activeState = states[idx + 1];
                     }
-                    u.innerHTML = getMiniHypercubeSVG(g, activeState);
+                    visuals.innerHTML = getMiniHypercubeSVG(g, activeState);
                 } else {
                     const { ctrl, target, zero } = parseGateSpec(g);
                     if (ctrl.length > 0) {
