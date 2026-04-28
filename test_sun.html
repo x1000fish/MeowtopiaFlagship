@@ -119,7 +119,7 @@
             top: 10px;
             bottom: 10px;
             width: 4px;
-            background-color: #FFB7C5;
+            background-color: #f78790;
             border-radius: 4px;
             z-index: 200;
             pointer-events: none;
@@ -180,7 +180,7 @@
                 </div>
                 <div id="tt-view-container" class="w-full flex-col hidden-el h-full flex" style="max-height: 100%; overflow: hidden;">
                     <div class="panel-section-title shrink-0 mt-2">Truth Table</div>
-                    <div class="text-lg text-gray-400 text-center mb-2 font-bold flex justify-between px-8 shrink-0 border-b border-black-100 pb-2">
+                    <div class="text-lg text-gray-400 text-center mb-2 mt-4 font-bold flex justify-between px-8 shrink-0 border-b border-black-100 pb-2">
                         <span class="w-1/2 text-left text-black">INPUT</span>
                         <span class="w-1/2 text-right text-black">OUTPUT</span>
                     </div>
@@ -463,7 +463,7 @@
                 circuitArea.addEventListener('dragover', (e) => {
                     e.preventDefault(); // 允許在此區域放置
                     e.dataTransfer.dropEffect = 'move';
-                    
+                    updateScrollSpeed(e.clientX);
                     if (draggedIndex === null) return;
 
                     // 全局清掃舊紅線，避免產生雙線
@@ -506,9 +506,13 @@
                         }
                     }
                     
-                    updateScrollSpeed(e.clientX);
+                    
                 });
-
+		// 新增：支援一般滑鼠移動到邊緣時也能自動滑動
+        	circuitArea.addEventListener('mousemove', (e) => {
+                       updateScrollSpeed(e.clientX);
+        	});
+		
                 circuitArea.addEventListener('dragleave', (e) => {
                     if (!circuitArea.contains(e.relatedTarget)) {
                         document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'drag-target-right'));
@@ -1019,7 +1023,7 @@
                     wire.style.left = '-3px';
                     wire.style.width = 'calc(100% + 6px)';
                     wire.style.height = '3px';
-                    wire.style.top = (q === 0 ? 24 : 52) + 'px';
+                    wire.style.top = (q === 0 ? 13 : 60) + 'px';
                     wire.style.zIndex = '1';
                     if (activeTraceInput !== null) {
                         if (stepIdx <= currentTraceStep) {
@@ -1087,19 +1091,19 @@
                     visuals.innerHTML = getMiniSquareSVG(g, traceState);
                 } else {
                     if(g.startsWith('X')) {
-                        const tQ = g==='X0'?0:1, tY = tQ===0?25.5:53.5, t = document.createElement('div');
+                        const tQ = g==='X0'?0:1, tY = tQ===0?14.5:61.5, t = document.createElement('div');
                         t.className = 'circuit-target';
                         t.style.left = '50%';
                         t.style.top = (tY)+'px';
                         visuals.appendChild(t);
                     }
                     else {
-                        const is01 = g.includes('01'), is0 = g.includes('C0'), cY = is01?25.5:53.5, tY = is01?53.5:25.5;
+                        const is01 = g.includes('01'), is0 = g.includes('C0'), cY = is01?14.5:61.5, tY = is01?61.5:14.5;
                         const v = document.createElement('div');
                         v.className = 'connection-v-line';
                         v.style.left = '50%';
                         v.style.top = Math.min(cY,tY)+'px';
-                        v.style.height = '28px';
+                        v.style.height = '47px';
                         visuals.appendChild(v);
                         const d = document.createElement('div');
                         d.className = 'control-dot';
