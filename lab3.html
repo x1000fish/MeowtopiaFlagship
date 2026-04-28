@@ -484,7 +484,9 @@
             dragGhost.style.animation = 'none';
             dragGhost.style.transform = 'translateZ(0)';
             dragGhost.style.willChange = 'left, top';
-            dragGhost.style.background = 'rgba(255, 183, 197, 0.3)';
+            const style = getComputedStyle(el);
+            const gateBg = style.getPropertyValue('--gate-bg-color');
+            dragGhost.style.backgroundColor = gateBg;
             dragGhost.style.borderRadius = '12px';
             dragGhost.style.boxShadow = 'none';
             dragGhost.style.border = 'none';
@@ -515,7 +517,6 @@
             if (dropUnit && dropUnit !== originalDragEl && dropUnit.dataset.index !== undefined) {
                 let targetIdx = parseInt(dropUnit.dataset.index);
                 if (targetIdx === -1) targetIdx = 0; // 若拖到頭部的感應區
-
                 if (targetIdx !== mDragIndex) {
                     if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e => {}); }
                     const oldHistory = [...gateHistory];
@@ -1314,9 +1315,11 @@
 
             if (!isTouchDevice && activeTraceInput === null) {
                 startU.ondragover = (e) => {
+                    if (draggedIndex === null || draggedIndex === idx) return;
                     e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
                     document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
-                    if (draggedIndex !== null) startU.classList.add('drag-target');
+                    u.classList.add('drag-target');
                     return false;
                 };
                 startU.ondragleave = () => startU.classList.remove('drag-target');
@@ -1396,9 +1399,7 @@
                         visuals.appendChild(t);
                     }
                 }
-                
                 u.appendChild(visuals);
-
                 if (!isTouchDevice && activeTraceInput === null) {
                     let dragClone = null;
                     u.ondragstart = (e) => { 
@@ -1409,7 +1410,9 @@
                         dragClone.style.position = 'absolute';
                         dragClone.style.top = '-9999px';
                         dragClone.style.left = '-9999px';
-                        dragClone.style.background = 'rgba(255, 183, 197, 0.4)';
+                        const style = getComputedStyle(u);
+                        const gateBg = style.getPropertyValue('--gate-bg-color');
+                        dragClone.style.backgroundColor = gateBg;
                         dragClone.style.borderRadius = '12px';
                         dragClone.style.boxSizing = 'border-box';
                         dragClone.style.border = 'none';
@@ -1602,14 +1605,13 @@
                 endPad.style.setProperty('flex-grow', '1', 'important');
             }
             drawWires(endPad, states.length > 0 ? states.length - 1 : 0);
-
             if (!isTouchDevice && activeTraceInput === null) {
                 endPad.ondragover = (e) => {
+                    if (draggedIndex === null || draggedIndex === gateHistory.length - 1) return;
                     e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
                     document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
-                    if (draggedIndex !== null && draggedIndex !== gateHistory.length - 1) {
-                        endPad.classList.add('drag-target');
-                    }
+                    endPad.classList.add('drag-target');
                     return false;
                 };
                 endPad.ondragleave = () => endPad.classList.remove('drag-target');
