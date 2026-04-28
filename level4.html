@@ -33,7 +33,11 @@
         .line-highlight { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; z-index: 15 !important; }
         .line-h { height: 8px; width: 300px; }
         .line-v { width: 8px; height: 250px; }
-        .fish-wrapper { position: absolute; width: 80px; pointer-events: none; z-index: 30; display: flex; flex-direction: column; align-items: center; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        .fish-wrapper { position: absolute; width: 80px; pointer-events: none; z-index: 30; display: none; flex-direction: column; align-items: center; }
+        .fish-ready { display: flex; }
+        .fish-animate { transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        
         .fish-wrapper img { width: 70px; height: auto; }
         .fish-label { background: rgba(70, 52, 56, 0.8); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; margin-bottom: -47px; z-index: 5; position: relative; top: -10px; }
         .game-btn { cursor: pointer; border: 5px solid #463438; border-radius: 60px; padding: 12px; font-size: 26px; font-weight: 900; color: white; text-shadow: 2px 2px 0 #463438; box-shadow: 0 6px 0 #463438; position: relative; transition: all 0.1s; display: inline-block; }
@@ -93,10 +97,13 @@
 
         .qubit-label { position: absolute; left: 12px; font-weight: 900; font-size: 16px; color: #463438; z-index: 5; }
         
-        .circuit-unit { min-width: 48px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: grab; transition: all 0.2s; touch-action: none; background-color: transparent !important;}
+        .circuit-unit { min-width: 48px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: grab; transition: background-color 0.2s, border 0.2s; touch-action: none; background-color: transparent !important; border: 3px solid transparent; border-radius: 12px; }
         .circuit-unit:active { cursor: grabbing; }
-        .circuit-unit:hover, .circuit-unit.selected { background-color: var(--bg-hover) !important; border-radius: 12px; }
+        .circuit-unit:hover { background-color: var(--bg-hover) !important; border-radius: 12px; }
+        .circuit-unit.selected { background-color: var(--bg-hover) !important; border: 3px solid var(--bg-selected) !important; border-radius: 12px; }
         
+        .drag-target::before,.drag-target-right::after{content:'';position:absolute;top:10px;bottom:10px;width:4px;background-color:#FFB7C5;border-radius:4px;z-index:200;pointer-events:none;}.drag-target::before{left:-3px;}.drag-target-right::after{right:-3px;}
+
         .control-dot { width: 14px; height: 14px; background: #463438; border-radius: 50%; position: absolute; z-index: 5; }
         .connection-v-line { position: absolute; width: 2.5px; background: #463438; z-index: 3; }
         .circuit-target { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2.5px solid #463438; display: flex; align-items: center; justify-content: center; z-index: 15; transform: translate(-50%, -50%); }
@@ -108,9 +115,6 @@
         .no-fish-anim .fish-wrapper, .no-fish-anim .node { transition: none !important; }
         
         .mode-toggle-fixed { position: fixed; top: 20px; right: 20px; width: 70px; height: 70px; background: white; border: 5px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; box-shadow: 0 4px 0 #463438; z-index: 500; }
-        .start-hint-banner { position: fixed; top: 100px; right: 15px; z-index: 600; pointer-events: none; display: flex; flex-direction: column; align-items: flex-end; animation: tap-anim 1.5s infinite; }
-        .hint-pill { background: #99C44D; color: #fff; font-weight: 900; padding: 4px 12px; border-radius: 9999px; font-size: 16px; margin-top: 8px; border: 3px solid #463438; box-shadow: 0 4px 0 #463438; }
-        @keyframes tap-anim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
         @keyframes pulse-red-undo { 0%, 100% { transform: scale(1); box-shadow: 0 4px 0 #463438; } 50% { transform: scale(1.05); box-shadow: 0 0 20px #FFB7C5, 0 4px 0 #463438; } }
         
         .wire-container { position: relative; width: 60%; max-width: 50px; height: 100%; background-image: linear-gradient(#463438, #463438), linear-gradient(#463438, #463438); background-size: 100% 3px; background-repeat: no-repeat; background-position: center 24px, center 52px; pointer-events: none; }
@@ -122,8 +126,7 @@
 <body class="min-h-screen flex flex-col items-center justify-center p-4 mini-mode" id="body-root">
     <div id="mode-toggle-container">
         <div id="mode-toggle" class="mode-toggle-fixed" onclick="togglePro()">👁️</div>
-        <div id="quantum-toggle" class="mode-toggle-fixed hidden" onclick="toggleQuantumMode()" style="top: 100px; font-size: 26px;">🔮</div>
-        <div id="start-hint" class="start-hint-banner"><span class="text-5xl">👆🏻</span><div class="hint-pill">CLICK TO START PRO MODE</div></div>
+        <div id="quantum-toggle" class="mode-toggle-fixed hidden" onclick="toggleQuantumMode()" style="top: 100px; font-size: 26px;">⚛️</div>
     </div>
     <div id="leaderboard-wrapper">
         <div class="side-leaderboard-content">
@@ -154,10 +157,12 @@
                 <div class="grid grid-cols-2 gap-2 w-10/12 mx-auto" id="gate-container">
                     <button id="gate-x0" class="gate-btn-v2 btn-not" onclick="applyGate('X0')" onmouseover="syncGateHighlight('X0', true)" onmouseout="syncGateHighlight('X0', false)"></button>
                     <button id="gate-x1" class="gate-btn-v2 btn-not" onclick="applyGate('X1')" onmouseover="syncGateHighlight('X1', true)" onmouseout="syncGateHighlight('X1', false)"></button>
-                    <button id="gate-cx01" class="gate-btn-v2 btn-cnot" onclick="applyGate('CX01')" onmouseover="syncGateHighlight('CX01', true)" onmouseout="syncGateHighlight('CX01', false)"></button>
-                    <button id="gate-c0x01" class="gate-btn-v2 btn-cnot" onclick="applyGate('C0X01')" onmouseover="syncGateHighlight('C0X01', true)" onmouseout="syncGateHighlight('C0X01', false)"></button>
+                    
                     <button id="gate-cx10" class="gate-btn-v2 btn-cnot" onclick="applyGate('CX10')" onmouseover="syncGateHighlight('CX10', true)" onmouseout="syncGateHighlight('CX10', false)"></button>
+                    <button id="gate-cx01" class="gate-btn-v2 btn-cnot" onclick="applyGate('CX01')" onmouseover="syncGateHighlight('CX01', true)" onmouseout="syncGateHighlight('CX01', false)"></button>
+                    
                     <button id="gate-c0x10" class="gate-btn-v2 btn-cnot" onclick="applyGate('C0X10')" onmouseover="syncGateHighlight('C0X10', true)" onmouseout="syncGateHighlight('C0X10', false)"></button>
+                    <button id="gate-c0x01" class="gate-btn-v2 btn-cnot" onclick="applyGate('C0X01')" onmouseover="syncGateHighlight('C0X01', true)" onmouseout="syncGateHighlight('C0X01', false)"></button>
                 </div>
                 <div class="panel-section-title">Control</div>
                 <button id="reset-btn" class="func-btn btn-reset" onclick="resetCircuit()">Reset Circuit</button>
@@ -221,21 +226,18 @@
 
         const pop = new Audio('pop.m4a'), meow = new Audio('meow.m4a');
 
-        // 滑順且快速的自動滾動計算邏輯 (Easing)
         function updateScrollSpeed(clientX) {
             const wrapper = document.getElementById('circuit-content-wrapper');
             if (!wrapper) return;
             const rect = wrapper.getBoundingClientRect();
-            const edgeThreshold = 120; // 加大邊緣感應範圍
-            const maxSpeed = 20;       // 大幅提高最高速度
+            const edgeThreshold = 120;
+            const maxSpeed = 20;
 
             if (clientX - rect.left < edgeThreshold) {
-                // 越靠近左邊緣，速度越快 (帶有曲線的漸進感)
                 let intensity = 1 - Math.max(0, clientX - rect.left) / edgeThreshold;
                 scrollSpeed = -(maxSpeed * Math.pow(intensity, 1.5));
                 if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
             } else if (rect.right - clientX < edgeThreshold) {
-                // 越靠近右邊緣，速度越快
                 let intensity = 1 - Math.max(0, rect.right - clientX) / edgeThreshold;
                 scrollSpeed = maxSpeed * Math.pow(intensity, 1.5);
                 if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
@@ -245,10 +247,18 @@
         }
 
         window.onload = () => {
+            updateFishUI();
+            
+            const fishes = document.querySelectorAll('.fish-wrapper');
+            fishes.forEach(fw => fw.classList.add('fish-ready'));
+            
+            setTimeout(() => {
+                fishes.forEach(fw => fw.classList.add('fish-animate'));
+            }, 50);
+
             timerInterval = setInterval(() => { time++; document.getElementById('timer').innerText = time; }, 1000);
             updateLabels();
             updateGateButtonsUI();
-            updateFishUI();
             updateUndoStatus();
             fetchLeaderboard();
             
@@ -290,10 +300,9 @@
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
         
-        // 更新 paths hover 使用的顏色邏輯
         function getGateColorMap(type) {
-            if (type.startsWith('X')) return '#e2de6e'; // 黃色 Not
-            return '#629eed'; // 藍色 CNOT
+            if (type.startsWith('X')) return '#e2de6e'; 
+            return '#629eed'; 
         }
 
         function toggleLeaderboard() {
@@ -360,6 +369,10 @@
             pop.currentTime = 0; pop.play();
             isQuantumMode = !isQuantumMode;
             document.getElementById('body-root').classList.toggle('mini-mode', !isQuantumMode);
+            
+            const qToggle = document.getElementById('quantum-toggle');
+            qToggle.innerText = isQuantumMode ? "🧊" : "⚛️";
+
             updateLabels();
             updateGateButtonsUI();
             renderCircuit();
@@ -421,8 +434,6 @@
             pop.currentTime = 0; pop.play();
             isPro = !isPro; 
             const b = document.getElementById('body-root');
-            const startHint = document.getElementById('start-hint');
-            if(startHint) startHint.style.display = 'none';
             
             b.classList.add('no-fish-anim'); 
             b.classList.toggle('pro-active', isPro);
@@ -507,10 +518,10 @@
         function getMiniSquareSVG(type) {
             let pairs = getHighlightPairsForGate(type);
             const miniNodes = [
-                { x: 20, y: 20 }, // 00
-                { x: 80, y: 20 }, // 01
-                { x: 20, y: 80 }, // 10
-                { x: 80, y: 80 }  // 11
+                { x: 20, y: 20 }, 
+                { x: 80, y: 20 }, 
+                { x: 20, y: 80 }, 
+                { x: 80, y: 80 }  
             ];
             let svg = `<svg viewBox="0 0 100 100" style="width:100%; height:100%; pointer-events:none; display: block;" preserveAspectRatio="xMidYMid meet">`;
             const edges = [ [0, 1], [0, 2], [1, 3], [2, 3] ];
@@ -556,7 +567,7 @@
                 }
             });
         }
-
+        
         function renderCircuit() {
             const c = document.getElementById('circuit-content'); 
             const wrapper = document.getElementById('circuit-content-wrapper');
@@ -565,9 +576,9 @@
                 const u = document.createElement('div');
                 u.className = 'circuit-unit' + (selectedIndices.includes(idx) ? ' selected' : '');
                 
-                // 動態設定 Paths hover 時的 rgba 顏色 (自動轉換 Hex to Rgba)
                 const hex = getGateColorMap(g);
                 u.style.setProperty('--bg-hover', getRgba(hex, 0.35));
+                u.style.setProperty('--bg-selected', hex);
                 
                 u.draggable = !isSolved;
                 u.ondragstart = (e) => handleDragStart(e, idx, u);
@@ -576,26 +587,41 @@
                     if (draggedIndex !== null && draggedIndex !== idx) {
                         const rect = u.getBoundingClientRect();
                         const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        u.style.borderLeft = isAfter ? '' : '4px solid #FFB7C5';
-                        u.style.borderRight = isAfter ? '4px solid #FFB7C5' : '';
+                        u.style.borderLeft = isAfter ? '' : '4px solid transparent';
+                        u.style.borderRight = isAfter ? '4px solid transparent' : '';
+                        u.classList.remove('drag-target', 'drag-target-right');
+
+                        if (isAfter) {
+                            if (idx === gateHistory.length - 1) {
+                                u.classList.add('drag-target-right');
+                            } else {
+                                const nextEl = u.nextElementSibling;
+                                if (nextEl) nextEl.classList.add('drag-target');
+                            }
+                        } else {
+                            u.classList.add('drag-target');
+                        }
                     }
-                    // 在拖曳經過時，同樣套用平滑捲動計算邏輯
                     updateScrollSpeed(e.clientX);
                 };
+
                 u.ondragleave = () => {
-                    u.style.borderLeft = '';
-                    u.style.borderRight = '';
+                    u.classList.remove('drag-target', 'drag-target-right');
+                    if (u.nextElementSibling) u.nextElementSibling.classList.remove('drag-target');
                 };
+
                 u.ondrop = (e) => {
                     e.preventDefault();
-                    u.style.borderLeft = '';
-                    u.style.borderRight = '';
+                    u.classList.remove('drag-target', 'drag-target-right');
+                    if (u.nextElementSibling) u.nextElementSibling.classList.remove('drag-target');
+                    
                     scrollSpeed = 0;
                     if (isSolved || draggedIndex === null || draggedIndex === idx) return;
                     
                     const rect = u.getBoundingClientRect();
                     const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                    let targetIdx = idx;
+                    
+                    let targetIdx;
                     if (isAfter) {
                         targetIdx = draggedIndex < idx ? idx : idx + 1;
                     } else {
@@ -605,6 +631,7 @@
                     pop.currentTime = 0; pop.play();
                     const movedGate = gateHistory.splice(draggedIndex, 1)[0];
                     gateHistory.splice(targetIdx, 0, movedGate);
+                    
                     pushHistory();
                     selectedIndices = [];
                     recalculatePositions();
@@ -668,12 +695,12 @@
                 } else {
                     if(g.startsWith('X')) {
                         const tQ = g==='X0'?0:1, tY = tQ===0?20:60, t = document.createElement('div');
-                        t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY+1.2)+'px'; u.appendChild(t);
+                        t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY-0.9)+'px'; u.appendChild(t);
                     } else {
                         const is01 = g.includes('01'), is0 = g.includes('C0'), cY = is01?20:60, tY = is01?60:20;
                         const v = document.createElement('div'); v.className = 'connection-v-line'; v.style.left = '23.5px'; v.style.top = Math.min(cY,tY)+'px'; v.style.height = '41px'; u.appendChild(v);
                         const d = document.createElement('div'); d.className = 'control-dot'; d.style.left = '18px'; d.style.top = (cY-7)+'px'; if(is0){d.style.background='white'; d.style.border='2.5px solid #463438';} u.appendChild(d);
-                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY+1.2)+'px'; u.appendChild(t);
+                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY-0.9)+'px'; u.appendChild(t);
                     }
                 }
                 c.appendChild(u);
@@ -693,7 +720,7 @@
         function resetCircuit() {
             if (isSolved) return;
             pop.currentTime=0; pop.play();
-            fishAtNode=[3,2,1,0]; gateHistory=[]; historyStack = [[]]; selectedIndices = []; steps=0; finishMove();
+            fishAtNode=[3, 2, 1, 0]; gateHistory=[]; historyStack = [[]]; selectedIndices = []; steps=0; finishMove();
         }
         
         function deleteGate(idx) {
