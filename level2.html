@@ -805,8 +805,8 @@
                     if (draggedIndex !== null && draggedIndex !== idx) {
                         const rect = u.getBoundingClientRect();
                         const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        u.style.borderLeft = isAfter ? '' : '4px solid transparent';
-                        u.style.borderRight = isAfter ? '4px solid transparent' : '';
+                        u.style.borderLeft = isAfter ? '' : '6px solid transparent';
+                        u.style.borderRight = isAfter ? '6px solid transparent' : '';
                         if (isAfter) {
                             u.classList.add('drop-hint-right');
                             u.classList.remove('drop-hint-left');
