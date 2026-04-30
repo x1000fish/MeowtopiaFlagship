@@ -416,7 +416,7 @@
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHimc4WS1FjvGEb2-gTBMhum8APQKfDHxc5wsiWRkNqkxJrocMOw/exec';
-        let steps = 0, time = 0, isPro = false, fishAtNode = [0, 1, 3, 2], gateHistory = [], timerInterval, isSolved = false;
+        let steps = 0, time = 0, isPro = false, fishAtNode = [0, 1, 3, 2], gateHistory = [], timerInterval, isSolved = false, isTimerRunning = false;
         let historyStack = [[]];
         let selectedIndices = [];
         let isMode2 = false;
@@ -431,6 +431,16 @@
         let scrollSpeed = 0;
 
         const pop = new Audio('pop.m4a'), meow = new Audio('meow.m4a');
+
+        function startTimer() {
+            if (!isTimerRunning && !isSolved) {
+                isTimerRunning = true;
+                timerInterval = setInterval(() => { 
+                    time++; 
+                    document.getElementById('timer').innerText = time; 
+                }, 1000);
+            }
+        }
 
         function updateScrollSpeed(clientX) {
             const wrapper = document.getElementById('circuit-content-wrapper');
@@ -453,8 +463,6 @@
         }
 
         window.onload = () => {
-            timerInterval = setInterval(() => { time++; document.getElementById('timer').innerText = time; }, 1000);
-            
             document.getElementById('quantum-toggle').innerText = isQuantumMode ? "🧊" : "⚛️";
             document.getElementById('body-root').classList.toggle('mini-mode', !isQuantumMode);
             
@@ -695,9 +703,11 @@
                     modalContent.style.transition = '';
                     modalContent.style.transform = '';
                     modalContent.style.opacity = '1';
+                    startTimer();
                 }, 400);
             } else {
                 modalOverlay.style.display = 'none';
+                startTimer();
             }
         }
         
