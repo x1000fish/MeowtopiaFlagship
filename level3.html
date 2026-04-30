@@ -106,7 +106,6 @@
         .circuit-unit.selected { background-color: var(--bg-hover) !important; border: 3px solid var(--border-color) !important; border-radius: 12px; }
         .circuit-unit > * { position: absolute; left: 50% !important; transform: translateX(-50%); }
         
-        /* 移除偽元素，以防止 DragDropTouch 在部分系統遺失 target 標靶的十字線 */
         .circuit-target { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2.5px solid #463438; display: flex; align-items: center; justify-content: center; z-index: 15; transform: translate(-50%, -50%); overflow: hidden; }
         
         .drop-hint-left::before { content: ''; position: absolute; left: -3px; top: 10px; bottom: 10px; width: 4px; background-color: #f78790; border-radius: 4px; z-index: 200; pointer-events: none; }
