@@ -120,10 +120,8 @@
 
         .control-dot { width: 14px; height: 14px; background: #463438; border-radius: 50%; position: absolute; z-index: 5; }
         .connection-v-line { position: absolute; width: 2.5px; background: #463438; z-index: 3; }
-        .circuit-target { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2.5px solid #463438; display: flex; align-items: center; justify-content: center; z-index: 15; transform: translate(-50%, -50%); }
-        .circuit-target::before { content: ""; position: absolute; width: 2.5px; height: 100%; background-color: #463438; }
-        .circuit-target::after { content: ""; position: absolute; width: 100%; height: 2.5px; background-color: #463438; }
-
+        .circuit-target { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2.5px solid #463438; display: flex; align-items: center; justify-content: center; z-index: 15; transform: translate(-50%, -50%); overflow: hidden; }
+        
         .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 2000; pointer-events: auto; }
         .modal-content { background: #FFF9F0; border: 8px solid #463438; border-radius: 40px; padding: 30px; text-align: center; width: 750px; box-shadow: 0 10px 0 #FFB7C5; color: #463438; z-index: 2001; }
         
@@ -838,6 +836,9 @@
         
         function updateGateButtonsUI() {
             const gates = ['X0', 'X1', 'CX10', 'CX01', 'C0X10', 'C0X01'];
+            // 獨立出十字架標靶內部實體元素，避免系統拖曳時遺失偽元素 ::before/::after
+            const targetInner = '<div style="position:absolute; width:2.5px; height:100%; background-color:#463438;"></div><div style="position:absolute; width:100%; height:2.5px; background-color:#463438;"></div>';
+            
             gates.forEach(g => {
                 const btn = document.getElementById('gate-' + g.toLowerCase());
                 if (!btn) return;
@@ -846,17 +847,17 @@
                 } else {
                     let html = '<div class="wire-container">';
                     if (g === 'X0') {
-                        html += '<div class="circuit-target" style="left: 50%; top: 25.5px;"></div>';
+                        html += `<div class="circuit-target" style="left: 50%; top: 25.5px;">${targetInner}</div>`;
                     } else if (g === 'X1') {
-                        html += '<div class="circuit-target" style="left: 50%; top: 53.5px;"></div>';
+                        html += `<div class="circuit-target" style="left: 50%; top: 53.5px;">${targetInner}</div>`;
                     } else if (g === 'CX01') {
-                        html += '<div class="connection-v-line" style="left: 50%; top: 25.5px; height: 28px; transform: translateX(-50%);"></div><div class="control-dot" style="left: 50%; top: 25.5px; background: #463438; transform: translate(-50%, -50%);"></div><div class="circuit-target" style="left: 50%; top: 53.5px;"></div>';
+                        html += `<div class="connection-v-line" style="left: 50%; top: 25.5px; height: 28px; transform: translateX(-50%);"></div><div class="control-dot" style="left: 50%; top: 25.5px; background: #463438; transform: translate(-50%, -50%);"></div><div class="circuit-target" style="left: 50%; top: 53.5px;">${targetInner}</div>`;
                     } else if (g === 'C0X01') {
-                        html += '<div class="connection-v-line" style="left: 50%; top: 25.5px; height: 28px; transform: translateX(-50%);"></div><div class="control-dot" style="box-sizing: border-box; left: 50%; top: 24px; background: white; border: 2.5px solid #463438; transform: translate(-50%, -50%);"></div><div class="circuit-target" style="left: 50%; top: 53.5px;"></div>';
+                        html += `<div class="connection-v-line" style="left: 50%; top: 25.5px; height: 28px; transform: translateX(-50%);"></div><div class="control-dot" style="box-sizing: border-box; left: 50%; top: 24px; background: white; border: 2.5px solid #463438; transform: translate(-50%, -50%);"></div><div class="circuit-target" style="left: 50%; top: 53.5px;">${targetInner}</div>`;
                     } else if (g === 'CX10') {
-                        html += '<div class="connection-v-line" style="left: 50%; top: 25.5px; height: 28px; transform: translateX(-50%);"></div><div class="control-dot" style="left: 50%; top: 53.5px; background: #463438; transform: translate(-50%, -50%);"></div><div class="circuit-target" style="left: 50%; top: 25.5px;"></div>';
+                        html += `<div class="connection-v-line" style="left: 50%; top: 25.5px; height: 28px; transform: translateX(-50%);"></div><div class="control-dot" style="left: 50%; top: 53.5px; background: #463438; transform: translate(-50%, -50%);"></div><div class="circuit-target" style="left: 50%; top: 25.5px;">${targetInner}</div>`;
                     } else if (g === 'C0X10') {
-                        html += '<div class="connection-v-line" style="left: 50%; top: 25.5px; height: 28px; transform: translateX(-50%);"></div><div class="control-dot" style="box-sizing: border-box; left: 50%; top: 53.5px; background: white; border: 2.5px solid #463438; transform: translate(-50%, -50%);"></div><div class="circuit-target" style="left: 50%; top: 25.5px;"></div>';
+                        html += `<div class="connection-v-line" style="left: 50%; top: 25.5px; height: 28px; transform: translateX(-50%);"></div><div class="control-dot" style="box-sizing: border-box; left: 50%; top: 53.5px; background: white; border: 2.5px solid #463438; transform: translate(-50%, -50%);"></div><div class="circuit-target" style="left: 50%; top: 25.5px;">${targetInner}</div>`;
                     }
                     html += '</div>';
                     btn.innerHTML = html;
@@ -905,7 +906,6 @@
                     renderCircuit();
                 };
 
-                // ---- 全新 iOS 滑動防干擾與視覺回饋邏輯 ----
                 let startY, startX;
                 let isVerticalSwipe = false;
                 let swipeThresholdMet = false;
@@ -937,7 +937,6 @@
                         if (isVerticalSwipe) {
                             if (e.cancelable) e.preventDefault();
                             
-                            // 滑動時提供精緻的位移回饋
                             if (lastDy < 0) {
                                 u.style.transform = `translateY(${Math.max(-40, lastDy)}px)`;
                                 u.style.opacity = lastDy < -30 ? '0.5' : '1';
@@ -946,41 +945,48 @@
                                 u.style.opacity = lastDy > 30 ? '0.5' : '1';
                             }
 
-                            // 【核心修正】：只要超過門檻就立刻執行，並強制清除殘留 ghost
+                            // 【核心修正】：一超過 30px 就立刻執行動作，並強力中斷拖曳套件
                             if (Math.abs(lastDy) > 30) {
-                                // 1. 中斷 DragDropTouch 的拖曳狀態
+                                // 1. 中斷 DragDropTouch 的拖曳狀態，避免它覆蓋或阻擋後續行為
                                 try {
-                                    document.dispatchEvent(new Event('touchend', { bubbles: true }));
-                                    document.dispatchEvent(new Event('touchcancel', { bubbles: true }));
+                                    u.dispatchEvent(new Event('touchend', { bubbles: true }));
                                 } catch(err) {}
 
-                                // 2. 清除所有可能的 Ghost 殘影
+                                // 2. 暴力清除畫面上可能已經出現的所有拖曳殘影 (Ghost)
                                 if (currentDragGhost && currentDragGhost.parentNode) {
                                     currentDragGhost.parentNode.removeChild(currentDragGhost);
                                     currentDragGhost = null;
                                 }
+                                document.querySelectorAll('.drag-drop-touch-ghost').forEach(el => el.remove());
                                 Array.from(document.body.children).forEach(el => {
-                                    if (el.style && el.style.zIndex === '999999') {
-                                        el.remove();
-                                    }
+                                    if (el.style && el.style.zIndex === '999999') el.remove();
                                 });
 
-                                // 3. 執行對應的變更或刪除動作
-                                if (lastDy > 30) {
-                                    const sIdx = selectedIndices.indexOf(idx);
-                                    if (sIdx > -1) selectedIndices.splice(sIdx, 1);
-                                    else selectedIndices.push(idx);
-                                    renderCircuit();
-                                } else if (lastDy < -30) {
-                                    syncGateHighlight(g, false);
-                                    selectedIndices = [];
-                                    deleteGate(idx);
-                                }
-                                
+                                const actionDy = lastDy;
                                 startY = undefined;
                                 isVerticalSwipe = false;
                                 swipeThresholdMet = false;
                                 lastDy = 0;
+
+                                // 3. 延遲 50 毫秒執行變更/刪除，確保底層事件已經完全清空
+                                setTimeout(() => {
+                                    if (actionDy > 30) {
+                                        const sIdx = selectedIndices.indexOf(idx);
+                                        if (sIdx > -1) selectedIndices.splice(sIdx, 1);
+                                        else selectedIndices.push(idx);
+                                        renderCircuit();
+                                    } else if (actionDy < -30) {
+                                        syncGateHighlight(g, false);
+                                        selectedIndices = [];
+                                        deleteGate(idx);
+                                    }
+                                    
+                                    // 最後買個保險，再次確保清除殘影
+                                    document.querySelectorAll('.drag-drop-touch-ghost').forEach(el => el.remove());
+                                    Array.from(document.body.children).forEach(el => {
+                                        if (el.style && el.style.zIndex === '999999') el.remove();
+                                    });
+                                }, 50);
                             }
                         }
                     }
@@ -988,7 +994,6 @@
 
                 u.addEventListener('touchend', (e) => {
                     if (isVerticalSwipe && startY !== undefined) {
-                        // 滑動距離不夠，回彈
                         u.style.transform = '';
                         u.style.opacity = '1';
                     }
@@ -997,7 +1002,6 @@
                     swipeThresholdMet = false;
                     lastDy = 0;
                 });
-                // ------------------------------------------
 
                 if (!isTouchDevice) {
                     u.onclick = (e) => {
@@ -1013,12 +1017,24 @@
                 } else {
                     if(g.startsWith('X')) {
                         const tQ = g==='X0'?0:1, tY = tQ===0?20:60, t = document.createElement('div');
-                        t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY-0.9)+'px'; u.appendChild(t);
+                        t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY-0.9)+'px'; 
+                        
+                        const tInner1 = document.createElement('div'); tInner1.style.cssText = 'position:absolute; width:2.5px; height:100%; background-color:#463438;';
+                        const tInner2 = document.createElement('div'); tInner2.style.cssText = 'position:absolute; width:100%; height:2.5px; background-color:#463438;';
+                        t.appendChild(tInner1); t.appendChild(tInner2);
+                        
+                        u.appendChild(t);
                     } else {
                         const is01 = g.includes('01'), is0 = g.includes('C0'), cY = is01?20:60, tY = is01?60:20;
                         const v = document.createElement('div'); v.className = 'connection-v-line'; v.style.left = '23.5px'; v.style.top = Math.min(cY,tY)+'px'; v.style.height = '41px'; u.appendChild(v);
                         const d = document.createElement('div'); d.className = 'control-dot'; d.style.left = '18px'; d.style.top = (cY-8)+'px'; if(is0){d.style.background='white'; d.style.border='2.5px solid #463438';} u.appendChild(d);
-                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY-0.9)+'px'; u.appendChild(t);
+                        
+                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY-0.9)+'px'; 
+                        const tInner1 = document.createElement('div'); tInner1.style.cssText = 'position:absolute; width:2.5px; height:100%; background-color:#463438;';
+                        const tInner2 = document.createElement('div'); tInner2.style.cssText = 'position:absolute; width:100%; height:2.5px; background-color:#463438;';
+                        t.appendChild(tInner1); t.appendChild(tInner2);
+                        
+                        u.appendChild(t);
                     }
                 }
                 c.appendChild(u);
