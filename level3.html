@@ -28,8 +28,11 @@
         .node { width: 140px; height: 140px; background: white; border: 6px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; box-shadow: 3px 3px 0 #463438; z-index: 20; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         .node img { width: 110px; height: auto; pointer-events: none; }
         .fixed-number { position: absolute; bottom: -5px; right: 50px; font-size: 22px; font-weight: 900; color: #463438; pointer-events: none; z-index: 25; }
+        
         .connection-line { position: absolute; background: #463438; cursor: pointer; z-index: 10; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
         .connection-line:hover { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; z-index: 16 !important; }
+        .connection-line::after { content: ''; position: absolute; top: -15px; bottom: -15px; left: -15px; right: -15px; background-color: transparent; }
+        
         .line-highlight { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; z-index: 15 !important; }
         .line-h { height: 8px; width: 300px; }
         .line-v { width: 8px; height: 250px; }
@@ -97,12 +100,15 @@
 
         .qubit-label { position: absolute; left: 12px; font-weight: 900; font-size: 16px; color: #463438; z-index: 5; }
         
-        .circuit-unit { min-width: 48px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: grab; transition: background-color 0.2s, border 0.2s; touch-action: none; background-color: transparent !important; border: 3px solid transparent; border-radius: 12px; }
+        .circuit-unit { min-width: 60px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: grab; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s, border 0.2s; touch-action: none; box-sizing: border-box; background-color: transparent !important; border: 3px solid transparent; border-radius: 12px; }
         .circuit-unit:active { cursor: grabbing; }
         .circuit-unit:hover { background-color: var(--bg-hover) !important; border-radius: 12px; }
-        .circuit-unit.selected { background-color: var(--bg-hover) !important; border: 3px solid var(--bg-selected) !important; border-radius: 12px; }
+        .circuit-unit.selected { background-color: var(--bg-hover) !important; border: 3px solid var(--border-color) !important; border-radius: 12px; }
+        .circuit-unit > * { position: absolute; left: 50% !important; transform: translateX(-50%); }
+        .circuit-target { left: 50% !important; transform: translate(-50%, -50%) !important; }
         
-        .drag-target::before,.drag-target-right::after{content:'';position:absolute;top:10px;bottom:10px;width:4px;background-color:#FFB7C5;border-radius:4px;z-index:200;pointer-events:none;}.drag-target::before{left:-3px;}.drag-target-right::after{right:-3px;}
+        .drop-hint-left::before { content: ''; position: absolute; left: -3px; top: 10px; bottom: 10px; width: 4px; background-color: #f78790; border-radius: 4px; z-index: 200; pointer-events: none; }
+        .drop-hint-right::after { content: ''; position: absolute; right: -3px; top: 10px; bottom: 10px; width: 4px; background-color: #f78790; border-radius: 4px; z-index: 200; pointer-events: none; }
 
         .control-dot { width: 14px; height: 14px; background: #463438; border-radius: 50%; position: absolute; z-index: 5; }
         .connection-v-line { position: absolute; width: 2.5px; background: #463438; z-index: 3; }
@@ -124,7 +130,6 @@
         .dragging #circuit-content {
             background-image: none !important;
         }
-        /* 拖移時強制保持背景顏色，並隱藏十字的橫線 */
         .circuit-unit.is-dragging {
             background-color: var(--bg-hover) !important;
         }
@@ -211,8 +216,8 @@
             <a href="index.html" class="game-btn btn-red px-16">GIVE UP</a>
         </div>
     </div>
-    <div id="victoryModal" class="modal-overlay">
-        <div class="modal-content">
+    <div id="victoryModal" class="modal-overlay" style="z-index: 3000;">
+        <div class="modal-content" style="width: 380px;">
             <h2 class="text-5xl font-black mb-4" style="color: #463438;">MEOW!</h2>
             <h2 class="text-5xl font-black mb-4" style="color: #463438;">🐾</h2>
             <p id="victoryMsg" class="text-xl font-bold mb-6"></p>
@@ -220,6 +225,7 @@
             <button onclick="viewInLab().style.display='none'" class="game-btn btn-red w-full">VIEW CIRCUIT</button>
         </div>
     </div>
+
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHimc4WS1FjvGEb2-gTBMhum8APQKfDHxc5wsiWRkNqkxJrocMOw/exec';
         let steps = 0, time = 0, isPro = false, fishAtNode = [1, 0, 3, 2], gateHistory = [], timerInterval, isSolved = false;
@@ -228,20 +234,20 @@
         let isMode2 = false;
         let leaderboardData = [];
         let draggedIndex = null;
+        let currentDragGhost = null;
         let isTouchDevice = ('ontouchstart' in window || navigator.maxTouchPoints > 0);
         let isQuantumMode = false;
-        
         let autoScrollRAF = null;
         let scrollSpeed = 0;
-
+        
         const pop = new Audio('pop.m4a'), meow = new Audio('meow.m4a');
 
         function updateScrollSpeed(clientX) {
             const wrapper = document.getElementById('circuit-content-wrapper');
             if (!wrapper) return;
             const rect = wrapper.getBoundingClientRect();
-            const edgeThreshold = 120;
-            const maxSpeed = 20;
+            const edgeThreshold = 120; 
+            const maxSpeed = 15; 
 
             if (clientX - rect.left < edgeThreshold) {
                 let intensity = 1 - Math.max(0, clientX - rect.left) / edgeThreshold;
@@ -258,15 +264,15 @@
 
         window.onload = () => {
             updateFishUI();
-            
             const fishes = document.querySelectorAll('.fish-wrapper');
             fishes.forEach(fw => fw.classList.add('fish-ready'));
+            setTimeout(() => { fishes.forEach(fw => fw.classList.add('fish-animate')); }, 50);
             
-            setTimeout(() => {
-                fishes.forEach(fw => fw.classList.add('fish-animate'));
-            }, 50);
-
             timerInterval = setInterval(() => { time++; document.getElementById('timer').innerText = time; }, 1000);
+            
+            document.getElementById('quantum-toggle').innerText = isQuantumMode ? "🧊" : "⚛️";
+            document.getElementById('body-root').classList.toggle('mini-mode', !isQuantumMode);
+            
             updateLabels();
             updateGateButtonsUI();
             updateUndoStatus();
@@ -319,47 +325,28 @@
             const wrapper = document.getElementById('leaderboard-wrapper');
             wrapper.classList.toggle('expanded');
         }
-        
+
         function handleDragStart(e, index, el) {
             if (isSolved) return;
-            el.classList.add('is-dragging');
             draggedIndex = index;
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', index.toString());
             
-            const dragGhost = el.cloneNode(true);
+            if (currentDragGhost && currentDragGhost.parentNode) {
+                currentDragGhost.parentNode.removeChild(currentDragGhost);
+            }
+            currentDragGhost = el.cloneNode(true);
+            currentDragGhost.style.position = 'absolute';
+            currentDragGhost.style.top = '-10000px';
+            currentDragGhost.style.left = '-10000px';
+            currentDragGhost.style.backgroundColor = 'transparent';
+            currentDragGhost.style.border = 'none';
+            currentDragGhost.classList.remove('selected');
+            document.body.appendChild(currentDragGhost);
+            
+            e.dataTransfer.setDragImage(currentDragGhost, el.offsetWidth / 2, el.offsetHeight / 2);
 
-            dragGhost.style.position = 'absolute';
-            dragGhost.style.top = '-9999px';
-            dragGhost.style.left = '-9999px';
-            dragGhost.style.width = el.offsetWidth + 'px';
-            dragGhost.style.height = el.offsetHeight + 'px';
-
-            dragGhost.style.backgroundColor = 'rgba(98, 158, 237, 0.25)';
-            dragGhost.style.borderRadius = '12px';
-            dragGhost.style.border = 'none';
-            dragGhost.style.boxShadow = 'none';
-            dragGhost.style.opacity = '1';
-
-            dragGhost.style.backgroundImage = 'none';
-
-            dragGhost.querySelectorAll('*').forEach(child => {
-                child.style.transition = 'none';
-                child.style.animation = 'none';
-            });
-
-            document.body.appendChild(dragGhost);
-
-            e.dataTransfer.setDragImage(
-                dragGhost,
-                dragGhost.offsetWidth / 2,
-                dragGhost.offsetHeight / 2
-            );
-
-            setTimeout(() => {
-                el.style.opacity = '0.5';
-                dragGhost.remove();
-            }, 0);
+            setTimeout(() => { el.style.opacity = '0.01'; }, 0);
         }
 
         async function fetchLeaderboard() {
@@ -413,10 +400,7 @@
             pop.currentTime = 0; pop.play();
             isQuantumMode = !isQuantumMode;
             document.getElementById('body-root').classList.toggle('mini-mode', !isQuantumMode);
-            
-            const qToggle = document.getElementById('quantum-toggle');
-            qToggle.innerText = isQuantumMode ? "🧊" : "⚛️";
-
+            document.getElementById('quantum-toggle').innerText = isQuantumMode ? "🧊" : "⚛️";
             updateLabels();
             updateGateButtonsUI();
             renderCircuit();
@@ -478,7 +462,6 @@
             pop.currentTime = 0; pop.play();
             isPro = !isPro; 
             const b = document.getElementById('body-root');
-            
             b.classList.add('no-fish-anim'); 
             b.classList.toggle('pro-active', isPro);
             
@@ -535,7 +518,7 @@
             fishAtNode = gateHistory.reduce((currentPositions, gate) => {
                 const permutation = getPermutation(gate);
                 return currentPositions.map(pos => permutation[pos]);
-            }, [3, 2, 1, 0]);
+            }, [1, 0, 3, 2]);
             steps = gateHistory.length;
         }
         
@@ -562,10 +545,10 @@
         function getMiniSquareSVG(type) {
             let pairs = getHighlightPairsForGate(type);
             const miniNodes = [
-                { x: 20, y: 20 }, 
-                { x: 80, y: 20 }, 
-                { x: 20, y: 80 }, 
-                { x: 80, y: 80 }  
+                { x: 20, y: 20 },
+                { x: 80, y: 20 },
+                { x: 20, y: 80 },
+                { x: 80, y: 80 }
             ];
             let svg = `<svg viewBox="0 0 100 100" style="width:100%; height:100%; pointer-events:none; display: block;" preserveAspectRatio="xMidYMid meet">`;
             const edges = [ [0, 1], [0, 2], [1, 3], [2, 3] ];
@@ -585,7 +568,7 @@
         }
         
         function updateGateButtonsUI() {
-            const gates = ['X0', 'X1', 'CX01', 'C0X01', 'CX10', 'C0X10'];
+            const gates = ['X0', 'X1', 'CX10', 'CX01', 'C0X10', 'C0X01'];
             gates.forEach(g => {
                 const btn = document.getElementById('gate-' + g.toLowerCase());
                 if (!btn) return;
@@ -622,67 +605,25 @@
                 
                 const hex = getGateColorMap(g);
                 u.style.setProperty('--bg-hover', getRgba(hex, 0.35));
-                u.style.setProperty('--bg-selected', hex);
+                u.style.setProperty('--border-color', getRgba(hex, 1)); 
                 
                 u.draggable = !isSolved;
                 u.ondragstart = (e) => handleDragStart(e, idx, u);
-                u.ondragover = (e) => {
-                    e.preventDefault();
-                    if (draggedIndex !== null && draggedIndex !== idx) {
-                        const rect = u.getBoundingClientRect();
-                        const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        u.style.borderLeft = isAfter ? '' : '6px solid transparent';
-                        u.style.borderRight = isAfter ? '6px solid transparent' : '';
-                        u.classList.remove('drag-target', 'drag-target-right');
-
-                        if (isAfter) {
-                            if (idx === gateHistory.length - 1) {
-                                u.classList.add('drag-target-right');
-                            } else {
-                                const nextEl = u.nextElementSibling;
-                                if (nextEl) nextEl.classList.add('drag-target');
-                            }
-                        } else {
-                            u.classList.add('drag-target');
-                        }
+                
+                u.ondragend = (e) => { 
+                    e.target.style.opacity = '1'; 
+                    draggedIndex = null; 
+                    scrollSpeed = 0; 
+                    Array.from(document.querySelectorAll('.circuit-unit')).forEach(el => {
+                        el.classList.remove('drop-hint-left', 'drop-hint-right');
+                        el.style.transform = '';
+                    });
+                    
+                    if (currentDragGhost && currentDragGhost.parentNode) {
+                        currentDragGhost.parentNode.removeChild(currentDragGhost);
+                        currentDragGhost = null;
                     }
-                    updateScrollSpeed(e.clientX);
                 };
-
-                u.ondragleave = () => {
-                    u.classList.remove('drag-target', 'drag-target-right');
-                    if (u.nextElementSibling) u.nextElementSibling.classList.remove('drag-target');
-                };
-
-                u.ondrop = (e) => {
-                    e.preventDefault();
-                    u.classList.remove('drag-target', 'drag-target-right');
-                    if (u.nextElementSibling) u.nextElementSibling.classList.remove('drag-target');
-                    
-                    scrollSpeed = 0;
-                    if (isSolved || draggedIndex === null || draggedIndex === idx) return;
-                    
-                    const rect = u.getBoundingClientRect();
-                    const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                    
-                    let targetIdx;
-                    if (isAfter) {
-                        targetIdx = draggedIndex < idx ? idx : idx + 1;
-                    } else {
-                        targetIdx = draggedIndex < idx ? idx - 1 : idx;
-                    }
-                    
-                    pop.currentTime = 0; pop.play();
-                    const movedGate = gateHistory.splice(draggedIndex, 1)[0];
-                    gateHistory.splice(targetIdx, 0, movedGate);
-                    
-                    pushHistory();
-                    selectedIndices = [];
-                    recalculatePositions();
-                    finishMove();
-                    draggedIndex = null;
-                };
-                u.ondragend = (e) => { e.target.style.opacity = '1'; e.target.classList.remove('is-dragging'); draggedIndex = null; scrollSpeed = 0; document.body.classList.remove('dragging');};
                 
                 u.onmouseover = () => syncGateHighlight(g, true);
                 u.onmouseout = () => syncGateHighlight(g, false);
@@ -696,34 +637,79 @@
                 };
 
                 let startY, startX;
+                let isVerticalSwipe = false;
+                let swipeThresholdMet = false;
+                let lastDy = 0;
+
                 u.addEventListener('touchstart', (e) => {
                     if (e.touches.length === 1) {
                         startY = e.touches[0].clientY;
                         startX = e.touches[0].clientX;
+                        isVerticalSwipe = false;
+                        swipeThresholdMet = false;
+                        lastDy = 0;
                     }
                 }, { passive: true });
                 
                 u.addEventListener('touchmove', (e) => {
                     if (startY !== undefined) {
-                        const dy = e.touches[0].clientY - startY;
+                        lastDy = e.touches[0].clientY - startY;
                         const dx = e.touches[0].clientX - startX;
-                        if (Math.abs(dy) > 30 && Math.abs(dy) > Math.abs(dx)) {
+                        
+                        if (!swipeThresholdMet && (Math.abs(dx) > 10 || Math.abs(lastDy) > 10)) {
+                            swipeThresholdMet = true;
+
+                            if (Math.abs(lastDy) > Math.abs(dx)) {
+                                isVerticalSwipe = true;
+                            }
+                        }
+
+                        if (isVerticalSwipe) {
                             if (e.cancelable) e.preventDefault();
-                            if (dy > 30) {
-                                const sIdx = selectedIndices.indexOf(idx);
-                                if (sIdx > -1) selectedIndices.splice(sIdx, 1);
-                                else selectedIndices.push(idx);
-                                renderCircuit();
-                                startY = undefined;
-                            } else if (dy < -30) {
-                                syncGateHighlight(g, false);
-                                selectedIndices = [];
-                                deleteGate(idx);
-                                startY = undefined;
+                            
+                            if (lastDy < 0) {
+                                u.style.transform = `translateY(${Math.max(-40, lastDy)}px)`;
+                                u.style.opacity = lastDy < -30 ? '0.5' : '1';
+                            } else {
+                                u.style.transform = `translateY(${Math.min(40, lastDy)}px)`;
                             }
                         }
                     }
                 }, { passive: false });
+
+                u.addEventListener('touchend', (e) => {
+                    if (isVerticalSwipe) {
+
+                        if (currentDragGhost && currentDragGhost.parentNode) {
+                            currentDragGhost.parentNode.removeChild(currentDragGhost);
+                            currentDragGhost = null;
+                        }
+                        
+                        document.querySelectorAll('.drag-drop-touch-ghost').forEach(el => el.remove());
+                        
+                        if (lastDy > 30) {
+                            setTimeout(() => {
+                                const sIdx = selectedIndices.indexOf(idx);
+                                if (sIdx > -1) selectedIndices.splice(sIdx, 1);
+                                else selectedIndices.push(idx);
+                                renderCircuit();
+                            }, 50);
+                        } else if (lastDy < -30) {
+                            setTimeout(() => {
+                                syncGateHighlight(g, false);
+                                selectedIndices = [];
+                                deleteGate(idx);
+                            }, 50);
+                        } else {
+                            u.style.transform = '';
+                            u.style.opacity = '1';
+                        }
+                    }
+                    startY = undefined;
+                    isVerticalSwipe = false;
+                    swipeThresholdMet = false;
+                    lastDy = 0;
+                });
 
                 if (!isTouchDevice) {
                     u.onclick = (e) => {
@@ -739,41 +725,118 @@
                 } else {
                     if(g.startsWith('X')) {
                         const tQ = g==='X0'?0:1, tY = tQ===0?20:60, t = document.createElement('div');
-                        t.className = 'circuit-target'; 
-                        t.style.left = '50%'; // 改為 50%
-                        t.style.top = (tY-0.9)+'px'; 
-                        u.appendChild(t);
+                        t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY-0.9)+'px'; u.appendChild(t);
                     } else {
                         const is01 = g.includes('01'), is0 = g.includes('C0'), cY = is01?20:60, tY = is01?60:20;
-                        
-                        // 中間的直線
-                        const v = document.createElement('div'); 
-                        v.className = 'connection-v-line'; 
-                        v.style.left = '50%'; // 改為 50%
-                        v.style.transform = 'translateX(-50%)'; // 確保線條本身置中
-                        v.style.top = Math.min(cY,tY)+'px'; 
-                        v.style.height = '41px'; 
-                        u.appendChild(v);
-                        
-                        // 控制點 (實心或空心圓)
-                        const d = document.createElement('div'); 
-                        d.className = 'control-dot'; 
-                        d.style.left = '50%'; // 改為 50%
-                        d.style.transform = 'translate(-50%, -50%)'; // X軸與Y軸都置中
-                        d.style.top = cY+'px'; // 因為加了 transform，原本的 (cY-7) 恢復成 cY 即可
-                        if(is0){d.style.background='white'; d.style.border='2.5px solid #463438';} 
-                        u.appendChild(d);
-                        
-                        // 目標端 (包含十字的圓)
-                        const t = document.createElement('div'); 
-                        t.className = 'circuit-target'; 
-                        t.style.left = '50%'; // 改為 50%
-                        t.style.top = (tY-0.9)+'px'; 
-                        u.appendChild(t);
+                        const v = document.createElement('div'); v.className = 'connection-v-line'; v.style.left = '23.5px'; v.style.top = Math.min(cY,tY)+'px'; v.style.height = '41px'; u.appendChild(v);
+                        const d = document.createElement('div'); d.className = 'control-dot'; d.style.left = '18px'; d.style.top = (cY-8)+'px'; if(is0){d.style.background='white'; d.style.border='2.5px solid #463438';} u.appendChild(d);
+                        const t = document.createElement('div'); t.className = 'circuit-target'; t.style.left = '25px'; t.style.top = (tY-0.9)+'px'; u.appendChild(t);
                     }
                 }
                 c.appendChild(u);
             });
+
+            c.ondragover = (e) => {
+                e.preventDefault();
+                updateScrollSpeed(e.clientX);
+                if (draggedIndex === null || isSolved) return;
+
+                const units = Array.from(c.querySelectorAll('.circuit-unit'));
+                const cRect = c.getBoundingClientRect();
+                const mouseX = e.clientX - cRect.left;
+
+                let currentX = units.length > 0 ? units[0].offsetLeft : 7;
+                let visualMids = [];
+                let mapping = [];
+                
+                for (let i = 0; i < units.length; i++) {
+                    if (i === draggedIndex) continue;
+                    visualMids.push(currentX + units[i].offsetWidth / 2);
+                    mapping.push(i);
+                    currentX += units[i].offsetWidth;
+                }
+
+                let insertVisualIdx = visualMids.length;
+                for (let v = 0; v < visualMids.length; v++) {
+                    if (mouseX < visualMids[v]) {
+                        insertVisualIdx = v;
+                        break;
+                    }
+                }
+                
+                let insertIdx = insertVisualIdx < mapping.length ? mapping[insertVisualIdx] : units.length;
+
+                units.forEach(el => el.classList.remove('drop-hint-left', 'drop-hint-right'));
+                if (insertIdx < units.length) {
+                    units[insertIdx].classList.add('drop-hint-left');
+                } else if (units.length > 0) {
+                    units[units.length - 1].classList.add('drop-hint-right');
+                }
+
+                const gap = (units[0] ? units[0].offsetWidth : 60) * 0.75;
+                units.forEach((unit, i) => {
+                    if (i === draggedIndex) {
+                        unit.style.transform = '';
+                        return;
+                    }
+                    let shift = 0;
+                    if (i > draggedIndex) shift -= gap;
+                    if (i >= insertIdx) shift += gap;
+                    unit.style.transform = `translateX(${shift}px)`;
+                });
+            };
+
+            c.ondrop = (e) => {
+                e.preventDefault();
+                scrollSpeed = 0;
+                const units = Array.from(c.querySelectorAll('.circuit-unit'));
+                
+                units.forEach(el => {
+                    el.classList.remove('drop-hint-left', 'drop-hint-right');
+                    el.style.transform = ''; 
+                });
+                
+                if (isSolved || draggedIndex === null) return;
+
+                const cRect = c.getBoundingClientRect();
+                const mouseX = e.clientX - cRect.left;
+
+                let currentX = units.length > 0 ? units[0].offsetLeft : 7;
+                let visualMids = [];
+                let mapping = [];
+                
+                for (let i = 0; i < units.length; i++) {
+                    if (i === draggedIndex) continue;
+                    visualMids.push(currentX + units[i].offsetWidth / 2);
+                    mapping.push(i);
+                    currentX += units[i].offsetWidth;
+                }
+
+                let insertVisualIdx = visualMids.length;
+                for (let v = 0; v < visualMids.length; v++) {
+                    if (mouseX < visualMids[v]) {
+                        insertVisualIdx = v;
+                        break;
+                    }
+                }
+                
+                let insertIdx = insertVisualIdx < mapping.length ? mapping[insertVisualIdx] : units.length;
+
+                pop.currentTime = 0; pop.play();
+                const movedGate = gateHistory.splice(draggedIndex, 1)[0];
+                
+                if (insertIdx > draggedIndex) {
+                    insertIdx--;
+                }
+                
+                gateHistory.splice(insertIdx, 0, movedGate);
+                pushHistory();
+                selectedIndices = [];
+                recalculatePositions();
+                finishMove();
+                draggedIndex = null;
+            };
+
             updateUndoStatus(); 
             setTimeout(() => { if(wrapper) wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' }); }, 100);
         }
