@@ -908,7 +908,6 @@
                 let startY, startX;
                 let isVerticalSwipe = false;
                 let swipeThresholdMet = false;
-                let lastDy = 0;
 
                 u.addEventListener('touchstart', (e) => {
                     if (e.touches.length === 1) {
@@ -916,19 +915,18 @@
                         startX = e.touches[0].clientX;
                         isVerticalSwipe = false;
                         swipeThresholdMet = false;
-                        lastDy = 0;
                     }
                 }, { passive: true });
                 
                 u.addEventListener('touchmove', (e) => {
                     if (startY !== undefined) {
-                        lastDy = e.touches[0].clientY - startY;
+                        const dy = e.touches[0].clientY - startY;
                         const dx = e.touches[0].clientX - startX;
                         
-                        if (!swipeThresholdMet && (Math.abs(dx) > 10 || Math.abs(lastDy) > 10)) {
+                        if (!swipeThresholdMet && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
                             swipeThresholdMet = true;
 
-                            if (Math.abs(lastDy) > Math.abs(dx)) {
+                            if (Math.abs(dy) > Math.abs(dx)) {
                                 isVerticalSwipe = true;
                             }
                         }
@@ -936,48 +934,53 @@
                         if (isVerticalSwipe) {
                             if (e.cancelable) e.preventDefault();
                             
-                            if (lastDy < 0) {
-                                u.style.transform = `translateY(${Math.max(-40, lastDy)}px)`;
-                                u.style.opacity = lastDy < -30 ? '0.5' : '1';
+                            if (dy < 0) {
+                                u.style.transform = `translateY(${Math.max(-40, dy)}px)`;
+                                u.style.opacity = dy < -25 ? '0.5' : '1';
                             } else {
-                                u.style.transform = `translateY(${Math.min(40, lastDy)}px)`;
+                                u.style.transform = `translateY(${Math.min(40, dy)}px)`;
+                                u.style.opacity = dy > 25 ? '0.5' : '1'; 
+                            }
+
+                            if (dy > 30) {
+                                if (currentDragGhost && currentDragGhost.parentNode) {
+                                    currentDragGhost.parentNode.removeChild(currentDragGhost);
+                                    currentDragGhost = null;
+                                }
+                                document.querySelectorAll('.drag-drop-touch-ghost').forEach(el => el.remove());
+                                
+                                const sIdx = selectedIndices.indexOf(idx);
+                                if (sIdx > -1) selectedIndices.splice(sIdx, 1);
+                                else selectedIndices.push(idx);
+                                renderCircuit();
+                                startY = undefined;
+                                isVerticalSwipe = false;
+                            } else if (dy < -30) {
+                                if (currentDragGhost && currentDragGhost.parentNode) {
+                                    currentDragGhost.parentNode.removeChild(currentDragGhost);
+                                    currentDragGhost = null;
+                                }
+                                document.querySelectorAll('.drag-drop-touch-ghost').forEach(el => el.remove());
+                                
+                                syncGateHighlight(g, false);
+                                selectedIndices = [];
+                                deleteGate(idx);
+                                startY = undefined;
+                                isVerticalSwipe = false;
                             }
                         }
                     }
                 }, { passive: false });
 
                 u.addEventListener('touchend', (e) => {
-                    if (isVerticalSwipe) {
+                    if (isVerticalSwipe && startY !== undefined) {
 
-                        if (currentDragGhost && currentDragGhost.parentNode) {
-                            currentDragGhost.parentNode.removeChild(currentDragGhost);
-                            currentDragGhost = null;
-                        }
-                        
-                        document.querySelectorAll('.drag-drop-touch-ghost').forEach(el => el.remove());
-                        
-                        if (lastDy > 30) {
-                            setTimeout(() => {
-                                const sIdx = selectedIndices.indexOf(idx);
-                                if (sIdx > -1) selectedIndices.splice(sIdx, 1);
-                                else selectedIndices.push(idx);
-                                renderCircuit();
-                            }, 50);
-                        } else if (lastDy < -30) {
-                            setTimeout(() => {
-                                syncGateHighlight(g, false);
-                                selectedIndices = [];
-                                deleteGate(idx);
-                            }, 50);
-                        } else {
-                            u.style.transform = '';
-                            u.style.opacity = '1';
-                        }
+                        u.style.transform = '';
+                        u.style.opacity = '1';
                     }
                     startY = undefined;
                     isVerticalSwipe = false;
                     swipeThresholdMet = false;
-                    lastDy = 0;
                 });
 
                 if (!isTouchDevice) {
@@ -1042,7 +1045,7 @@
                     units[units.length - 1].classList.add('drop-hint-right');
                 }
 
-                const gap = (units[0] ? units[0].offsetWidth : 60) * 0.75;
+                const gap = (units[0] ? units[0].offsetWidth : 60) * 0.25;
                 units.forEach((unit, i) => {
                     if (i === draggedIndex) {
                         unit.style.transform = '';
