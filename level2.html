@@ -905,9 +905,11 @@
                     renderCircuit();
                 };
 
+                // ---- 全新 iOS 滑動防干擾與視覺回饋邏輯 ----
                 let startY, startX;
                 let isVerticalSwipe = false;
                 let swipeThresholdMet = false;
+                let lastDy = 0;
 
                 u.addEventListener('touchstart', (e) => {
                     if (e.touches.length === 1) {
@@ -915,18 +917,19 @@
                         startX = e.touches[0].clientX;
                         isVerticalSwipe = false;
                         swipeThresholdMet = false;
+                        lastDy = 0;
                     }
                 }, { passive: true });
                 
                 u.addEventListener('touchmove', (e) => {
                     if (startY !== undefined) {
-                        const dy = e.touches[0].clientY - startY;
+                        lastDy = e.touches[0].clientY - startY;
                         const dx = e.touches[0].clientX - startX;
                         
-                        if (!swipeThresholdMet && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
+                        if (!swipeThresholdMet && (Math.abs(dx) > 10 || Math.abs(lastDy) > 10)) {
                             swipeThresholdMet = true;
-
-                            if (Math.abs(dy) > Math.abs(dx)) {
+                            // 確認滑動方向為主垂直
+                            if (Math.abs(lastDy) > Math.abs(dx)) {
                                 isVerticalSwipe = true;
                             }
                         }
@@ -934,39 +937,50 @@
                         if (isVerticalSwipe) {
                             if (e.cancelable) e.preventDefault();
                             
-                            if (dy < 0) {
-                                u.style.transform = `translateY(${Math.max(-40, dy)}px)`;
-                                u.style.opacity = dy < -25 ? '0.5' : '1';
+                            // 滑動時提供精緻的位移回饋
+                            if (lastDy < 0) {
+                                u.style.transform = `translateY(${Math.max(-40, lastDy)}px)`;
+                                u.style.opacity = lastDy < -30 ? '0.5' : '1';
                             } else {
-                                u.style.transform = `translateY(${Math.min(40, dy)}px)`;
-                                u.style.opacity = dy > 25 ? '0.5' : '1'; 
+                                u.style.transform = `translateY(${Math.min(40, lastDy)}px)`;
+                                u.style.opacity = lastDy > 30 ? '0.5' : '1';
                             }
 
-                            if (dy > 30) {
+                            // 【核心修正】：只要超過門檻就立刻執行，並強制清除殘留 ghost
+                            if (Math.abs(lastDy) > 30) {
+                                // 1. 中斷 DragDropTouch 的拖曳狀態
+                                try {
+                                    document.dispatchEvent(new Event('touchend', { bubbles: true }));
+                                    document.dispatchEvent(new Event('touchcancel', { bubbles: true }));
+                                } catch(err) {}
+
+                                // 2. 清除所有可能的 Ghost 殘影
                                 if (currentDragGhost && currentDragGhost.parentNode) {
                                     currentDragGhost.parentNode.removeChild(currentDragGhost);
                                     currentDragGhost = null;
                                 }
-                                document.querySelectorAll('.drag-drop-touch-ghost').forEach(el => el.remove());
-                                
-                                const sIdx = selectedIndices.indexOf(idx);
-                                if (sIdx > -1) selectedIndices.splice(sIdx, 1);
-                                else selectedIndices.push(idx);
-                                renderCircuit();
-                                startY = undefined;
-                                isVerticalSwipe = false;
-                            } else if (dy < -30) {
-                                if (currentDragGhost && currentDragGhost.parentNode) {
-                                    currentDragGhost.parentNode.removeChild(currentDragGhost);
-                                    currentDragGhost = null;
+                                Array.from(document.body.children).forEach(el => {
+                                    if (el.style && el.style.zIndex === '999999') {
+                                        el.remove();
+                                    }
+                                });
+
+                                // 3. 執行對應的變更或刪除動作
+                                if (lastDy > 30) {
+                                    const sIdx = selectedIndices.indexOf(idx);
+                                    if (sIdx > -1) selectedIndices.splice(sIdx, 1);
+                                    else selectedIndices.push(idx);
+                                    renderCircuit();
+                                } else if (lastDy < -30) {
+                                    syncGateHighlight(g, false);
+                                    selectedIndices = [];
+                                    deleteGate(idx);
                                 }
-                                document.querySelectorAll('.drag-drop-touch-ghost').forEach(el => el.remove());
                                 
-                                syncGateHighlight(g, false);
-                                selectedIndices = [];
-                                deleteGate(idx);
                                 startY = undefined;
                                 isVerticalSwipe = false;
+                                swipeThresholdMet = false;
+                                lastDy = 0;
                             }
                         }
                     }
@@ -974,14 +988,16 @@
 
                 u.addEventListener('touchend', (e) => {
                     if (isVerticalSwipe && startY !== undefined) {
-
+                        // 滑動距離不夠，回彈
                         u.style.transform = '';
                         u.style.opacity = '1';
                     }
                     startY = undefined;
                     isVerticalSwipe = false;
                     swipeThresholdMet = false;
+                    lastDy = 0;
                 });
+                // ------------------------------------------
 
                 if (!isTouchDevice) {
                     u.onclick = (e) => {
@@ -1045,7 +1061,7 @@
                     units[units.length - 1].classList.add('drop-hint-right');
                 }
 
-                const gap = (units[0] ? units[0].offsetWidth : 60) * 0.25;
+                const gap = (units[0] ? units[0].offsetWidth : 60) * 0.75;
                 units.forEach((unit, i) => {
                     if (i === draggedIndex) {
                         unit.style.transform = '';
