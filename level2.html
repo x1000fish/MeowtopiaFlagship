@@ -33,8 +33,11 @@
         .node { width: 140px; height: 140px; background: white; border: 6px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; box-shadow: 3px 3px 0 #463438; z-index: 20; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         .node img { width: 110px; height: auto; pointer-events: none; }
         .fixed-number { position: absolute; bottom: -5px; right: 50px; font-size: 22px; font-weight: 900; color: #463438; pointer-events: none; z-index: 25; }
+        
         .connection-line { position: absolute; background: #463438; cursor: pointer; z-index: 10; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
         .connection-line:hover { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; z-index: 16 !important; }
+        .connection-line::after { content: ''; position: absolute; top: -15px; bottom: -15px; left: -15px; right: -15px; background-color: transparent; }
+        
         .line-highlight { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; z-index: 15 !important; }
         .line-h { height: 8px; width: 300px; }
         .line-v { width: 8px; height: 250px; }
@@ -49,6 +52,11 @@
         .game-btn:active { top: 6px; box-shadow: 0 2px 0 #463438; }
         .btn-red { background: #FFB7C5; }
         .btn-green { background: #99C44D; }
+        
+        .help-btn { background: #FFB7C5; border: 3px solid #463438; border-radius: 50%; width: 34px; height: 34px; font-weight: 900; font-size: 18px; color: white; cursor: pointer; box-shadow: 0 4px 0 #463438; transition: all 0.1s; text-shadow: 2px 2px 0 #463438; display: flex; align-items: center; justify-content: center; padding-bottom: 2px; }
+        .help-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #463438; }
+        .help-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #463438; }
+
         .multi-toggle-btn { background: #e2de6e; border: 4px solid #463438; border-radius: 20px; padding: 5px 15px; font-weight: 900; font-size: 20px; color: white; cursor: pointer; box-shadow: 0 4px 0 #463438; transition: all 0.1s; min-width: 140px; text-shadow: 2px 2px 0 #463438; }
         .multi-toggle-btn.active-mode { background: #629eed; }
         .multi-toggle-btn:hover,
@@ -100,11 +108,13 @@
 
         .qubit-label { position: absolute; left: 12px; font-weight: 900; font-size: 16px; color: #463438; z-index: 5; }
         
-        .circuit-unit { min-width: 48px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: grab; transition: all 0.2s; touch-action: none; background-color: transparent !important; box-sizing: border-box; border: 3px solid transparent; border-radius: 12px;}
+        .circuit-unit { min-width: 60px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: grab; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); touch-action: none; box-sizing: border-box; border: 3px solid transparent; border-radius: 12px; }
         .circuit-unit:active { cursor: grabbing; }
         .circuit-unit:hover { background-color: var(--bg-hover) !important; }
         .circuit-unit.selected { background-color: var(--bg-hover) !important; border-color: var(--border-color) !important; }
-        
+        .circuit-unit > * { position: absolute; left: 50% !important; transform: translateX(-50%); }
+        .circuit-target { left: 50% !important; transform: translate(-50%, -50%) !important; }
+
         .drop-hint-left::before { content: ''; position: absolute; left: -3px; top: 10px; bottom: 10px; width: 4px; background-color: #f78790; border-radius: 4px; z-index: 200; pointer-events: none; }
         .drop-hint-right::after { content: ''; position: absolute; right: -3px; top: 10px; bottom: 10px; width: 4px; background-color: #f78790; border-radius: 4px; z-index: 200; pointer-events: none; }
 
@@ -197,11 +207,6 @@
         .c4-mob-block { width: 24px; height: 24px; background: #fff9c4; border: 2.5px solid #463438; border-radius: 6px; position: absolute; top: 20px; animation: c4Rep 3s infinite; }
         .c4-mob-hand { font-size: 24px; position: absolute; z-index: 10; animation: c4MobHandDown 3s infinite; }
         @keyframes c4MobHandDown { 0%, 10% { transform: translate(0, -15px); opacity: 0; } 15% { transform: translate(0, -15px); opacity: 1; } 20%, 30% { transform: translate(0, 15px); opacity: 1; } 35%, 100% { transform: translate(0, 15px); opacity: 0; } }
-
-        .circuit-unit { min-width: 60px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: grab; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); touch-action: none; box-sizing: border-box; border: 3px solid transparent; border-radius: 12px; }
-        .circuit-unit:active { cursor: grabbing; }
-        .circuit-unit > * { position: absolute; left: 50% !important; transform: translateX(-50%); }
-        .circuit-target { left: 50% !important; transform: translate(-50%, -50%) !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4 mini-mode" id="body-root">
@@ -343,7 +348,10 @@
         <div class="flex justify-between w-full px-4 mb-4 items-center mt-6">
             <div class="text-3xl font-black" style="color: #463438;">STEPS: <span id="step-count">0</span> | TIME: <span id="timer">0</span>s</div>
             <div class="flex items-center gap-12 ml-auto">
-                <button id="mode-2-btn" class="multi-toggle-btn" onclick="toggleMode2()">Mode: 1</button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="reopen-tut-btn" class="help-btn" onclick="openTutorial()">?</button>
+                    <button id="mode-2-btn" class="multi-toggle-btn" onclick="toggleMode2()">Mode: 1</button>
+                </div>
                 <div class="text-3xl font-black" style="color: #7bc202;">LEVEL 2</div>
             </div>
         </div>
@@ -414,6 +422,7 @@
         let isMode2 = false;
         let leaderboardData = [];
         let draggedIndex = null;
+        let currentDragGhost = null;
         let isTouchDevice = ('ontouchstart' in window || navigator.maxTouchPoints > 0);
         let isQuantumMode = false;
         let tutorialShown = false;
@@ -428,7 +437,7 @@
             if (!wrapper) return;
             const rect = wrapper.getBoundingClientRect();
             const edgeThreshold = 120; 
-            const maxSpeed = 70;       
+            const maxSpeed = 15;  
 
             if (clientX - rect.left < edgeThreshold) {
                 let intensity = 1 - Math.max(0, clientX - rect.left) / edgeThreshold;
@@ -515,7 +524,22 @@
             draggedIndex = index;
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', index.toString());
-            setTimeout(() => { el.style.opacity = '0.5'; }, 0);
+            
+            if (currentDragGhost && currentDragGhost.parentNode) {
+                currentDragGhost.parentNode.removeChild(currentDragGhost);
+            }
+            currentDragGhost = el.cloneNode(true);
+            currentDragGhost.style.position = 'absolute';
+            currentDragGhost.style.top = '-10000px';
+            currentDragGhost.style.left = '-10000px';
+            currentDragGhost.style.backgroundColor = 'transparent';
+            currentDragGhost.style.border = 'none';
+            currentDragGhost.classList.remove('selected');
+            document.body.appendChild(currentDragGhost);
+            
+            e.dataTransfer.setDragImage(currentDragGhost, el.offsetWidth / 2, el.offsetHeight / 2);
+
+            setTimeout(() => { el.style.opacity = '0.01'; }, 0);
         }
 
         async function fetchLeaderboard() {
@@ -627,6 +651,20 @@
             if (gate) applyGate(gate);
         }
 
+        function openTutorial() {
+            pop.currentTime = 0; pop.play();
+            document.getElementById('tut-page-1').classList.remove('hidden');
+            document.getElementById('tut-page-2').classList.add('hidden');
+            const modal = document.getElementById('tutorialModal');
+            modal.style.display = 'flex';
+            
+            document.querySelectorAll('.modal-content').forEach(p => {
+                p.style.transition = '';
+                p.style.transform = '';
+                p.style.opacity = '1';
+            });
+        }
+
         function nextTutPage() {
             pop.currentTime = 0; pop.play();
             document.getElementById('tut-page-1').classList.add('hidden');
@@ -635,7 +673,32 @@
 
         function closeTutorial() {
             pop.currentTime = 0; pop.play();
-            document.getElementById('tutorialModal').style.display = 'none';
+            const modalOverlay = document.getElementById('tutorialModal');
+            const modalContent = document.getElementById('tut-page-2');
+            const targetBtn = document.getElementById('reopen-tut-btn');
+
+            if (modalContent && targetBtn && !modalContent.classList.contains('hidden')) {
+                const btnRect = targetBtn.getBoundingClientRect();
+                const modalRect = modalContent.getBoundingClientRect();
+                
+                const tx = btnRect.left + btnRect.width / 2 - (modalRect.left + modalRect.width / 2);
+                const ty = btnRect.top + btnRect.height / 2 - (modalRect.top + modalRect.height / 2);
+                const scale = targetBtn.offsetWidth / modalRect.width;
+
+                modalContent.style.transformOrigin = 'center center';
+                modalContent.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease 0.1s';
+                modalContent.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+                modalContent.style.opacity = '0';
+
+                setTimeout(() => {
+                    modalOverlay.style.display = 'none';
+                    modalContent.style.transition = '';
+                    modalContent.style.transform = '';
+                    modalContent.style.opacity = '1';
+                }, 400);
+            } else {
+                modalOverlay.style.display = 'none';
+            }
         }
         
         function togglePro() {
@@ -805,51 +868,21 @@
                 
                 u.draggable = !isSolved;
                 u.ondragstart = (e) => handleDragStart(e, idx, u);
-                u.ondragover = (e) => {
-                    e.preventDefault();
-                    if (draggedIndex !== null && draggedIndex !== idx) {
-                        const rect = u.getBoundingClientRect();
-                        const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        u.style.borderLeft = isAfter ? '' : '4px solid transparent';
-                        u.style.borderRight = isAfter ? '4px solid transparent' : '';
-                        if (isAfter) {
-                            u.classList.add('drop-hint-right');
-                            u.classList.remove('drop-hint-left');
-                        } else {
-                            u.classList.add('drop-hint-left');
-                            u.classList.remove('drop-hint-right');
-                        }
-                    }
-                    updateScrollSpeed(e.clientX);
-                };
-                u.ondragleave = () => {
-                    u.classList.remove('drop-hint-left', 'drop-hint-right');
-                };
-                u.ondrop = (e) => {
-                    e.preventDefault();
-                    u.classList.remove('drop-hint-left', 'drop-hint-right');
-                    scrollSpeed = 0;
-                    if (isSolved || draggedIndex === null || draggedIndex === idx) return;
+                
+                u.ondragend = (e) => { 
+                    e.target.style.opacity = '1'; 
+                    draggedIndex = null; 
+                    scrollSpeed = 0; 
+                    Array.from(document.querySelectorAll('.circuit-unit')).forEach(el => {
+                        el.classList.remove('drop-hint-left', 'drop-hint-right');
+                        el.style.transform = '';
+                    });
                     
-                    const rect = u.getBoundingClientRect();
-                    const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                    let targetIdx = idx;
-                    if (isAfter) {
-                        targetIdx = draggedIndex < idx ? idx : idx + 1;
-                    } else {
-                        targetIdx = draggedIndex < idx ? idx - 1 : idx;
+                    if (currentDragGhost && currentDragGhost.parentNode) {
+                        currentDragGhost.parentNode.removeChild(currentDragGhost);
+                        currentDragGhost = null;
                     }
-                    
-                    pop.currentTime = 0; pop.play();
-                    const movedGate = gateHistory.splice(draggedIndex, 1)[0];
-                    gateHistory.splice(targetIdx, 0, movedGate);
-                    pushHistory();
-                    selectedIndices = [];
-                    recalculatePositions();
-                    finishMove();
-                    draggedIndex = null;
                 };
-                u.ondragend = (e) => { e.target.style.opacity = '1'; draggedIndex = null; scrollSpeed = 0; u.classList.remove('drop-hint-left', 'drop-hint-right'); };
                 
                 u.onmouseover = () => syncGateHighlight(g, true);
                 u.onmouseout = () => syncGateHighlight(g, false);
@@ -916,6 +949,108 @@
                 }
                 c.appendChild(u);
             });
+
+            c.ondragover = (e) => {
+                e.preventDefault();
+                updateScrollSpeed(e.clientX);
+                if (draggedIndex === null || isSolved) return;
+
+                const units = Array.from(c.querySelectorAll('.circuit-unit'));
+                const cRect = c.getBoundingClientRect();
+                const mouseX = e.clientX - cRect.left;
+
+                let currentX = units.length > 0 ? units[0].offsetLeft : 7;
+                let visualMids = [];
+                let mapping = [];
+                
+                for (let i = 0; i < units.length; i++) {
+                    if (i === draggedIndex) continue;
+                    visualMids.push(currentX + units[i].offsetWidth / 2);
+                    mapping.push(i);
+                    currentX += units[i].offsetWidth;
+                }
+
+                let insertVisualIdx = visualMids.length;
+                for (let v = 0; v < visualMids.length; v++) {
+                    if (mouseX < visualMids[v]) {
+                        insertVisualIdx = v;
+                        break;
+                    }
+                }
+                
+                let insertIdx = insertVisualIdx < mapping.length ? mapping[insertVisualIdx] : units.length;
+
+                units.forEach(el => el.classList.remove('drop-hint-left', 'drop-hint-right'));
+                if (insertIdx < units.length) {
+                    units[insertIdx].classList.add('drop-hint-left');
+                } else if (units.length > 0) {
+                    units[units.length - 1].classList.add('drop-hint-right');
+                }
+
+                const gap = (units[0] ? units[0].offsetWidth : 60) * 0.25;
+                units.forEach((unit, i) => {
+                    if (i === draggedIndex) {
+                        unit.style.transform = '';
+                        return;
+                    }
+                    let shift = 0;
+                    if (i > draggedIndex) shift -= gap;
+                    if (i >= insertIdx) shift += gap;
+                    unit.style.transform = `translateX(${shift}px)`;
+                });
+            };
+
+            c.ondrop = (e) => {
+                e.preventDefault();
+                scrollSpeed = 0;
+                const units = Array.from(c.querySelectorAll('.circuit-unit'));
+                
+                units.forEach(el => {
+                    el.classList.remove('drop-hint-left', 'drop-hint-right');
+                    el.style.transform = ''; 
+                });
+                
+                if (isSolved || draggedIndex === null) return;
+
+                const cRect = c.getBoundingClientRect();
+                const mouseX = e.clientX - cRect.left;
+
+                let currentX = units.length > 0 ? units[0].offsetLeft : 7;
+                let visualMids = [];
+                let mapping = [];
+                
+                for (let i = 0; i < units.length; i++) {
+                    if (i === draggedIndex) continue;
+                    visualMids.push(currentX + units[i].offsetWidth / 2);
+                    mapping.push(i);
+                    currentX += units[i].offsetWidth;
+                }
+
+                let insertVisualIdx = visualMids.length;
+                for (let v = 0; v < visualMids.length; v++) {
+                    if (mouseX < visualMids[v]) {
+                        insertVisualIdx = v;
+                        break;
+                    }
+                }
+                
+                let insertIdx = insertVisualIdx < mapping.length ? mapping[insertVisualIdx] : units.length;
+
+                pop.currentTime = 0; pop.play();
+                const movedGate = gateHistory.splice(draggedIndex, 1)[0];
+                
+                if (insertIdx > draggedIndex) {
+                    insertIdx--;
+                }
+                
+                gateHistory.splice(insertIdx, 0, movedGate);
+                pushHistory();
+                selectedIndices = [];
+                recalculatePositions();
+                finishMove();
+                draggedIndex = null;
+            };
+
             updateUndoStatus(); 
             setTimeout(() => { if(wrapper) wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' }); }, 100);
         }
