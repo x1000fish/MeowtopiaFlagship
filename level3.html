@@ -242,6 +242,14 @@
         
         const pop = new Audio('pop.m4a'), meow = new Audio('meow.m4a');
 
+        function cleanupDragGhost() {
+            if (currentDragGhost && currentDragGhost.parentNode) {
+                currentDragGhost.parentNode.removeChild(currentDragGhost);
+                currentDragGhost = null;
+            }
+            document.querySelectorAll('.drag-drop-touch-ghost').forEach(el => el.remove());
+        }
+
         function updateScrollSpeed(clientX) {
             const wrapper = document.getElementById('circuit-content-wrapper');
             if (!wrapper) return;
@@ -332,9 +340,8 @@
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', index.toString());
             
-            if (currentDragGhost && currentDragGhost.parentNode) {
-                currentDragGhost.parentNode.removeChild(currentDragGhost);
-            }
+            cleanupDragGhost();
+            
             currentDragGhost = el.cloneNode(true);
             currentDragGhost.style.position = 'absolute';
             currentDragGhost.style.top = '-10000px';
@@ -611,7 +618,7 @@
                 u.ondragstart = (e) => handleDragStart(e, idx, u);
                 
                 u.ondragend = (e) => { 
-                    e.target.style.opacity = '1'; 
+                    if (e && e.target) e.target.style.opacity = '1'; 
                     draggedIndex = null; 
                     scrollSpeed = 0; 
                     Array.from(document.querySelectorAll('.circuit-unit')).forEach(el => {
@@ -619,10 +626,7 @@
                         el.style.transform = '';
                     });
                     
-                    if (currentDragGhost && currentDragGhost.parentNode) {
-                        currentDragGhost.parentNode.removeChild(currentDragGhost);
-                        currentDragGhost = null;
-                    }
+                    cleanupDragGhost();
                 };
                 
                 u.onmouseover = () => syncGateHighlight(g, true);
@@ -679,13 +683,8 @@
 
                 u.addEventListener('touchend', (e) => {
                     if (isVerticalSwipe) {
-
-                        if (currentDragGhost && currentDragGhost.parentNode) {
-                            currentDragGhost.parentNode.removeChild(currentDragGhost);
-                            currentDragGhost = null;
-                        }
                         
-                        document.querySelectorAll('.drag-drop-touch-ghost').forEach(el => el.remove());
+                        cleanupDragGhost();
                         
                         if (lastDy > 30) {
                             setTimeout(() => {
@@ -773,7 +772,7 @@
                     units[units.length - 1].classList.add('drop-hint-right');
                 }
 
-                const gap = (units[0] ? units[0].offsetWidth : 60) * 0.75;
+                const gap = (units[0] ? units[0].offsetWidth : 60) * 0.25;
                 units.forEach((unit, i) => {
                     if (i === draggedIndex) {
                         unit.style.transform = '';
@@ -832,6 +831,9 @@
                 gateHistory.splice(insertIdx, 0, movedGate);
                 pushHistory();
                 selectedIndices = [];
+                
+                cleanupDragGhost();
+
                 recalculatePositions();
                 finishMove();
                 draggedIndex = null;
