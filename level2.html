@@ -917,8 +917,15 @@
                     if (startY !== undefined) {
                         const dy = e.touches[0].clientY - startY;
                         const dx = e.touches[0].clientX - startX;
+                        
                         if (Math.abs(dy) > 30 && Math.abs(dy) > Math.abs(dx)) {
                             if (e.cancelable) e.preventDefault();
+                            
+                            if (currentDragGhost && currentDragGhost.parentNode) {
+                                currentDragGhost.parentNode.removeChild(currentDragGhost);
+                                currentDragGhost = null;
+                            }
+
                             if (dy > 30) {
                                 const sIdx = selectedIndices.indexOf(idx);
                                 if (sIdx > -1) selectedIndices.splice(sIdx, 1);
