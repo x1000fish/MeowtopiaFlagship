@@ -905,7 +905,6 @@
                     renderCircuit();
                 };
 
-                // ---- 全新 iOS 滑動防干擾與視覺回饋邏輯 ----
                 let startY, startX;
                 let isVerticalSwipe = false;
                 let swipeThresholdMet = false;
@@ -928,7 +927,7 @@
                         
                         if (!swipeThresholdMet && (Math.abs(dx) > 10 || Math.abs(lastDy) > 10)) {
                             swipeThresholdMet = true;
-                            // 確認滑動方向為主垂直
+
                             if (Math.abs(lastDy) > Math.abs(dx)) {
                                 isVerticalSwipe = true;
                             }
@@ -937,7 +936,6 @@
                         if (isVerticalSwipe) {
                             if (e.cancelable) e.preventDefault();
                             
-                            // 滑動時提供精緻的位移回饋
                             if (lastDy < 0) {
                                 u.style.transform = `translateY(${Math.max(-40, lastDy)}px)`;
                                 u.style.opacity = lastDy < -30 ? '0.5' : '1';
@@ -950,16 +948,14 @@
 
                 u.addEventListener('touchend', (e) => {
                     if (isVerticalSwipe) {
-                        // 清理自己建的 DragGhost
+
                         if (currentDragGhost && currentDragGhost.parentNode) {
                             currentDragGhost.parentNode.removeChild(currentDragGhost);
                             currentDragGhost = null;
                         }
                         
-                        // 強制清除 iOS 可能殘留的所有 polyfill ghost
                         document.querySelectorAll('.drag-drop-touch-ghost').forEach(el => el.remove());
                         
-                        // 等待 50ms 讓 iOS 徹底釋放觸控/拖曳事件，避免 DOM 被刪除時留下幽靈殘影
                         if (lastDy > 30) {
                             setTimeout(() => {
                                 const sIdx = selectedIndices.indexOf(idx);
@@ -974,7 +970,6 @@
                                 deleteGate(idx);
                             }, 50);
                         } else {
-                            // 滑動距離不夠，回彈
                             u.style.transform = '';
                             u.style.opacity = '1';
                         }
@@ -984,7 +979,6 @@
                     swipeThresholdMet = false;
                     lastDy = 0;
                 });
-                // ------------------------------------------
 
                 if (!isTouchDevice) {
                     u.onclick = (e) => {
