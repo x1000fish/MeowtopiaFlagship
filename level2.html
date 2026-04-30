@@ -108,20 +108,20 @@
 
         .qubit-label { position: absolute; left: 12px; font-weight: 900; font-size: 16px; color: #463438; z-index: 5; }
         
-        .circuit-unit { min-width: 60px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: grab; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); touch-action: none; box-sizing: border-box; border: 3px solid transparent; border-radius: 12px; }
+        .circuit-unit { min-width: 60px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: grab; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s, border 0.2s; touch-action: none; box-sizing: border-box; background-color: transparent !important; border: 3px solid transparent; border-radius: 12px; }
         .circuit-unit:active { cursor: grabbing; }
-        .circuit-unit:hover { background-color: var(--bg-hover) !important; }
-        .circuit-unit.selected { background-color: var(--bg-hover) !important; border-color: var(--border-color) !important; }
+        .circuit-unit:hover { background-color: var(--bg-hover) !important; border-radius: 12px; }
+        .circuit-unit.selected { background-color: var(--bg-hover) !important; border: 3px solid var(--border-color) !important; border-radius: 12px; }
         .circuit-unit > * { position: absolute; left: 50% !important; transform: translateX(-50%); }
-        .circuit-target { left: 50% !important; transform: translate(-50%, -50%) !important; }
+        .circuit-target { left: 50% !important; transform: translate(-50%, -50%) !important; overflow: hidden; }
 
         .drop-hint-left::before { content: ''; position: absolute; left: -3px; top: 10px; bottom: 10px; width: 4px; background-color: #f78790; border-radius: 4px; z-index: 200; pointer-events: none; }
         .drop-hint-right::after { content: ''; position: absolute; right: -3px; top: 10px; bottom: 10px; width: 4px; background-color: #f78790; border-radius: 4px; z-index: 200; pointer-events: none; }
 
         .control-dot { width: 14px; height: 14px; background: #463438; border-radius: 50%; position: absolute; z-index: 5; }
         .connection-v-line { position: absolute; width: 2.5px; background: #463438; z-index: 3; }
-        .circuit-target { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2.5px solid #463438; display: flex; align-items: center; justify-content: center; z-index: 15; transform: translate(-50%, -50%); overflow: hidden; }
-        
+        .circuit-target { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2.5px solid #463438; display: flex; align-items: center; justify-content: center; z-index: 15; transform: translate(-50%, -50%); }
+
         .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 2000; pointer-events: auto; }
         .modal-content { background: #FFF9F0; border: 8px solid #463438; border-radius: 40px; padding: 30px; text-align: center; width: 750px; box-shadow: 0 10px 0 #FFB7C5; color: #463438; z-index: 2001; }
         
@@ -179,7 +179,7 @@
         .t-line-v.left { left: 2px; } .t-line-v.right { right: 2px; }
 
         @keyframes c1Hl { 0%, 15% { background: rgba(70,52,56,1); border: 0.5px solid #463438;} 20%, 40% { background: #99C44D; border: 2px solid #99C44D;} 45%, 100% { background: rgba(70,52,56,1); border: 0.5px solid #463438;} }
-        @keyframes c1Btn { 0%, 15% { transform: scale(1); border-color: #463438; background-color: rgba(226, 222, 110, 0.35); } 20%, 40% { transform: scale(1.1); border-color: #99C44D; background-color: #FFB7C5; } 45%, 100% { transform: scale(1); border-color: #463438; background-color: rgba(226, 222, 110, 0.35); } }
+        @keyframes c1Btn { 0%, 15% { transform: scale(1); border-color: #463438; background: rgba(226, 222, 110, 0.35); } 20%, 40% { transform: scale(1.1); border-color: #99C44D; background: #FFB7C5; } 45%, 100% { transform: scale(1); border-color: #463438; background: rgba(226, 222, 110, 0.35); } }
         @keyframes c1HandLeft { 0%, 10% { transform: translate(15px, 20px); opacity: 0; } 15% { transform: translate(0, 10px); opacity: 1; } 20%, 40% { transform: translate(0, 0) scale(0.9); opacity: 1; } 45%, 100% { transform: translate(15px, 20px); opacity: 0; } }
         @keyframes c1HandRight { 0%, 10% { transform: translate(15px, 20px); opacity: 0; } 15% { transform: translate(0, 0px); opacity: 1; } 20%, 40% { transform: translate(-5px, -10px) scale(0.9); opacity: 1; } 45%, 100% { transform: translate(15px, 20px); opacity: 0; } }
 
@@ -906,102 +906,87 @@
                     renderCircuit();
                 };
 
+                // ---- iOS 滑動防干擾與視覺回饋邏輯 ----
                 let startY, startX;
                 let isVerticalSwipe = false;
-                let swipeThresholdMet = false;
-                let lastDy = 0;
+                let actionTriggered = false;
 
                 u.addEventListener('touchstart', (e) => {
                     if (e.touches.length === 1) {
                         startY = e.touches[0].clientY;
                         startX = e.touches[0].clientX;
                         isVerticalSwipe = false;
-                        swipeThresholdMet = false;
-                        lastDy = 0;
+                        actionTriggered = false;
                     }
                 }, { passive: true });
                 
                 u.addEventListener('touchmove', (e) => {
-                    if (startY !== undefined) {
-                        lastDy = e.touches[0].clientY - startY;
-                        const dx = e.touches[0].clientX - startX;
+                    if (startY === undefined || actionTriggered) return;
+
+                    const dy = e.touches[0].clientY - startY;
+                    const dx = e.touches[0].clientX - startX;
+                    
+                    if (!isVerticalSwipe) {
+                        if (Math.abs(dy) > 15 && Math.abs(dy) > Math.abs(dx)) {
+                            isVerticalSwipe = true;
+                        } else if (Math.abs(dx) > 15 && Math.abs(dx) > Math.abs(dy)) {
+                            startY = undefined; // 取消上下滑動的判定，讓給原生拖曳
+                            return;
+                        }
+                    }
+
+                    if (isVerticalSwipe) {
+                        try { if (e.cancelable) e.preventDefault(); } catch(err) {}
                         
-                        if (!swipeThresholdMet && (Math.abs(dx) > 10 || Math.abs(lastDy) > 10)) {
-                            swipeThresholdMet = true;
-                            // 確認滑動方向為主垂直
-                            if (Math.abs(lastDy) > Math.abs(dx)) {
-                                isVerticalSwipe = true;
-                            }
+                        // Visuals
+                        if (dy < 0) {
+                            u.style.transform = `translateY(${Math.max(-45, dy)}px)`;
+                            u.style.opacity = dy < -30 ? '0.5' : '1';
+                        } else {
+                            u.style.transform = `translateY(${Math.min(45, dy)}px)`;
+                            u.style.opacity = dy > 30 ? '0.5' : '1';
                         }
 
-                        if (isVerticalSwipe) {
-                            if (e.cancelable) e.preventDefault();
+                        // 只要達到門檻，立刻執行並強力中止任何拖曳與殘影
+                        if (Math.abs(dy) > 45) {
+                            actionTriggered = true;
                             
-                            if (lastDy < 0) {
-                                u.style.transform = `translateY(${Math.max(-40, lastDy)}px)`;
-                                u.style.opacity = lastDy < -30 ? '0.5' : '1';
-                            } else {
-                                u.style.transform = `translateY(${Math.min(40, lastDy)}px)`;
-                                u.style.opacity = lastDy > 30 ? '0.5' : '1';
+                            // 強制清理殘影
+                            if (currentDragGhost && currentDragGhost.parentNode) {
+                                currentDragGhost.remove();
+                                currentDragGhost = null;
                             }
+                            Array.from(document.body.children).forEach(el => {
+                                if (el.style && el.style.zIndex === '999999') el.remove();
+                            });
 
-                            // 【核心修正】：一超過 30px 就立刻執行動作，並強力中斷拖曳套件
-                            if (Math.abs(lastDy) > 30) {
-                                // 1. 中斷 DragDropTouch 的拖曳狀態，避免它覆蓋或阻擋後續行為
-                                try {
-                                    u.dispatchEvent(new Event('touchend', { bubbles: true }));
-                                } catch(err) {}
-
-                                // 2. 暴力清除畫面上可能已經出現的所有拖曳殘影 (Ghost)
-                                if (currentDragGhost && currentDragGhost.parentNode) {
-                                    currentDragGhost.parentNode.removeChild(currentDragGhost);
-                                    currentDragGhost = null;
-                                }
-                                document.querySelectorAll('.drag-drop-touch-ghost').forEach(el => el.remove());
-                                Array.from(document.body.children).forEach(el => {
-                                    if (el.style && el.style.zIndex === '999999') el.remove();
-                                });
-
-                                const actionDy = lastDy;
-                                startY = undefined;
-                                isVerticalSwipe = false;
-                                swipeThresholdMet = false;
-                                lastDy = 0;
-
-                                // 3. 延遲 50 毫秒執行變更/刪除，確保底層事件已經完全清空
-                                setTimeout(() => {
-                                    if (actionDy > 30) {
-                                        const sIdx = selectedIndices.indexOf(idx);
-                                        if (sIdx > -1) selectedIndices.splice(sIdx, 1);
-                                        else selectedIndices.push(idx);
-                                        renderCircuit();
-                                    } else if (actionDy < -30) {
-                                        syncGateHighlight(g, false);
-                                        selectedIndices = [];
-                                        deleteGate(idx);
-                                    }
-                                    
-                                    // 最後買個保險，再次確保清除殘影
-                                    document.querySelectorAll('.drag-drop-touch-ghost').forEach(el => el.remove());
-                                    Array.from(document.body.children).forEach(el => {
-                                        if (el.style && el.style.zIndex === '999999') el.remove();
-                                    });
-                                }, 50);
+                            if (dy > 45) {
+                                // 下滑：多選
+                                const sIdx = selectedIndices.indexOf(idx);
+                                if (sIdx > -1) selectedIndices.splice(sIdx, 1);
+                                else selectedIndices.push(idx);
+                                renderCircuit();
+                            } else if (dy < -45) {
+                                // 上滑：刪除
+                                syncGateHighlight(g, false);
+                                selectedIndices = [];
+                                deleteGate(idx);
                             }
                         }
                     }
                 }, { passive: false });
 
                 u.addEventListener('touchend', (e) => {
-                    if (isVerticalSwipe && startY !== undefined) {
+                    if (isVerticalSwipe && !actionTriggered) {
+                        // 距離不夠，回彈
                         u.style.transform = '';
                         u.style.opacity = '1';
                     }
                     startY = undefined;
                     isVerticalSwipe = false;
-                    swipeThresholdMet = false;
-                    lastDy = 0;
+                    actionTriggered = false;
                 });
+                // ------------------------------------------
 
                 if (!isTouchDevice) {
                     u.onclick = (e) => {
@@ -1077,7 +1062,7 @@
                     units[units.length - 1].classList.add('drop-hint-right');
                 }
 
-                const gap = (units[0] ? units[0].offsetWidth : 60) * 0.75;
+                const gap = (units[0] ? units[0].offsetWidth : 60) * 0.25;
                 units.forEach((unit, i) => {
                     if (i === draggedIndex) {
                         unit.style.transform = '';
