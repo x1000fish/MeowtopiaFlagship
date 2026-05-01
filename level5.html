@@ -27,17 +27,15 @@
         .node img { width: 100px; height: auto; pointer-events: none; }
         .fixed-number { position: absolute; bottom: -4px; right: 41px; font-size: 20px; font-weight: 900; color: #463438; pointer-events: none; z-index: 25; }
         
-        .connection-line { position: absolute; background: #463438; z-index: 10; cursor: pointer; transition: all 0.2s ease; opacity: 1; touch-action: none; }
-        .connection-line::after { content: ''; position: absolute; top: -20px; bottom: -20px; left: 0; right: 0; background-color: rgba(255, 255, 255, 0); z-index: 10; }
+        .connection-line { position: absolute; background: #463438; z-index: 10; cursor: pointer; transition: all 0.2s ease; opacity: 1; }
+        .connection-line::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 30px; transform: translateY(-50%); background: transparent; z-index: 10; }
         
         @media (hover: hover) { .connection-line:hover { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8); height: 10px !important; z-index: 16; opacity: 1 !important; } }
         .line-highlight { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; height: 8px !important; z-index: 15; opacity: 1 !important; }
-        
         .fish-wrapper { position: absolute; width: 80px; height: 80px; pointer-events: none; z-index: 30; display: flex; justify-content: center; align-items: center; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         .fish-wrapper img.fish-img { width: 70px; height: auto; position: absolute; z-index: 2; top: 50%; transform: translateY(-50%); }
         .fish-wrapper img.fish-bg-shape { width: 70px; height: auto; position: absolute; z-index: 1; filter: brightness(0) invert(1); opacity: 1; top: 50%; transform: translateY(-50%); }
         .fish-label { background: rgba(70, 52, 56, 0.8); color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; z-index: 5; position: absolute; top: px; }
-        
         #pro-panel { width: 0; opacity: 0; height: 628px; overflow: hidden; background: #fff; border: 0px solid #463438; border-radius: 40px; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .pro-active #pro-panel { width: 650px; opacity: 1; border: 8px solid #463438; padding: 20px; box-shadow: 10px 10px 0px #99C44D;}
         .panel-section-title { font-weight: 900; font-size: 18px; margin: 10px 0 1px; color: #463438; text-align: center; white-space: nowrap; }
@@ -56,137 +54,52 @@
         .btn-undo.active { background: #FFB7C5 !important; border-color: #463438 !important; color: #fff !important; opacity: 1; cursor: pointer; box-shadow: 0 4px 0 #463438; }
         .btn-undo.active:hover { background-color: #ff9fb2 !important; transform: translateY(-2px); box-shadow: 0 6px 0 #463438; }
         .func-btn:hover { background-color: #FFB7C5 !important; color: #fff !important; border-color: #463438 !important; transform: translateY(-2px); box-shadow: 0 3px 0 #463438; }
-        
         #circuit-area { width: 1024px; height: 0; opacity: 0; background: #fff; border: 0px solid #463438; border-radius: 30px; margin-top: 20px; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; }
         .pro-active #circuit-area { height: 210px; opacity: 1; border: 8px solid #463438; padding: 15px; box-shadow: 10px 10px 0px #FFB7C5;}
-        #circuit-content-wrapper { position: relative; height: 150px; overflow-x: auto; margin-left: 45px; -ms-overflow-style: none; scrollbar-width: none; }
+        
+        #circuit-content-wrapper { position: relative; height: 150px; overflow-x: auto; margin-left: 45px; -ms-overflow-style: none; scrollbar-width: none; touch-action: pan-x; }
         #circuit-content-wrapper::-webkit-scrollbar { display: none; }
-        #circuit-content { display: flex; height: 100%; padding: 0 10px; min-width: 100%; width: max-content; position: relative; background-image: linear-gradient(#463438,#463438), linear-gradient(#463438,#463438), linear-gradient(#463438,#463438); background-size: 100% 3px; background-repeat: no-repeat; background-position: 0 30px, 0 70px, 0 110px; }
+        #circuit-content { display: flex; height: 100%; padding: 0 10px 0 0; min-width: 100%; width: max-content; position: relative; background-image: linear-gradient(#463438,#463438), linear-gradient(#463438,#463438), linear-gradient(#463438,#463438); background-size: 100% 3px; background-repeat: no-repeat; background-position: 0 30px, 0 70px, 0 110px; }
         .mini-mode #circuit-content { background-image: none !important; }
-
         .qubit-label { position: absolute; left: 18px; font-weight: 900; font-size: 16px; color: #463438; transition: all 0.3s; }
         
-        .circuit-unit{min-width:55px;width:55px;max-width:55px;flex:0 0 55px;height:140px;display:flex;flex-direction:column;position:relative;cursor:pointer;transition:all 0.2s ease, margin 0.2s ease;background-color:transparent !important;} 
-        .mini-mode .circuit-unit{min-width:120px;width:120px;max-width:120px;flex:0 0 120px;height:140px;margin-top:0px;padding:0 5px;}
+        .circuit-unit {
+            box-sizing: content-box !important;
+            min-width: 55px; width: 55px; max-width: 55px; flex: 0 0 55px; height: 140px;
+            display: flex; flex-direction: column; position: relative; cursor: pointer;
+            background-color: transparent !important; background-clip: padding-box;
+            border-left: 0px solid transparent; border-right: 0px solid transparent;
+            margin-left: 0px; margin-right: 0px;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, border-left-width 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-right-width 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.2s ease, opacity 0.2s ease;
+        } 
+        .mini-mode .circuit-unit { min-width: 110px; width: 110px; max-width: 110px; flex: 0 0 110px; height: 140px; margin-top: 0px; padding: 0 5px; }
         
         .circuit-unit:hover { background-color: var(--bg-hover) !important; border-radius: 12px; }
         .circuit-unit.selected-gate { background-color: var(--bg-hover) !important; border-radius: 12px; box-shadow: inset 0 0 0 3px var(--border-color) !important; }
-        
         .control-dot { width: 14px; height: 14px; background: #463438; border-radius: 50%; position: absolute; left: 50%; transform: translateX(-50%); z-index: 5; }
         .connection-v-line { position: absolute; width: 2.5px; background: #463438; left: 50%; transform: translateX(-50%); z-index: 3; }
         .circuit-target { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 2.5px solid #463438; left: 50%; transform: translate(-50%, -50%); z-index: 15; }
         .circuit-target::before { content: ""; position: absolute; width: 2.5px; height: 100%; background: #463438; left: 50%; transform: translateX(-50%); }
         .circuit-target::after { content: ""; position: absolute; width: 100%; height: 2.5px; background: #463438; top: 50%; transform: translateY(-50%); }
         .mode-toggle-fixed { position: fixed; top: 20px; right: 20px; width: 70px; height: 70px; background: #fff; border: 5px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; box-shadow: 0 4px 0 #463438; z-index: 500; }
-        
         #gate-scroll-area { position: relative; margin-top: 5px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 10px; -ms-overflow-style: none; scrollbar-width: none; }
         #gate-scroll-area::-webkit-scrollbar { display: none; }
-        
         :root { --cube-offset-x: 175px; }
         .pro-active { --cube-offset-x: 42px; }
-        
-        .modal-overlay { position: fixed; inset: 0; background: rgba(70, 52, 56, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.4s ease; }
-        .modal-content { background: #FFF9F0; border: 8px solid #463438; border-radius: 40px; padding: 30px; text-align: center; width: 380px; box-shadow: 0 10px 0 #FFB7C5; color: #463438; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(1) translate(0, 0); opacity: 1; }
-
-        .tut-anim-box { height: 110px; background: #fffaf5; border: 3px dashed #463438; border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; margin: 12px 0; }
-        .tut-anim-line { width: 80%; height: 6px; background: #99C44D; position: absolute; border-radius: 3px; }
-        
-        .css-mouse {
-            width: 44px; height: 64px; border: 3.5px solid #463438; border-radius: 22px;
-            position: absolute; z-index: 3; background: #fff;
-            animation: mouseMoveAnim 6s infinite; display: flex; justify-content: center;
-            box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
-        }
-
-        .mouse-left, .mouse-right { position: absolute; width: 50%; height: 28px; top: -1px; border-bottom: 3.5px solid #463438; }
-        .mouse-left { left: -1px; border-right: 1.75px solid #463438; border-top-left-radius: 20px; border-left: 3.5px solid #463438; border-top: 3.5px solid #463438; animation: leftClickAnim 6s infinite; }
-        .mouse-right { right: -1px; border-left: 1.75px solid #463438; border-top-right-radius: 20px; border-right: 3.5px solid #463438; border-top: 3.5px solid #463438; animation: rightClickAnim 6s infinite; }
-        .mouse-wheel { position: absolute; width: 6px; height: 14px; background: #463438; border-radius: 3px; top: 10px; animation: wheelAnim 6s infinite; z-index: 2;}
-
-        .anim-scroll { font-size: 24px; position: absolute; z-index: 2; margin-top: -40px; animation: scrollTextAnim 6s infinite; opacity: 0; }
-
-        @keyframes mouseMoveAnim {
-            0%, 5% { transform: translate(40px, 40px) scale(1); opacity: 0; }
-            10% { opacity: 1; }
-            12%, 15% { transform: translate(0, 5px) scale(1); opacity: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
-            18% { transform: translate(0, 5px) scale(0.95); filter: drop-shadow(0 0 10px #FFB7C5); } 
-            24%, 40% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
-            45%, 60% { transform: translate(0, 5px) scale(1); } 
-            72% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
-            75% { transform: translate(0, 5px) scale(0.95); filter: drop-shadow(0 0 10px #99C44D); } 
-            85% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); opacity: 1; }
-            95%, 100% { transform: translate(40px, 40px) scale(1); opacity: 0; }
-        }
-        @keyframes leftClickAnim {
-            0%, 17% { background: #fff; }
-            18%, 24% { background: #FFB7C5; }
-            25%, 100% { background: #fff; }
-        }
-        @keyframes rightClickAnim {
-            0%, 74% { background: #fff; }
-            75%, 85% { background: #99C44D; }
-            86%, 100% { background: #fff; }
-        }
-        @keyframes wheelAnim {
-            0%, 40% { transform: translateY(0); background: #463438; }
-            45%, 60% { background: #629eed; transform: translateY(-4px); }
-            65%, 100% { transform: translateY(0); background: #463438; }
-        }
-        @keyframes scrollTextAnim {
-            0%, 38% { opacity: 0; transform: translateY(10px); }
-            45%, 60% { opacity: 1; transform: translateY(0); }
-            65%, 100% { opacity: 0; transform: translateY(-10px); }
-        }
-
-        .anim-phone { font-size: 55px; position: absolute; z-index: 3; animation: phoneAnim 6s infinite; }
-        .anim-finger { position: absolute; z-index: 5; font-size: 40px; animation: fingerTapAnim 6s infinite; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.3)); left: 42%; top: 52%; margin-left: -5px; margin-top: -15px;}
-        .anim-tap { width: 25px; height: 25px; background: rgba(255, 183, 197, 0.8); border: 2px solid #463438; border-radius: 50%; position: absolute; z-index: 4; opacity: 0; }
-        .anim-tap.center { animation: centerTapAnim 6s infinite; }
-        .anim-tap.left { margin-left: -30px; margin-top: -10px; animation: doubleTapAnim 6s infinite; }
-        .anim-tap.right { margin-left: 30px; margin-top: 20px; animation: doubleTapAnim 6s infinite; }
-
-        @keyframes fingerTapAnim {
-            0%, 5% { transform: translate(30px, 30px); opacity: 0; }
-            12%, 15% { transform: translate(0, 0); opacity: 1; }
-            18% { transform: translate(0, 0) scale(0.85); opacity: 1; }
-            22% { transform: translate(0, 0) scale(1); opacity: 1; }
-            28%, 100% { transform: translate(30px, 30px); opacity: 0; }
-        }
-        @keyframes centerTapAnim {
-            0%, 16% { opacity: 0; transform: scale(0.5); }
-            18% { opacity: 1; transform: scale(1.2); }
-            28%, 100% { opacity: 0; transform: scale(1.8); }
-        }
-        @keyframes phoneAnim {
-            0%, 28% { opacity: 0; transform: rotate(0deg) scale(0.5); }
-            33% { opacity: 1; transform: rotate(0deg) scale(1); }
-            45% { transform: rotate(-25deg) scale(1); opacity: 1;} 
-            55% { transform: rotate(25deg) scale(1); opacity: 1;}  
-            65% { transform: rotate(0deg) scale(1); opacity: 1;}   
-            75%, 85% { opacity: 1; transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 10px #FFB7C5); }
-            90%, 100% { opacity: 0; transform: rotate(0deg) scale(0.5); }
-        }
-        @keyframes doubleTapAnim {
-            0%, 73% { opacity: 0; transform: scale(0.5); }
-            75% { opacity: 1; transform: scale(1.2); }
-            85%, 100% { opacity: 0; transform: scale(1.8); }
-        }
-
+        .modal-overlay { position: fixed; inset: 0; background: rgba(70, 52, 56, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: #FFF9F0; border: 8px solid #463438; border-radius: 40px; padding: 30px; text-align: center; width: 380px; box-shadow: 0 10px 0 #FFB7C5; color: #463438;}      
         #ios-indicator { position: absolute; top: 0; left: 0; transform: translate(-50%, -120%) scale(0.8); background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(15px); border-radius: 50px; padding: 6px 18px; display: flex; align-items: center; box-shadow: 0 8px 24px rgba(70,52,56,0.12); opacity: 0; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000; pointer-events: none; border: 1px solid rgba(70,52,56,0.35); }
         #ios-indicator.active { opacity: 1; transform: translate(-50%, -120%) scale(1); }
         .ind-fraction { color: #463438; font-size: 16px; font-weight: 900; }
-        
         .gate-btn-v2 { position: relative; height: 75px; width: 60px; display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid #463438; border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 6px rgba(0,0,0,0.1); background-size: 60% 1.5px; background-repeat: no-repeat; background-position: center 18px, center 36.5px, center 55px; margin: auto;}
         .gate-btn-v2:hover { background-color: #FFB7C5 !important; filter: brightness(1.05); transform: scale(1.05); z-index: 10; }
-        .btn-highlight { transform: scale(1.15); box-shadow: 0 0 10px rgba(0,0,0,0.3); border: 4px solid #99C44D !important; z-index: 10; filter: brightness(1.1); background-color: #FFB7C5 !important; }
-        
+        .btn-highlight { transform: scale(1.15); box-shadow: 0 0 10px rgba(0,0,0,0.3); border: 4px solid #99C44D !important; z-index: 10; filter: brightness(1.1); background-color: #FFB7C5 !important; }        
         .hyper-line { stroke: #463438; stroke-width: 0.6; opacity: 0.3; }
         .hyper-line-hi { stroke: #FFB7C5; stroke-width: 2.5; opacity: 1; transition: stroke 0.2s; }
         .gate-btn-v2 .hyper-line-hi { stroke: #f78790; }
         .gate-btn-v2:hover .hyper-line-hi { stroke: #ffffff !important; }
         .btn-highlight .hyper-line-hi { stroke: #ffffff !important; }
         .circuit-unit:hover .hyper-line-hi, .circuit-unit.selected-gate .hyper-line-hi { stroke: #99C44D !important; }
-
         .gate-v-line { position: absolute; width: 1.5px; background: #463438; left: 50%; transform: translateX(-50%); z-index: 1; }
         .gate-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid #463438; left: 50%; transform: translate(-50%, -50%); z-index: 2; }
         .gate-dot.fill { background: #463438; }
@@ -194,24 +107,35 @@
         .gate-target-circle { position: absolute; width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #463438; background: #fff; left: 50%; transform: translate(-50%, -50%); z-index: 3; }
         .gate-target-circle::before { content: ''; position: absolute; width: 100%; height: 1.5px; top: 50%; left: 0; transform: translateY(-50%); background: #463438; }
         .gate-target-circle::after { content: ''; position: absolute; height: 100%; width: 1.5px; left: 50%; top: 0; transform: translateX(-50%); background: #463438; }
-        
         #canvas-bottom-btns {position: absolute;bottom: 20px;right: 30px; display: flex;flex-direction: column; gap: 10px;z-index: 100;}
         #canvas-bottom-btns .func-btn { margin-top: 0; width: 90px; font-size: 14px;padding: 8px 5px; text-transform: uppercase; border-width: 3px;}
         .pro-active #canvas-bottom-btns {display: none !important;}
         canvas, .game-canvas, .circuit-unit, .node, .gate-btn-v2 { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; } 
         .swap-active { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; height: 8px !important; z-index: 15 !important; opacity: 1 !important; border-top: none !important;}
         
-        .drag-target{margin-left:25px;position:relative;}
-        .drag-target.right{margin-left:0;margin-right:25px;}
-        .drag-target::before{content:'';position:absolute;left:-14px;top:10px;bottom:10px;width:4px;background-color:#FFB7C5;border-radius:4px;z-index:200;pointer-events:none;}
-        .drag-target.right::before{left:auto;right:-14px;}
+        .drag-target { border-left-width: 35px !important; position: relative; }
+        .drag-target.right { border-left-width: 0px !important; border-right-width: 35px !important; }
+        
+        .circuit-unit::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            bottom: 10px;
+            width: 4px;
+            background-color: #FFB7C5;
+            border-radius: 4px;
+            z-index: 200;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .drag-target::before { opacity: 1; left: -19.5px; right: auto; }
+        .drag-target.right::before { opacity: 1; left: auto; right: -19.5px; }
     </style>
 </head>
 <body id="body-root" class="mini-mode">
-
     <div id="mode-toggle" class="mode-toggle-fixed" onclick="togglePro()">👁️</div>
     <div id="quantum-toggle" class="mode-toggle-fixed hidden" onclick="toggleQuantumMode()" style="top: 100px; font-size: 26px;">⚛️</div>
-    
     <div id="leaderboard-wrapper">
         <div class="side-leaderboard-content">
             <h2 class="text-xl font-black mb-3 text-center" style="color: #463438;">🏆 TOP CATS</h2>
@@ -227,14 +151,12 @@
             <div class="bookmark-text">RANK</div>
         </div>
     </div>
-    
     <div class="w-full max-w-5xl">
         <div class="flex justify-between w-full px-4 mb-4 items-center mt-6">
             <div class="text-3xl font-black" style="color: #463438;">STEPS: <span id="step-count">0</span> | TIME: <span id="timer">0</span>s</div>
-            <div class="flex items-center gap-6 ml-auto">
-                <button id="help-btn" class="multi-toggle-btn" style="min-width: 40px; width: 40px; height: 40px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #FFB7C5; color: white;" onclick="openTutorial()">?</button>
+            <div class="flex items-center gap-12 ml-auto">
                 <button id="mode-btn" class="multi-toggle-btn" onclick="cycleLineMode()">Mode: 1</button>
-                <div class="text-3xl font-black ml-6" style="color: #7bc202;">LEVEL 5</div>
+                <div class="text-3xl font-black" style="color: #7bc202;">LEVEL 5</div>
             </div>
         </div>
         <div class="main-layout">
@@ -273,58 +195,6 @@
             <a href="index.html" class="game-btn btn-red px-16">GIVE UP</a>
         </div>
     </div>
-    
-    <div id="tutorialModal" class="modal-overlay" style="display: flex;">
-        <div class="modal-content" style="width: 600px; max-width: 95vw; padding: 25px;">
-            <h2 class="text-2xl font-black mb-4" style="color: #463438;">How to Play Multi-Line Mode 🐾</h2>
-            
-            <div class="flex flex-col md:flex-row gap-4 mb-4 font-bold text-left">
-                <div class="flex-1 bg-white p-4 border-4 border-[#463438] rounded-2xl relative mt-4 md:mt-0">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#99C44D] text-white px-4 py-1 rounded-full border-4 border-[#463438] whitespace-nowrap">
-                        💻 Desktop
-                    </div>
-                    <div class="tut-anim-box">
-                        <div class="tut-anim-line"></div>
-                        <div class="anim-scroll"></div>
-                        <div class="css-mouse">
-                            <div class="mouse-left"></div>
-                            <div class="mouse-right"></div>
-                            <div class="mouse-wheel"></div>
-                        </div>
-                    </div>
-                    <ol class="list-decimal pl-5 text-sm space-y-2" style="color: #463438;">
-                        <li><b>Click</b> a line to select.</li>
-                        <li><b>Scroll</b> mouse wheel to switch.</li>
-                        <li><b>Right-Click</b> to confirm.</li>
-                    </ol>
-                </div>
-                
-                <div class="flex-1 bg-white p-4 border-4 border-[#463438] rounded-2xl relative mt-6 md:mt-0">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#FFB7C5] text-white px-4 py-1 rounded-full border-4 border-[#463438] whitespace-nowrap">
-                        📱 Mobile
-                    </div>
-                    <div class="tut-anim-box">
-                        <div class="tut-anim-line"></div>
-                        <div class="anim-phone">📱</div>
-                        <div class="anim-finger">👆🏻</div>
-                        <div class="anim-tap center"></div>
-                        <div class="anim-tap left"></div>
-                        <div class="anim-tap right"></div>
-                    </div>
-                    <ol class="list-decimal pl-5 text-sm space-y-2" style="color: #463438;">
-                        <li><b>Tap</b> a line to select.</li>
-                        <li><b>Tilt</b> phone L/R to switch.</li>
-                        <li><b>2-Finger Tap</b> to confirm.</li>
-                    </ol>
-                </div>
-            </div>
-            
-            <p class="text-sm font-black mb-5" style="color: #463438;">💡 TIP: You can also just use the Gate Buttons!</p>
-            
-            <button onclick="closeTutorial()" class="game-btn btn-green w-full">GOT IT!</button>
-        </div>
-    </div>
-
     <div id="victoryModal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="text-5xl font-black mb-4" style="color: #463438;">MEOW!</h2>
@@ -334,44 +204,48 @@
             <button onclick="viewInLab().style.display='none'" class="game-btn btn-red w-full">View Circuit</button>
         </div>
     </div>
-
-<script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHimc4WS1FjvGEb2-gTBMhum8APQKfDHxc5wsiWRkNqkxJrocMOw/exec';
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHimc4WS1FjvGEb2-gTBMhum8APQKfDHxc5wsiWRkNqkxJrocMOw/exec';
         let steps = 0, time = 0, isPro = false, isQuantumMode = false, timerInterval, gateHistory = [], isSolved = false;
         let selectedIndices = [];
         let actionStack = [];
-        let hasTimerStarted = false;
         
-        let fishAtNode = [7, 6, 5, 4, 3, 2, 1, 0];    
-        
+        let fishAtNode = [1, 0, 3, 2, 5, 4, 7, 6]; 
+           
         let lineMode = 1;
         let hoverLine = null;
         let currentOptionIndex = -1;
         let currentOptions = [];
         let draggedIndex = null;
         let leaderboardData;
+        
         let mobileDragging = false;
+        let dragGhost = null;
+        let originalDragEl = null;
+        let mDragIndex = null;
         
         let isTouchDevice = ('ontouchstart' in window || navigator.maxTouchPoints > 0);
         let lockedLineId = null;
         let hasScrolled = false;
-        
         let lastTiltDirection = 0;
         const TILT_THRESHOLD = 15;
         const RETURN_THRESHOLD = 10;
         let gyroPermissionGranted = false;
         let lastSwipeTime = 0;
         
+        let targetScrollSpeed = 0;
+        let currentScrollSpeed = 0;
         let autoScrollRAF = null;
-        let scrollSpeed = 0;
 
-        let gateScrollRAF = null;
-        let gateScrollSpeed = 0;
         let targetGateScrollSpeed = 0;
+        let currentGateScrollSpeed = 0;
+        let gateAutoScrollRAF = null;
+        
+        window.activeDropUnit = null;
+        window.activeDropLeft = null;
 
         const pop = new Audio('pop.m4a'), meow = new Audio('meow.m4a');
         const getDynamicOffset = () => parseInt(getComputedStyle(document.body).getPropertyValue('--cube-offset-x')) || 0;
-        
         const nodePositions = Array.from({ length: 8 }, (_, i) => {
             let t, l_rel;
             if (i === 0) { t = 150; l_rel = 135; }
@@ -386,54 +260,75 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             Object.defineProperty(pos, 'l', { get: () => pos.relX + getDynamicOffset() });
             return pos;
         });
-
-        function openTutorial() {
-            if(typeof pop !== 'undefined') { pop.currentTime = 0; pop.play(); }
-            const modal = document.getElementById('tutorialModal');
-            const modalContent = document.querySelector('#tutorialModal .modal-content');
-            const btn = document.getElementById('help-btn');
+        
+        function scrollLoop() {
+            const circuitWrapper = document.getElementById('circuit-content-wrapper');
+            currentScrollSpeed += (targetScrollSpeed - currentScrollSpeed) * 0.3;
             
-            if (btn && modalContent) {
-                const btnRect = btn.getBoundingClientRect();
-                const originX = btnRect.left + btnRect.width/2 - (window.innerWidth/2);
-                const originY = btnRect.top + btnRect.height/2 - (window.innerHeight/2);
-                modalContent.style.transformOrigin = `calc(50% + ${originX}px) calc(50% + ${originY}px)`;
+            if (Math.abs(currentScrollSpeed) > 0.1 || Math.abs(targetScrollSpeed) > 0) {
+                circuitWrapper.scrollLeft += currentScrollSpeed;
+                autoScrollRAF = requestAnimationFrame(scrollLoop);
+            } else {
+                currentScrollSpeed = 0;
+                autoScrollRAF = null;
             }
-            
-            modal.style.display = 'flex';
-            modalContent.style.transform = 'scale(0)';
-            modalContent.style.opacity = '0';
-            void modalContent.offsetWidth; 
-            
-            requestAnimationFrame(() => {
-                modalContent.style.transform = 'scale(1)';
-                modalContent.style.opacity = '1';
-            });
         }
 
-        function closeTutorial() {
-            if(typeof pop !== 'undefined') { pop.currentTime = 0; pop.play(); }
-            const modal = document.getElementById('tutorialModal');
-            const modalContent = document.querySelector('#tutorialModal .modal-content');
-            const btn = document.getElementById('help-btn');
+        function gateScrollLoop() {
+            const gateScrollArea = document.getElementById('gate-scroll-area');
+            currentGateScrollSpeed += (targetGateScrollSpeed - currentGateScrollSpeed) * 0.3;
             
-            if (btn && modalContent) {
-                const btnRect = btn.getBoundingClientRect();
-                const originX = btnRect.left + btnRect.width/2 - (window.innerWidth/2);
-                const originY = btnRect.top + btnRect.height/2 - (window.innerHeight/2);
-                modalContent.style.transformOrigin = `calc(50% + ${originX}px) calc(50% + ${originY}px)`;
+            if (Math.abs(currentGateScrollSpeed) > 0.1 || Math.abs(targetGateScrollSpeed) > 0) {
+                gateScrollArea.scrollTop += currentGateScrollSpeed;
+                gateAutoScrollRAF = requestAnimationFrame(gateScrollLoop);
+            } else {
+                currentGateScrollSpeed = 0;
+                gateAutoScrollRAF = null;
             }
+        }
 
-            modalContent.style.transform = 'scale(0)';
-            modalContent.style.opacity = '0';
+        function handleCircuitScroll(clientX) {
+            const circuitWrapper = document.getElementById('circuit-content-wrapper');
+            const rect = circuitWrapper.getBoundingClientRect();
+            const edgeThreshold = 100; 
+            const maxSpeed = 20;       
 
-            setTimeout(() => {
-                modal.style.display = 'none';
-                if (!hasTimerStarted) {
-                    hasTimerStarted = true;
-                    timerInterval = setInterval(() => { time++; document.getElementById('timer').innerText = time; }, 1000);
-                }
-            }, 400);
+            let distLeft = clientX - rect.left;
+            let distRight = rect.right - clientX;
+
+            if (distLeft < edgeThreshold && distLeft > -50) {
+                let ratio = Math.max(0, 1 - (Math.max(0, distLeft) / edgeThreshold));
+                targetScrollSpeed = -(ratio * maxSpeed); 
+                if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
+            } else if (distRight < edgeThreshold && distRight > -50) {
+                let ratio = Math.max(0, 1 - (Math.max(0, distRight) / edgeThreshold));
+                targetScrollSpeed = (ratio * maxSpeed); 
+                if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
+            } else {
+                targetScrollSpeed = 0; 
+            }
+        }
+
+        function handleGateScroll(clientY) {
+            const gateScrollArea = document.getElementById('gate-scroll-area');
+            const rect = gateScrollArea.getBoundingClientRect();
+            const edgeThreshold = 100; 
+            const maxSpeed = 10; 
+
+            let distTop = clientY - rect.top;
+            let distBottom = rect.bottom - clientY;
+
+            if (distTop < edgeThreshold && distTop > -50) {
+                let ratio = Math.max(0, 1 - (Math.max(0, distTop) / edgeThreshold));
+                targetGateScrollSpeed = -(ratio * maxSpeed);
+                if (!gateAutoScrollRAF) gateAutoScrollRAF = requestAnimationFrame(gateScrollLoop);
+            } else if (distBottom < edgeThreshold && distBottom > -50) {
+                let ratio = Math.max(0, 1 - (Math.max(0, distBottom) / edgeThreshold));
+                targetGateScrollSpeed = (ratio * maxSpeed);
+                if (!gateAutoScrollRAF) gateAutoScrollRAF = requestAnimationFrame(gateScrollLoop);
+            } else {
+                targetGateScrollSpeed = 0;
+            }
         }
 
         window.onload = () => {
@@ -443,139 +338,76 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             updateFishUI();
             updateUndoStatus();
             fetchLeaderboard();
-            
-            const btn = document.getElementById('help-btn');
-            const modalContent = document.querySelector('#tutorialModal .modal-content');
-            if (btn && modalContent) {
-                const btnRect = btn.getBoundingClientRect();
-                const originX = btnRect.left + btnRect.width/2 - (window.innerWidth/2);
-                const originY = btnRect.top + btnRect.height/2 - (window.innerHeight/2);
-                modalContent.style.transformOrigin = `calc(50% + ${originX}px) calc(50% + ${originY}px)`;
-            }
+            timerInterval = setInterval(() => { time++; document.getElementById('timer').innerText = time; }, 1000);
             
             const circuitWrapper = document.getElementById('circuit-content-wrapper');
             const gateScrollArea = document.getElementById('gate-scroll-area');
             
-            circuitWrapper.addEventListener('wheel', (e) => {
-                if (Math.abs(e.deltaY) > 0) {
-                    e.preventDefault();
-                    circuitWrapper.scrollLeft += e.deltaY;
-                }
-            }, { passive: false });
+            const scrollSpeedMultiplier = 6; 
 
-            function scrollLoop() {
-                if (scrollSpeed !== 0) {
-                    circuitWrapper.scrollLeft += scrollSpeed;
-                    autoScrollRAF = requestAnimationFrame(scrollLoop);
-                } else {
-                    autoScrollRAF = null;
-                }
+            function setupSmoothWheel(element, isHorizontal) {
+                let targetScroll = isHorizontal ? element.scrollLeft : element.scrollTop;
+                let isScrolling = false;
+
+                element.addEventListener('wheel', (e) => {
+                    if (Math.abs(e.deltaY) > 0) {
+                        e.preventDefault();
+                        if (!isScrolling) {
+                            targetScroll = isHorizontal ? element.scrollLeft : element.scrollTop;
+                        }
+                        targetScroll += (e.deltaY * scrollSpeedMultiplier);
+                        const maxScroll = Math.max(0, isHorizontal 
+                            ? element.scrollWidth - element.clientWidth 
+                            : element.scrollHeight - element.clientHeight);
+                        targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
+
+                        if (!isScrolling) {
+                            isScrolling = true;
+                            const smoothScrollLoop = () => {
+                                const current = isHorizontal ? element.scrollLeft : element.scrollTop;
+                                const diff = targetScroll - current;
+                                if (Math.abs(diff) > 0.5) {
+                                    if (isHorizontal) element.scrollLeft = current + diff * 0.3;
+                                    else element.scrollTop = current + diff * 0.3;
+                                    requestAnimationFrame(smoothScrollLoop);
+                                } else {
+                                    if (isHorizontal) element.scrollLeft = targetScroll;
+                                    else element.scrollTop = targetScroll;
+                                    isScrolling = false;
+                                }
+                            };
+                            requestAnimationFrame(smoothScrollLoop);
+                        }
+                    }
+                }, { passive: false });
             }
 
-            circuitWrapper.addEventListener('mousemove', (e) => {
-                const rect = circuitWrapper.getBoundingClientRect();
-                const edgeThreshold = 80;
-                if (e.clientX - rect.left < edgeThreshold) {
-                    scrollSpeed = -8; 
-                    if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
-                } else if (rect.right - e.clientX < edgeThreshold) {
-                    scrollSpeed = 8; 
-                    if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
-                } else {
-                    scrollSpeed = 0;
-                }
-            });
+            setupSmoothWheel(circuitWrapper, true);
+            setupSmoothWheel(gateScrollArea, false);
 
-            circuitWrapper.addEventListener('mouseleave', () => { scrollSpeed = 0; });
+            circuitWrapper.addEventListener('mousemove', (e) => handleCircuitScroll(e.clientX));
             circuitWrapper.addEventListener('dragover', (e) => {
                 if (draggedIndex !== null) {
                     e.preventDefault();
                     e.dataTransfer.dropEffect = 'move';
-                    const rect = circuitWrapper.getBoundingClientRect();
-                    const edgeThreshold = 80;
-                    if (e.clientX - rect.left < edgeThreshold) {
-                        scrollSpeed = -8; 
-                        if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
-                    } else if (rect.right - e.clientX < edgeThreshold) {
-                        scrollSpeed = 8; 
-                        if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
-                    } else {
-                        scrollSpeed = 0;
-                    }
-                }
-            });
-            circuitWrapper.addEventListener('dragenter', (e) => { if (draggedIndex !== null) e.preventDefault(); });
-            circuitWrapper.addEventListener('drop', (e) => {
-                e.preventDefault();
-                scrollSpeed = 0;
-                if (draggedIndex === null) return;
-                
-                const units = Array.from(document.querySelectorAll('.circuit-unit'));
-                let targetIdx = gateHistory.length;
-                for (let i = 0; i < units.length; i++) {
-                    const rect = units[i].getBoundingClientRect();
-                    if (e.clientX < rect.left + rect.width / 2) {
-                        targetIdx = i;
-                        break;
-                    }
-                }
-                if (draggedIndex < targetIdx) targetIdx--;
-                if (draggedIndex !== targetIdx && targetIdx >= 0 && targetIdx <= gateHistory.length) {
-                    pop.currentTime = 0; pop.play();
-                    const movedGate = gateHistory.splice(draggedIndex, 1)[0];
-                    gateHistory.splice(targetIdx, 0, movedGate);
-                    actionStack.push({ type: 'replace', index: 0, oldGates: [], newGate: null });
-                    selectedIndices = []; 
-                    recalculate();
-                } else {
-                    document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
-                }
-                draggedIndex = null;
-            });
-            circuitWrapper.addEventListener('dragleave', (e) => {
-                if (!circuitWrapper.contains(e.relatedTarget)) {
-                    document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
-                    scrollSpeed = 0;
+                    handleCircuitScroll(e.clientX);
                 }
             });
 
-            function gateScrollLoop() {
-                gateScrollSpeed += (targetGateScrollSpeed - gateScrollSpeed) * 0.15;
-                
-                if (Math.abs(gateScrollSpeed) > 0.5 || Math.abs(targetGateScrollSpeed) > 0) {
-                    gateScrollArea.scrollTop += gateScrollSpeed;
-                    gateScrollRAF = requestAnimationFrame(gateScrollLoop);
-                } else {
-                    gateScrollSpeed = 0;
-                    gateScrollRAF = null;
-                }
-            }
+            circuitWrapper.addEventListener('mouseleave', () => targetScrollSpeed = 0);
+            circuitWrapper.addEventListener('dragleave', () => targetScrollSpeed = 0);
+            circuitWrapper.addEventListener('drop', () => { targetScrollSpeed = 0; window.activeDropUnit = null; });
 
-            gateScrollArea.addEventListener('mousemove', (e) => {
-                const rect = gateScrollArea.getBoundingClientRect();
-                
-                const edgeThreshold = 40; 
-                const maxSpeed = 2;
-
-                let distTop = e.clientY - rect.top;
-                let distBottom = rect.bottom - e.clientY;
-
-                if (distTop < edgeThreshold && distTop > -20) {
-                    let ratio = Math.max(0, (edgeThreshold - distTop) / edgeThreshold);
-                    targetGateScrollSpeed = -(5 + ratio * maxSpeed);
-                    if (!gateScrollRAF) gateScrollRAF = requestAnimationFrame(gateScrollLoop);
-                } else if (distBottom < edgeThreshold && distBottom > -20) {
-                    let ratio = Math.max(0, (edgeThreshold - distBottom) / edgeThreshold);
-                    targetGateScrollSpeed = (5 + ratio * maxSpeed);
-                    if (!gateScrollRAF) gateScrollRAF = requestAnimationFrame(gateScrollLoop);
-                } else {
-                    targetGateScrollSpeed = 0;
+            gateScrollArea.addEventListener('mousemove', (e) => handleGateScroll(e.clientY));
+            gateScrollArea.addEventListener('dragover', (e) => {
+                if (draggedIndex !== null) {
+                    e.preventDefault();
+                    handleGateScroll(e.clientY);
                 }
             });
-
-            gateScrollArea.addEventListener('mouseleave', () => { 
-                targetGateScrollSpeed = 0; 
-            });
+            gateScrollArea.addEventListener('mouseleave', () => targetGateScrollSpeed = 0);
+            gateScrollArea.addEventListener('dragleave', () => targetGateScrollSpeed = 0);
+            gateScrollArea.addEventListener('drop', () => targetGateScrollSpeed = 0);
 
             document.addEventListener('wheel', (e) => {
                 if (!lockedLineId || lineMode === 1 || lineMode === 4 || isTouchDevice) return;
@@ -588,9 +420,9 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                     showIndicatorScrolled();
                 }
             }, { passive: false });
-
+            
             const canvas = document.getElementById('main-canvas');
-            const indicator = document.getElementById('ios-indicator');
+            const indicator = document.getElementById('ios-indicator'); 
             
             canvas.addEventListener('mousedown', (e) => {
                 if (lockedLineId && !isTouchDevice) {
@@ -598,8 +430,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                         cancelLock(); 
                     }
                 }
-            });
-            
+            }); 
             canvas.addEventListener('contextmenu', (e) => {
                 if (lockedLineId && !isTouchDevice) {
                     e.preventDefault(); 
@@ -608,7 +439,6 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                     else if (currentOptions[currentOptionIndex]) applyGate(currentOptions[currentOptionIndex].gateType);
                 }
             });
-
             window.addEventListener('touchstart', (e) => {
                 if (lockedLineId && e.touches.length >= 2) {
                     e.preventDefault();
@@ -617,13 +447,11 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                     else if (hasScrolled && currentOptions[currentOptionIndex]) applyGate(currentOptions[currentOptionIndex].gateType);
                 }
             }, { passive: false });
-
             canvas.addEventListener('touchstart', (e) => {
                 if (e.touches.length === 1 && lockedLineId) {
                     if (!e.target.classList.contains('connection-line')) { cancelLock(); }
                 }
             });
-
             canvas.addEventListener('mousemove', (e) => {
                 if (indicator.classList.contains('active') && !isTouchDevice) {
                     const rect = canvas.getBoundingClientRect();
@@ -632,13 +460,11 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                 }
             });
         };
-
+        
         function handleOrientation(event) {
             if (!lockedLineId || lineMode === 1 || lineMode === 4) return;
-            
             let tilt = event.gamma; 
             const orientation = (screen.orientation || {}).type || window.orientation;
-            
             if (orientation === 90 || orientation === "landscape-primary") {
                 tilt = event.beta;
             } else if (orientation === -90 || orientation === "landscape-secondary") {
@@ -646,10 +472,8 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             } else if (orientation === 180 || orientation === "portrait-secondary") {
                 tilt = -event.gamma;
             }
-
             const now = Date.now();
             if (now - lastSwipeTime < 400) return;
-
             if (tilt > TILT_THRESHOLD && lastTiltDirection <= 0) {
                 currentOptionIndex = (currentOptionIndex + 1) % currentOptions.length;
                 lastTiltDirection = 1;
@@ -668,13 +492,13 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                 lastTiltDirection = 0;
             }
         }
-
+        
         function getRgba(hex, alpha) {
             hex = hex.replace('#', '');
             const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
-
+        
         function getHighlightPairsForGate(type) {
             let pairs = [];
             if (type.startsWith('X')) {
@@ -691,12 +515,12 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             }
             return pairs;
         }
-
+        
         window.clearHighlight = function() { 
             document.querySelectorAll('.connection-line').forEach(l=>l.classList.remove('line-highlight')); 
             document.querySelectorAll('.gate-btn-v2').forEach(b=>b.classList.remove('btn-highlight'));
         }
-
+        
         function highlightGateButton(type) {
             document.querySelectorAll('.gate-btn-v2').forEach(btn => btn.classList.remove('btn-highlight'));
             if(type) {
@@ -708,23 +532,26 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                     const containerRect = container.getBoundingClientRect();
                     
                     if (btnRect.top < containerRect.top) {
-                        container.scrollTop -= (containerRect.top - btnRect.top + 10);
+                        container.scrollTo({ top: container.scrollTop - (containerRect.top - btnRect.top + 10), behavior: 'smooth' });
                     } else if (btnRect.bottom > containerRect.bottom) {
-                        container.scrollTop += (btnRect.bottom - containerRect.bottom + 10);
+                        container.scrollTo({ top: container.scrollTop + (btnRect.bottom - containerRect.bottom + 10), behavior: 'smooth' });
                     }
                 }
             }
         }
+        
         window.highlightByGate = function(type) {
             highlightPairs(getHighlightPairsForGate(type));
             highlightGateButton(type);
         }
+        
         function getGateColorMap(type) {
             if (type.startsWith('SWAP')) return '#e2de6e'; 
             if (type.startsWith('CX')) return '#629eed';   
             if (type.startsWith('X')) return '#b583e5';    
             return '#fff';
         }
+        
         function getMiniHypercubeSVG(type) {
             let pairs = getHighlightPairsForGate(type);
             
@@ -752,7 +579,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             svg += `</svg>`;
             return svg;
         }
-
+        
         function getGateContent(type) {
             if (isQuantumMode) {
                 let controls = [], target = -1;
@@ -778,23 +605,21 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                 return getMiniHypercubeSVG(type);
             }
         }
-
+        
         function toggleQuantumMode() {
             pop.currentTime = 0; pop.play();
             isQuantumMode = !isQuantumMode;
             document.getElementById('quantum-toggle').innerText = isQuantumMode ? "🧊" : "⚛️";
             document.getElementById('body-root').classList.toggle('mini-mode', !isQuantumMode);
-            
             document.getElementById('circuit-diagram-title').innerText = isQuantumMode ? "Circuit Diagram" : "Paths";
             document.getElementById('panel-gate-title').innerText = isQuantumMode ? "Quantum Gates" : "Transformations";
             for(let i=0; i<3; i++) {
                 document.getElementById(`q${i}-label`).innerText = isQuantumMode ? `q${i}` : `d${i+1}`;
             }
-
             initGates();
             renderCircuit();
         }
-
+        
         function togglePro() {
             pop.currentTime = 0; pop.play();
             isPro = !isPro;
@@ -814,16 +639,14 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             };
             requestAnimationFrame(animateMove);
         }
-
+        
         function initGates() {
             const grid = document.getElementById('gate-grid');
             let html = '';
-            
             let gateOrderX = [];
             let gateOrderCX = [];
             let gateOrderSWAP = [];
             let added = new Set();
-
             let edges = [];
             for (let dim=0; dim<3; dim++) {
                 for (let i=0; i<8; i++) {
@@ -831,12 +654,10 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                     if (i < j) edges.push({i, j, dim});
                 }
             }
-
             for(let dim=0; dim<3; dim++) {
                 let g = `X${2-dim}`;
                 if(!added.has(g)) { gateOrderX.push(g); added.add(g); }
             }
-            
             edges.forEach(edge => {
                 const targetQ = 2 - edge.dim; 
                 const ctrlPool = [0,1,2].filter(q=>q!==targetQ); 
@@ -846,12 +667,10 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                     if(!added.has(g)) { gateOrderCX.push(g); added.add(g); }
                 });
             });
-            
             edges.forEach(edge => { 
                 let g = `SWAP_${edge.i}_${edge.j}`;
                 if(!added.has(g)) { gateOrderSWAP.push(g); added.add(g); }
             });
-
             const wrapBtn = (type) => {
                 const hex = getGateColorMap(type);
                 const rgbaLight = getRgba(hex, 0.35); 
@@ -861,22 +680,18 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                     onmouseleave="clearHighlight()"
                     onclick="applyGate('${type}')">${getGateContent(type)}</button>`;
             };
-            
             html += `<div class="flex flex-wrap justify-center gap-2 w-full">`;
             gateOrderX.forEach(g => { html += wrapBtn(g); });
             html += `</div>`;
-
             html += `<div class="flex flex-wrap justify-center gap-2 w-full">`;
             gateOrderCX.forEach(g => { html += wrapBtn(g); });
             html += `</div>`;
-
             html += `<div class="flex flex-wrap justify-center gap-2 w-full">`;
             gateOrderSWAP.forEach(g => { html += wrapBtn(g); });
             html += `</div>`;
-            
             grid.innerHTML = html;
         }
-
+        
         function flashGateLines(type) {
             let pairs = getHighlightPairsForGate(type);
             pairs.forEach(([a, b]) => {
@@ -891,7 +706,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                 clearHighlight();
             }, 500);
         }
-
+        
         function drawStaticLines() {
             const layer = document.getElementById('lines-layer');
             layer.innerHTML = '';
@@ -902,7 +717,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                 }
             }
         }
-
+        
         function createLine(i, j, dim) {
             const n1 = nodePositions[i], n2 = nodePositions[j];
             const x1 = n1.l + 65, y1 = n1.t + 65, x2 = n2.l + 65, y2 = n2.t + 65;
@@ -912,9 +727,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             line.className = 'connection-line';
             line.id = `line-${Math.min(i,j)}-${Math.max(i,j)}`;
             line.style.cssText = `width:${len}px; left:${x1}px; top:${y1}px; transform:rotate(${ang}deg); transform-origin:0 50%;`;
-            
-            line.style.height='3px'; line.style.background='#463438';
-            
+            line.style.height='3px'; line.style.background='#463438';    
             line.onmouseenter = () => {
                 if (isTouchDevice || lockedLineId) return;
                 hoverLine = { i, j, dim };
@@ -933,7 +746,6 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             line.onclick = (e) => {
                 e.stopPropagation();
                 if (isSolved) return;
-                
                 if (isTouchDevice && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     if (!gyroPermissionGranted) {
                         DeviceOrientationEvent.requestPermission().then(state => {
@@ -947,31 +759,26 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                     gyroPermissionGranted = true;
                     window.addEventListener('deviceorientation', handleOrientation);
                 }
-
                 if (lineMode === 1) { applyGate(`SWAP_${i}_${j}`); return; }
                 if (lineMode === 4) { applyGate(`X${2 - dim}`); return; }
-
                 if (lockedLineId === line.id) {
                     cancelLock();
                     return;
                 }
-
                 lockedLineId = line.id;
                 hoverLine = { i, j, dim };
                 currentOptions = buildGateOptions(i, j, dim);
                 currentOptionIndex = 0;
                 hasScrolled = false;
-
                 const canvasRect = document.getElementById('main-canvas').getBoundingClientRect();
                 const indicator = document.getElementById('ios-indicator');
                 indicator.style.left = (e.clientX - canvasRect.left) + 'px';
                 indicator.style.top = (e.clientY - canvasRect.top - 25) + 'px';
-
                 showIndicatorLockedPrompt();
             };
             document.getElementById('lines-layer').appendChild(line);
         }
-
+        
         function cancelLock() {
             lockedLineId = null;
             hoverLine = null;
@@ -979,7 +786,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             hideIndicator();
             clearHighlight();
         }
-
+        
         function cycleLineMode(){ 
             pop.currentTime = 0; pop.play(); 
             const modes = [1, 2, 4]; 
@@ -988,7 +795,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             btn.innerText = `Mode: ${lineMode}`; btn.className = `multi-toggle-btn mode-${lineMode}`; 
             cancelLock();
         }
-
+        
         function showIndicatorLockedPrompt() {
             const pill = document.getElementById('ios-indicator');
             const frac = document.getElementById('ind-fraction');
@@ -997,7 +804,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             clearHighlight();
             highlightPairs([[hoverLine.i, hoverLine.j]]);
         }
-
+        
         function showIndicatorScrolled() { 
             const pill = document.getElementById('ios-indicator'); 
             const frac = document.getElementById('ind-fraction'); 
@@ -1008,9 +815,9 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             highlightPairs(opt.highlightPairs); 
             highlightGateButton(opt.gateType);
         }
-
+        
         function hideIndicator() { document.getElementById('ios-indicator').classList.remove('active'); clearHighlight(); }
-
+        
         function buildGateOptions(i, j, dim) {
             const targetQ = 2 - dim; const ctrlPool = [0,1,2].filter(q=>q!==targetQ); const bit = 1 << dim; const options = [];
             if(lineMode === 2) {
@@ -1024,9 +831,9 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             }
             return options;
         }
-
+        
         function getAllPairs(dim){ const bit=1<<dim, pairs=[]; for(let k=0;k<8;k++) if((k&bit)===0) pairs.push([k,k^bit]); return pairs; }
-
+        
         function highlightPairs(pairs){ 
             clearHighlight(); 
             pairs.forEach(([a,b])=>{ const el=document.getElementById(`line-${Math.min(a,b)}-${Math.max(a,b)}`); if(el) el.classList.add('line-highlight'); }); 
@@ -1052,7 +859,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                 finishMove();
             }
         }
-
+        
         function executeLogic(type) {
             pop.currentTime = 0; pop.play();
             if (type.startsWith('SWAP_')) { let p = type.split('_'), iA = parseInt(p[1]), iB = parseInt(p[2]); [fishAtNode[iA], fishAtNode[iB]] = [fishAtNode[iB], fishAtNode[iA]]; return; }
@@ -1066,11 +873,12 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             for (let i = 0; i < 8; i++) newFish[pm[i]] = fishAtNode[i];
             fishAtNode = newFish;
         }
-
+        
         function recalculate() { 
-            fishAtNode = [7, 6, 5, 4, 3, 2, 1, 0]; 
+            fishAtNode = [1, 0, 3, 2, 5, 4, 7, 6]; 
             let h = [...gateHistory]; gateHistory = []; h.forEach(g => { executeLogic(g); gateHistory.push(g); }); steps = gateHistory.length; finishMove(); 
         }
+        
         function finishMove() { document.getElementById('step-count').innerText = steps; updateFishUI(); renderCircuit(); checkWin(); }
         
         function updateFishUI() { 
@@ -1083,68 +891,227 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                 } 
             } 
         }
+
+        function getDropInfo(targetUnit, clientX) {
+            const type = targetUnit.dataset.type;
+            const now = Date.now();
+            if (!targetUnit._cachedRect || now - (targetUnit._lastRectTime || 0) > 150) {
+                targetUnit._cachedRect = targetUnit.getBoundingClientRect();
+                targetUnit._lastRectTime = now;
+            }
+            const rect = targetUnit._cachedRect;
+            
+            const isAfter = (clientX - rect.left) > (rect.width / 2);
+            let insertIdx;
+            let borderLeft = false;
+            let borderRight = false;
+            if (type === 'start') {
+                insertIdx = 0;
+                borderRight = true;
+            } else if (type === 'end') {
+                insertIdx = gateHistory.length;
+                borderLeft = true;
+            } else {
+                const idx = parseInt(targetUnit.dataset.idx);
+                insertIdx = isAfter ? idx + 1 : idx;
+                borderLeft = !isAfter;
+                borderRight = isAfter;
+            }
+            return { insertIdx, borderLeft, borderRight };
+        }
+
+        function startMobileDrag(touch, el, idx) {
+            mobileDragging = true;
+            mDragIndex = idx;
+            originalDragEl = el;
+            originalDragEl.style.opacity = '0.3';
+            
+            dragGhost = el.cloneNode(true);
+            dragGhost.style.position = 'fixed';
+            dragGhost.style.pointerEvents = 'none';
+            dragGhost.style.zIndex = '9999';
+            dragGhost.style.opacity = '0.9';
+            dragGhost.classList.remove('selected-gate', 'drag-target', 'right');
+            
+            const hex = getGateColorMap(gateHistory[idx]);
+            dragGhost.style.backgroundColor = getRgba(hex, 0.95);
+            dragGhost.style.border = 'none';
+            dragGhost.style.borderRadius = '12px';
+            dragGhost.style.boxShadow = 'none';
+            
+            const rect = el.getBoundingClientRect();
+            dragGhost.dataset.offsetX = touch.clientX - rect.left;
+            dragGhost.dataset.offsetY = touch.clientY - rect.top;
+            
+            dragGhost.style.left = (touch.clientX - dragGhost.dataset.offsetX) + 'px';
+            dragGhost.style.top = (touch.clientY - dragGhost.dataset.offsetY) + 'px';
+            document.body.appendChild(dragGhost);
+        }
+
+        function moveMobileDrag(touch) {
+            if (dragGhost) {
+                dragGhost.style.left = (touch.clientX - parseFloat(dragGhost.dataset.offsetX)) + 'px';
+                dragGhost.style.top = (touch.clientY - parseFloat(dragGhost.dataset.offsetY)) + 'px';
+            }
+        }
+
+        function endMobileDrag(touch) {
+            let targetUnit = null;
+            const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (targetEl) {
+                targetUnit = targetEl.closest('.circuit-unit');
+            }
+            if (dragGhost) { dragGhost.remove(); dragGhost = null; }
+            if (originalDragEl) { originalDragEl.style.opacity = '1'; originalDragEl = null; }
+            document.querySelectorAll('.circuit-unit').forEach(el => {
+                el.style.opacity = '1'; el.style.visibility = '1';
+                el.classList.remove('drag-target', 'right');
+            });
+            window.activeDropUnit = null;
+            if (targetUnit && mDragIndex !== null) {
+                const type = targetUnit.dataset.type;
+                const isSelf = type === 'gate' && parseInt(targetUnit.dataset.idx) === mDragIndex;
+                if (!isSelf) {
+                    const info = getDropInfo(targetUnit, touch.clientX);
+                    let finalIdx = info.insertIdx;
+                    if (mDragIndex < finalIdx) finalIdx--;
+                    if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
+                    const oldHistory = [...gateHistory];
+                    const movedItem = gateHistory.splice(mDragIndex, 1)[0];
+                    gateHistory.splice(finalIdx, 0, movedItem);
+                    
+                    actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
+                    recalculate();
+                }
+            }
+            mobileDragging = false;
+            mDragIndex = null;
+            targetScrollSpeed = 0;
+            targetGateScrollSpeed = 0;
+        }
         
         function renderCircuit() {
             const c = document.getElementById('circuit-content');
             const wrapper = document.getElementById('circuit-content-wrapper');
             c.innerHTML = '';
+            
+            const bindDropEvents = (unit) => {
+                unit.addEventListener('dragenter', (e) => {
+                    if (draggedIndex !== null) {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                    }
+                });
+                unit.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (draggedIndex === null) return;
+                    e.dataTransfer.dropEffect = 'move';
+                    const type = unit.dataset.type;
+                    if (type === 'gate' && parseInt(unit.dataset.idx) === draggedIndex) return;
+                    
+                    const info = getDropInfo(unit, e.clientX);
+                    
+                    if (window.activeDropUnit !== unit || window.activeDropLeft !== info.borderLeft) {
+                        document.querySelectorAll('.circuit-unit').forEach(el => {
+                            el.classList.remove('drag-target', 'right');
+                        });
+                        if (info.borderLeft) unit.classList.add('drag-target');
+                        if (info.borderRight) unit.classList.add('right');
+                        
+                        window.activeDropUnit = unit;
+                        window.activeDropLeft = info.borderLeft;
+                    }
+                });
+                unit.addEventListener('dragleave', () => {});
+                unit.addEventListener('drop', (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    unit.classList.remove('drag-target', 'right');
+                    window.activeDropUnit = null;
+                    targetScrollSpeed = 0;
+                    if (draggedIndex === null) return;
+                    const type = unit.dataset.type;
+                    if (type === 'gate' && parseInt(unit.dataset.idx) === draggedIndex) return;
+                    const info = getDropInfo(unit, e.clientX);
+                    let finalIdx = info.insertIdx;
+                    if (draggedIndex < finalIdx) finalIdx--;
+                    if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
+                    const oldHistory = [...gateHistory];
+                    const movedItem = gateHistory.splice(draggedIndex, 1)[0];
+                    gateHistory.splice(finalIdx, 0, movedItem);
+                    actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
+                    draggedIndex = null;
+                    selectedIndices = [];
+                    recalculate();
+                });
+            };
+
+            const startU = document.createElement('div');
+            startU.className = 'circuit-unit';
+            startU.style.minWidth = '5px';
+            startU.style.width = '5px';
+            startU.style.maxWidth = '5px';
+            startU.style.flex = '0 0 5px';
+            startU.style.padding = '0';
+            startU.style.cursor = 'default';
+            startU.dataset.type = 'start';
+            bindDropEvents(startU);
+            c.appendChild(startU);
+
             gateHistory.forEach((g, idx) => {
                 const u = document.createElement('div');
-                u.className = 'circuit-unit';
-                
+                u.className = 'circuit-unit';  
+                u.dataset.type = 'gate';
+                u.dataset.idx = idx;
                 const hex = getGateColorMap(g);
                 u.style.setProperty('--bg-hover', getRgba(hex, 0.35));
                 u.style.setProperty('--border-color', hex);
-
                 if (selectedIndices.includes(idx)) u.classList.add('selected-gate');
-                
                 u.draggable = true;
-                
+                bindDropEvents(u);
+
                 u.addEventListener('dragstart', (e) => {
                     if (isSolved || mobileDragging) return;
                     draggedIndex = idx;
-
-                    const ghost = u.cloneNode(true);
                     
+                    const ghost = u.cloneNode(true);
+                    ghost.id = 'custom-drag-ghost';
                     ghost.style.position = 'absolute';
-                    ghost.style.top = '-1000px';
-                    ghost.style.left = '-1000px';
+                    ghost.style.top = '-10000px'; 
+                    ghost.style.left = '-10000px';
+                    ghost.style.opacity = '1';
+                    ghost.style.transform = 'none';
+                    ghost.style.backgroundColor = getRgba(hex, 0.95); 
+                    ghost.style.border = 'none';
+                    ghost.style.borderRadius = '12px';
+                    ghost.style.boxShadow = 'none';
+                    ghost.classList.remove('selected-gate', 'drag-target', 'right');
+                    
                     document.body.appendChild(ghost);
                     
-                    e.dataTransfer.setDragImage(ghost, ghost.offsetWidth / 2, ghost.offsetHeight / 2);
-
-                    setTimeout(() => {
-                        u.classList.add('opacity-50');
-                        document.body.removeChild(ghost);
-                    }, 0);
+                    const rect = u.getBoundingClientRect();
+                    e.dataTransfer.setDragImage(ghost, e.clientX - rect.left, e.clientY - rect.top);
                     
+                    setTimeout(() => {
+                        if (ghost.parentNode) document.body.removeChild(ghost);
+                        u.style.opacity = '0.3';
+                    }, 0);
+
                     e.dataTransfer.effectAllowed = 'move';
                     e.dataTransfer.setData('text/plain', idx);
-                });
-                
-                u.addEventListener('dragover', (e) => { 
-                    e.preventDefault(); 
-                    e.dataTransfer.dropEffect = 'move';
-                    
-                    if (draggedIndex !== null && draggedIndex !== idx) {
-                        document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
-                        const rect = u.getBoundingClientRect();
-                        const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        if (!isAfter) {
-                            u.classList.add('drag-target');
-                        } else {
-                            u.classList.add('drag-target', 'right');
-                        }
-                    }
-                });
+                }); 
                 
                 u.addEventListener('dragend', () => { 
-                    u.classList.remove('opacity-50'); 
-                    draggedIndex = null; 
-                    scrollSpeed = 0;
-                    document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
-                });
+                    const leftoverGhost = document.getElementById('custom-drag-ghost');
+                    if (leftoverGhost && leftoverGhost.parentNode) leftoverGhost.parentNode.removeChild(leftoverGhost);
 
+                    u.style.opacity = ''; 
+                    u.style.transform = '';
+                    draggedIndex = null; 
+                    targetScrollSpeed = 0;
+                    document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
+                    window.activeDropUnit = null;
+                    renderCircuit();
+                });
                 u.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (isSolved || mobileDragging || isTouchDevice) return; 
@@ -1155,7 +1122,6 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                     selectedIndices = []; 
                     recalculate();
                 });
-
                 u.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
                     if (isSolved || mobileDragging) return;
@@ -1163,20 +1129,42 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                     if (sIdx > -1) selectedIndices.splice(sIdx, 1); else selectedIndices.push(idx);
                     renderCircuit();
                 });
-                
                 u.onmouseenter = () => highlightByGate(g);
                 u.onmouseleave = () => clearHighlight();
-                
                 let touchTimer = null;
                 let startX, startY;
                 u.addEventListener('touchstart', (e) => {
                     if (isSolved || e.touches.length > 1) return;
                     startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-                    touchTimer = setTimeout(() => { touchTimer = null; }, 400);
+                    touchTimer = setTimeout(() => { touchTimer = null; startMobileDrag(e.touches[0], u, idx); }, 400);
                 }, { passive: true });
-                
                 u.addEventListener('touchmove', (e) => {
                     if (mobileDragging) {
+                        if (e.cancelable) e.preventDefault();
+                        moveMobileDrag(e.touches[0]);
+                        handleCircuitScroll(e.touches[0].clientX);
+                        handleGateScroll(e.touches[0].clientY);
+                        
+                        const targetEl = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+                        if (targetEl) {
+                            const targetUnit = targetEl.closest('.circuit-unit');
+                            if (targetUnit) {
+                                const type = targetUnit.dataset.type;
+                                const isSelf = type === 'gate' && parseInt(targetUnit.dataset.idx) === idx;
+                                if (!isSelf) {
+                                    const info = getDropInfo(targetUnit, e.touches[0].clientX);
+                                    if (window.activeDropUnit !== targetUnit || window.activeDropLeft !== info.borderLeft) {
+                                        document.querySelectorAll('.circuit-unit').forEach(el => {
+                                            el.classList.remove('drag-target', 'right');
+                                        });
+                                        if (info.borderLeft) targetUnit.classList.add('drag-target');
+                                        if (info.borderRight) targetUnit.classList.add('right');
+                                        window.activeDropUnit = targetUnit;
+                                        window.activeDropLeft = info.borderLeft;
+                                    }
+                                }
+                            }
+                        }
                     } else if (touchTimer !== null || startY !== undefined) {
                         const dx = e.touches[0].clientX - startX, dy = e.touches[0].clientY - startY;
                         if (Math.abs(dx) > 10 || Math.abs(dy) > 10) { if(touchTimer) { clearTimeout(touchTimer); touchTimer = null; } }
@@ -1195,10 +1183,15 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                             }
                         }
                     }
-                }, { passive: false });
-                
-                u.addEventListener('touchend', () => { if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } });
-
+                }, { passive: false }); 
+                u.addEventListener('touchend', (e) => { 
+                    if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } 
+                    if (mobileDragging) { if (e.cancelable) e.preventDefault(); endMobileDrag(e.changedTouches[0]); }
+                });
+                u.addEventListener('touchcancel', (e) => {
+                    if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+                    if (mobileDragging) { const touch = (e.changedTouches && e.changedTouches[0]) || (e.touches && e.touches[0]); if (touch) endMobileDrag(touch); }
+                });
                 if (!isQuantumMode) {
                     u.innerHTML = getMiniHypercubeSVG(g);
                 } else {
@@ -1222,14 +1215,25 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                 }
                 c.appendChild(u);
             });
+
+            const endU = document.createElement('div');
+            endU.className = 'circuit-unit';
+            endU.style.minWidth = '50px';
+            endU.style.width = '50px';
+            endU.style.flex = '1';
+            endU.style.padding = '0';
+            endU.style.cursor = 'default';
+            endU.dataset.type = 'end';
+            bindDropEvents(endU);
+            c.appendChild(endU);
+
             updateUndoStatus();
             if (selectedIndices.length === 0 && gateHistory.length > 0 && draggedIndex === null) { setTimeout(() => wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' }), 50); }
-        }
+        }       
         
         function undo() { if (isSolved || actionStack.length === 0) return; pop.currentTime = 0; pop.play(); const action = actionStack.pop(); if (action.type === 'add') { gateHistory.splice(action.index, 1); } else if (action.type === 'delete') { gateHistory.splice(action.index, 0, ...action.oldGates); } else if (action.type === 'replace') { if (action.newGate === null) gateHistory = [...action.oldGates]; else gateHistory.splice(action.index, 1, ...action.oldGates); } selectedIndices = []; recalculate(); }
         function resetCircuit() { if (isSolved) return; pop.currentTime = 0; pop.play(); gateHistory = []; actionStack = []; selectedIndices = []; recalculate(); }
-        function updateUndoStatus() { const isActive = actionStack.length > 0 && !isSolved; const topUndo = document.getElementById('undo-btn'); if(topUndo) topUndo.classList.toggle('active', isActive); const bottomUndo = document.getElementById('undo-btn-bottom'); if(bottomUndo) bottomUndo.classList.toggle('active', isActive); }
-        
+        function updateUndoStatus() { const isActive = actionStack.length > 0 && !isSolved; const topUndo = document.getElementById('undo-btn'); if(topUndo) topUndo.classList.toggle('active', isActive); const bottomUndo = document.getElementById('undo-btn-bottom'); if(bottomUndo) bottomUndo.classList.toggle('active', isActive); }        
         async function checkWin() {
             if (fishAtNode.every((pos, i) => pos === i)) {
                 isSolved = true; updateUndoStatus(); if (timerInterval) clearInterval(timerInterval);
@@ -1257,8 +1261,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                     });
                 }
             }
-        }
-        
+        }   
         function viewInLab() { if (gateHistory.length === 0) { alert("Current circuit is empty!"); return; } window.location.href = `lab3.html?circuit=${encodeURIComponent(gateHistory.join(','))}`; }
         function toggleLeaderboard() { document.getElementById('leaderboard-wrapper').classList.toggle('expanded'); }
         async function fetchLeaderboard() { const listArea = document.getElementById('rankList'); try { const response = await fetch(`${SCRIPT_URL}?action=getLeaderboard&level=5`); const data = await response.json(); if (data && Array.isArray(data) && data.length > 0) { leaderboardData = data; renderRank('steps'); } else { listArea.innerHTML = '<p class="text-center italic text-gray-400 mt-10 text-sm">No records yet</p>'; } } catch (e) { listArea.innerHTML = '<p class="text-center italic text-red-400 mt-10 text-sm">Load Error</p>'; } }
