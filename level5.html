@@ -26,7 +26,10 @@
         .node { width: 130px; height: 130px; background: white; border: 6px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; box-shadow: 3px 3px 0 #463438; z-index: 20; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         .node img { width: 100px; height: auto; pointer-events: none; }
         .fixed-number { position: absolute; bottom: -4px; right: 41px; font-size: 20px; font-weight: 900; color: #463438; pointer-events: none; z-index: 25; }
-        .connection-line { position: absolute; background: #463438; z-index: 10; cursor: pointer; transition: all 0.2s ease; opacity: 1; }
+        
+        .connection-line { position: absolute; background: #463438; z-index: 10; cursor: pointer; transition: all 0.2s ease; opacity: 1; touch-action: none; }
+        .connection-line::after { content: ''; position: absolute; top: -20px; bottom: -20px; left: 0; right: 0; background-color: rgba(255, 255, 255, 0); z-index: 10; }
+        
         @media (hover: hover) { .connection-line:hover { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8); height: 10px !important; z-index: 16; opacity: 1 !important; } }
         .line-highlight { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; height: 8px !important; z-index: 15; opacity: 1 !important; }
         
@@ -76,7 +79,7 @@
         .circuit-target::after { content: ""; position: absolute; width: 100%; height: 2.5px; background: #463438; top: 50%; transform: translateY(-50%); }
         .mode-toggle-fixed { position: fixed; top: 20px; right: 20px; width: 70px; height: 70px; background: #fff; border: 5px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; box-shadow: 0 4px 0 #463438; z-index: 500; }
         
-        #gate-scroll-area { position: relative; margin-top: 5px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 10px; -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth;}
+        #gate-scroll-area { position: relative; margin-top: 5px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 10px; -ms-overflow-style: none; scrollbar-width: none; }
         #gate-scroll-area::-webkit-scrollbar { display: none; }
         
         :root { --cube-offset-x: 175px; }
@@ -85,44 +88,88 @@
         .modal-overlay { position: fixed; inset: 0; background: rgba(70, 52, 56, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.4s ease; }
         .modal-content { background: #FFF9F0; border: 8px solid #463438; border-radius: 40px; padding: 30px; text-align: center; width: 380px; box-shadow: 0 10px 0 #FFB7C5; color: #463438; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(1) translate(0, 0); opacity: 1; }
 
-        /* 內建 CSS 教學動畫 */
         .tut-anim-box { height: 110px; background: #fffaf5; border: 3px dashed #463438; border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; margin: 12px 0; }
         .tut-anim-line { width: 80%; height: 6px; background: #99C44D; position: absolute; border-radius: 3px; }
         
-        /* PC 動畫 */
-        .anim-mouse { font-size: 35px; position: absolute; z-index: 3; animation: mouseAnim 3.5s infinite; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.2)); }
-        .anim-scroll { font-size: 24px; position: absolute; z-index: 2; margin-top: -40px; animation: scrollAnim 3.5s infinite; opacity: 0; }
-        @keyframes mouseAnim {
-            0% { transform: translate(40px, 40px); }
-            20% { transform: translate(0, 5px); } /* 點擊線段 */
-            25% { transform: translate(0, 5px) scale(0.9); }
-            30% { transform: translate(0, 5px) scale(1); }
-            45%, 65% { transform: translate(0, 5px); } /* 滾動中停頓 */
-            75% { transform: translate(0, 5px) scale(0.9); filter: drop-shadow(0 0 10px #FFB7C5); } /* 右鍵確認 */
-            85% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.2)); }
-            100% { transform: translate(40px, 40px); }
-        }
-        @keyframes scrollAnim {
-            0%, 35% { opacity: 0; transform: translateY(10px); }
-            45%, 60% { opacity: 1; transform: translateY(0); }
-            70%, 100% { opacity: 0; transform: translateY(-10px); }
+        .css-mouse {
+            width: 44px; height: 64px; border: 3.5px solid #463438; border-radius: 22px;
+            position: absolute; z-index: 3; background: #fff;
+            animation: mouseMoveAnim 6s infinite; display: flex; justify-content: center;
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
         }
 
-        /* 手機動畫 */
-        .anim-phone { font-size: 45px; position: absolute; z-index: 3; animation: phoneAnim 3.5s infinite; }
-        .anim-tap { width: 25px; height: 25px; background: rgba(255, 183, 197, 0.8); border: 2px solid #463438; border-radius: 50%; position: absolute; z-index: 4; opacity: 0; animation: tapAnim 3.5s infinite; }
-        .anim-tap.left { margin-left: -30px; margin-top: -10px; }
-        .anim-tap.right { margin-left: 30px; margin-top: 20px; }
-        @keyframes phoneAnim {
-            0%, 15% { transform: rotate(0deg) scale(0.8); }
-            25% { transform: rotate(-25deg) scale(1); } /* 往左傾 */
-            45% { transform: rotate(25deg) scale(1); }  /* 往右傾 */
-            65%, 100% { transform: rotate(0deg) scale(1); }
+        .mouse-left, .mouse-right { position: absolute; width: 50%; height: 28px; top: -1px; border-bottom: 3.5px solid #463438; }
+        .mouse-left { left: -1px; border-right: 1.75px solid #463438; border-top-left-radius: 20px; border-left: 3.5px solid #463438; border-top: 3.5px solid #463438; animation: leftClickAnim 6s infinite; }
+        .mouse-right { right: -1px; border-left: 1.75px solid #463438; border-top-right-radius: 20px; border-right: 3.5px solid #463438; border-top: 3.5px solid #463438; animation: rightClickAnim 6s infinite; }
+        .mouse-wheel { position: absolute; width: 6px; height: 14px; background: #463438; border-radius: 3px; top: 10px; animation: wheelAnim 6s infinite; z-index: 2;}
+
+        .anim-scroll { font-size: 24px; position: absolute; z-index: 2; margin-top: -40px; animation: scrollTextAnim 6s infinite; opacity: 0; }
+
+        @keyframes mouseMoveAnim {
+            0%, 5% { transform: translate(40px, 40px) scale(1); opacity: 0; }
+            10% { opacity: 1; }
+            12%, 15% { transform: translate(0, 5px) scale(1); opacity: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
+            18% { transform: translate(0, 5px) scale(0.95); filter: drop-shadow(0 0 10px #FFB7C5); } 
+            24%, 40% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
+            45%, 60% { transform: translate(0, 5px) scale(1); } 
+            72% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
+            75% { transform: translate(0, 5px) scale(0.95); filter: drop-shadow(0 0 10px #99C44D); } 
+            85% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); opacity: 1; }
+            95%, 100% { transform: translate(40px, 40px) scale(1); opacity: 0; }
         }
-        @keyframes tapAnim {
-            0%, 75% { opacity: 0; transform: scale(0.5); }
-            80% { opacity: 1; transform: scale(1.2); }
-            90%, 100% { opacity: 0; transform: scale(1.8); }
+        @keyframes leftClickAnim {
+            0%, 17% { background: #fff; }
+            18%, 24% { background: #FFB7C5; }
+            25%, 100% { background: #fff; }
+        }
+        @keyframes rightClickAnim {
+            0%, 74% { background: #fff; }
+            75%, 85% { background: #99C44D; }
+            86%, 100% { background: #fff; }
+        }
+        @keyframes wheelAnim {
+            0%, 40% { transform: translateY(0); background: #463438; }
+            45%, 60% { background: #629eed; transform: translateY(-4px); }
+            65%, 100% { transform: translateY(0); background: #463438; }
+        }
+        @keyframes scrollTextAnim {
+            0%, 38% { opacity: 0; transform: translateY(10px); }
+            45%, 60% { opacity: 1; transform: translateY(0); }
+            65%, 100% { opacity: 0; transform: translateY(-10px); }
+        }
+
+        .anim-phone { font-size: 55px; position: absolute; z-index: 3; animation: phoneAnim 6s infinite; }
+        .anim-finger { position: absolute; z-index: 5; font-size: 40px; animation: fingerTapAnim 6s infinite; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.3)); left: 42%; top: 52%; margin-left: -5px; margin-top: -15px;}
+        .anim-tap { width: 25px; height: 25px; background: rgba(255, 183, 197, 0.8); border: 2px solid #463438; border-radius: 50%; position: absolute; z-index: 4; opacity: 0; }
+        .anim-tap.center { animation: centerTapAnim 6s infinite; }
+        .anim-tap.left { margin-left: -30px; margin-top: -10px; animation: doubleTapAnim 6s infinite; }
+        .anim-tap.right { margin-left: 30px; margin-top: 20px; animation: doubleTapAnim 6s infinite; }
+
+        @keyframes fingerTapAnim {
+            0%, 5% { transform: translate(30px, 30px); opacity: 0; }
+            12%, 15% { transform: translate(0, 0); opacity: 1; }
+            18% { transform: translate(0, 0) scale(0.85); opacity: 1; }
+            22% { transform: translate(0, 0) scale(1); opacity: 1; }
+            28%, 100% { transform: translate(30px, 30px); opacity: 0; }
+        }
+        @keyframes centerTapAnim {
+            0%, 16% { opacity: 0; transform: scale(0.5); }
+            18% { opacity: 1; transform: scale(1.2); }
+            28%, 100% { opacity: 0; transform: scale(1.8); }
+        }
+        @keyframes phoneAnim {
+            0%, 28% { opacity: 0; transform: rotate(0deg) scale(0.5); }
+            33% { opacity: 1; transform: rotate(0deg) scale(1); }
+            45% { transform: rotate(-25deg) scale(1); opacity: 1;} 
+            55% { transform: rotate(25deg) scale(1); opacity: 1;}  
+            65% { transform: rotate(0deg) scale(1); opacity: 1;}   
+            75%, 85% { opacity: 1; transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 10px #FFB7C5); }
+            90%, 100% { opacity: 0; transform: rotate(0deg) scale(0.5); }
+        }
+        @keyframes doubleTapAnim {
+            0%, 73% { opacity: 0; transform: scale(0.5); }
+            75% { opacity: 1; transform: scale(1.2); }
+            85%, 100% { opacity: 0; transform: scale(1.8); }
         }
 
         #ios-indicator { position: absolute; top: 0; left: 0; transform: translate(-50%, -120%) scale(0.8); background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(15px); border-radius: 50px; padding: 6px 18px; display: flex; align-items: center; box-shadow: 0 8px 24px rgba(70,52,56,0.12); opacity: 0; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000; pointer-events: none; border: 1px solid rgba(70,52,56,0.35); }
@@ -184,9 +231,10 @@
     <div class="w-full max-w-5xl">
         <div class="flex justify-between w-full px-4 mb-4 items-center mt-6">
             <div class="text-3xl font-black" style="color: #463438;">STEPS: <span id="step-count">0</span> | TIME: <span id="timer">0</span>s</div>
-            <div class="flex items-center gap-12 ml-auto">
+            <div class="flex items-center gap-6 ml-auto">
+                <button id="help-btn" class="multi-toggle-btn" style="min-width: 40px; width: 40px; height: 40px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #FFB7C5; color: white;" onclick="openTutorial()">?</button>
                 <button id="mode-btn" class="multi-toggle-btn" onclick="cycleLineMode()">Mode: 1</button>
-                <div class="text-3xl font-black" style="color: #7bc202;">LEVEL 5</div>
+                <div class="text-3xl font-black ml-6" style="color: #7bc202;">LEVEL 5</div>
             </div>
         </div>
         <div class="main-layout">
@@ -237,8 +285,12 @@
                     </div>
                     <div class="tut-anim-box">
                         <div class="tut-anim-line"></div>
-                        <div class="anim-scroll">↕️</div>
-                        <div class="anim-mouse">🖱️</div>
+                        <div class="anim-scroll"></div>
+                        <div class="css-mouse">
+                            <div class="mouse-left"></div>
+                            <div class="mouse-right"></div>
+                            <div class="mouse-wheel"></div>
+                        </div>
                     </div>
                     <ol class="list-decimal pl-5 text-sm space-y-2" style="color: #463438;">
                         <li><b>Click</b> a line to select.</li>
@@ -254,6 +306,8 @@
                     <div class="tut-anim-box">
                         <div class="tut-anim-line"></div>
                         <div class="anim-phone">📱</div>
+                        <div class="anim-finger">👆🏻</div>
+                        <div class="anim-tap center"></div>
                         <div class="anim-tap left"></div>
                         <div class="anim-tap right"></div>
                     </div>
@@ -281,16 +335,12 @@
         </div>
     </div>
 
-    <script>
-        function closeTutorial() {
-            const modal = document.getElementById('tutorialModal');
-            modal.style.display = 'none';
-        }
-
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHimc4WS1FjvGEb2-gTBMhum8APQKfDHxc5wsiWRkNqkxJrocMOw/exec';
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHimc4WS1FjvGEb2-gTBMhum8APQKfDHxc5wsiWRkNqkxJrocMOw/exec';
         let steps = 0, time = 0, isPro = false, isQuantumMode = false, timerInterval, gateHistory = [], isSolved = false;
         let selectedIndices = [];
         let actionStack = [];
+        let hasTimerStarted = false;
         
         let fishAtNode = [7, 6, 5, 4, 3, 2, 1, 0];    
         
@@ -315,6 +365,10 @@
         let autoScrollRAF = null;
         let scrollSpeed = 0;
 
+        let gateScrollRAF = null;
+        let gateScrollSpeed = 0;
+        let targetGateScrollSpeed = 0;
+
         const pop = new Audio('pop.m4a'), meow = new Audio('meow.m4a');
         const getDynamicOffset = () => parseInt(getComputedStyle(document.body).getPropertyValue('--cube-offset-x')) || 0;
         
@@ -333,6 +387,55 @@
             return pos;
         });
 
+        function openTutorial() {
+            if(typeof pop !== 'undefined') { pop.currentTime = 0; pop.play(); }
+            const modal = document.getElementById('tutorialModal');
+            const modalContent = document.querySelector('#tutorialModal .modal-content');
+            const btn = document.getElementById('help-btn');
+            
+            if (btn && modalContent) {
+                const btnRect = btn.getBoundingClientRect();
+                const originX = btnRect.left + btnRect.width/2 - (window.innerWidth/2);
+                const originY = btnRect.top + btnRect.height/2 - (window.innerHeight/2);
+                modalContent.style.transformOrigin = `calc(50% + ${originX}px) calc(50% + ${originY}px)`;
+            }
+            
+            modal.style.display = 'flex';
+            modalContent.style.transform = 'scale(0)';
+            modalContent.style.opacity = '0';
+            void modalContent.offsetWidth; 
+            
+            requestAnimationFrame(() => {
+                modalContent.style.transform = 'scale(1)';
+                modalContent.style.opacity = '1';
+            });
+        }
+
+        function closeTutorial() {
+            if(typeof pop !== 'undefined') { pop.currentTime = 0; pop.play(); }
+            const modal = document.getElementById('tutorialModal');
+            const modalContent = document.querySelector('#tutorialModal .modal-content');
+            const btn = document.getElementById('help-btn');
+            
+            if (btn && modalContent) {
+                const btnRect = btn.getBoundingClientRect();
+                const originX = btnRect.left + btnRect.width/2 - (window.innerWidth/2);
+                const originY = btnRect.top + btnRect.height/2 - (window.innerHeight/2);
+                modalContent.style.transformOrigin = `calc(50% + ${originX}px) calc(50% + ${originY}px)`;
+            }
+
+            modalContent.style.transform = 'scale(0)';
+            modalContent.style.opacity = '0';
+
+            setTimeout(() => {
+                modal.style.display = 'none';
+                if (!hasTimerStarted) {
+                    hasTimerStarted = true;
+                    timerInterval = setInterval(() => { time++; document.getElementById('timer').innerText = time; }, 1000);
+                }
+            }, 400);
+        }
+
         window.onload = () => {
             initGameLayout();
             initGates();
@@ -340,9 +443,18 @@
             updateFishUI();
             updateUndoStatus();
             fetchLeaderboard();
-            timerInterval = setInterval(() => { time++; document.getElementById('timer').innerText = time; }, 1000);
+            
+            const btn = document.getElementById('help-btn');
+            const modalContent = document.querySelector('#tutorialModal .modal-content');
+            if (btn && modalContent) {
+                const btnRect = btn.getBoundingClientRect();
+                const originX = btnRect.left + btnRect.width/2 - (window.innerWidth/2);
+                const originY = btnRect.top + btnRect.height/2 - (window.innerHeight/2);
+                modalContent.style.transformOrigin = `calc(50% + ${originX}px) calc(50% + ${originY}px)`;
+            }
             
             const circuitWrapper = document.getElementById('circuit-content-wrapper');
+            const gateScrollArea = document.getElementById('gate-scroll-area');
             
             circuitWrapper.addEventListener('wheel', (e) => {
                 if (Math.abs(e.deltaY) > 0) {
@@ -375,7 +487,6 @@
             });
 
             circuitWrapper.addEventListener('mouseleave', () => { scrollSpeed = 0; });
-
             circuitWrapper.addEventListener('dragover', (e) => {
                 if (draggedIndex !== null) {
                     e.preventDefault();
@@ -393,11 +504,7 @@
                     }
                 }
             });
-
-            circuitWrapper.addEventListener('dragenter', (e) => {
-                if (draggedIndex !== null) e.preventDefault();
-            });
-
+            circuitWrapper.addEventListener('dragenter', (e) => { if (draggedIndex !== null) e.preventDefault(); });
             circuitWrapper.addEventListener('drop', (e) => {
                 e.preventDefault();
                 scrollSpeed = 0;
@@ -405,7 +512,6 @@
                 
                 const units = Array.from(document.querySelectorAll('.circuit-unit'));
                 let targetIdx = gateHistory.length;
-                
                 for (let i = 0; i < units.length; i++) {
                     const rect = units[i].getBoundingClientRect();
                     if (e.clientX < rect.left + rect.width / 2) {
@@ -413,9 +519,7 @@
                         break;
                     }
                 }
-                
                 if (draggedIndex < targetIdx) targetIdx--;
-                
                 if (draggedIndex !== targetIdx && targetIdx >= 0 && targetIdx <= gateHistory.length) {
                     pop.currentTime = 0; pop.play();
                     const movedGate = gateHistory.splice(draggedIndex, 1)[0];
@@ -428,12 +532,49 @@
                 }
                 draggedIndex = null;
             });
-
             circuitWrapper.addEventListener('dragleave', (e) => {
                 if (!circuitWrapper.contains(e.relatedTarget)) {
                     document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
                     scrollSpeed = 0;
                 }
+            });
+
+            function gateScrollLoop() {
+                gateScrollSpeed += (targetGateScrollSpeed - gateScrollSpeed) * 0.15;
+                
+                if (Math.abs(gateScrollSpeed) > 0.5 || Math.abs(targetGateScrollSpeed) > 0) {
+                    gateScrollArea.scrollTop += gateScrollSpeed;
+                    gateScrollRAF = requestAnimationFrame(gateScrollLoop);
+                } else {
+                    gateScrollSpeed = 0;
+                    gateScrollRAF = null;
+                }
+            }
+
+            gateScrollArea.addEventListener('mousemove', (e) => {
+                const rect = gateScrollArea.getBoundingClientRect();
+                
+                const edgeThreshold = 40; 
+                const maxSpeed = 2;
+
+                let distTop = e.clientY - rect.top;
+                let distBottom = rect.bottom - e.clientY;
+
+                if (distTop < edgeThreshold && distTop > -20) {
+                    let ratio = Math.max(0, (edgeThreshold - distTop) / edgeThreshold);
+                    targetGateScrollSpeed = -(5 + ratio * maxSpeed);
+                    if (!gateScrollRAF) gateScrollRAF = requestAnimationFrame(gateScrollLoop);
+                } else if (distBottom < edgeThreshold && distBottom > -20) {
+                    let ratio = Math.max(0, (edgeThreshold - distBottom) / edgeThreshold);
+                    targetGateScrollSpeed = (5 + ratio * maxSpeed);
+                    if (!gateScrollRAF) gateScrollRAF = requestAnimationFrame(gateScrollLoop);
+                } else {
+                    targetGateScrollSpeed = 0;
+                }
+            });
+
+            gateScrollArea.addEventListener('mouseleave', () => { 
+                targetGateScrollSpeed = 0; 
             });
 
             document.addEventListener('wheel', (e) => {
@@ -963,7 +1104,20 @@
                     if (isSolved || mobileDragging) return;
                     draggedIndex = idx;
 
-                    setTimeout(() => u.classList.add('opacity-50'), 0);
+                    const ghost = u.cloneNode(true);
+                    
+                    ghost.style.position = 'absolute';
+                    ghost.style.top = '-1000px';
+                    ghost.style.left = '-1000px';
+                    document.body.appendChild(ghost);
+                    
+                    e.dataTransfer.setDragImage(ghost, ghost.offsetWidth / 2, ghost.offsetHeight / 2);
+
+                    setTimeout(() => {
+                        u.classList.add('opacity-50');
+                        document.body.removeChild(ghost);
+                    }, 0);
+                    
                     e.dataTransfer.effectAllowed = 'move';
                     e.dataTransfer.setData('text/plain', idx);
                 });
@@ -973,9 +1127,7 @@
                     e.dataTransfer.dropEffect = 'move';
                     
                     if (draggedIndex !== null && draggedIndex !== idx) {
-
                         document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
-                        
                         const rect = u.getBoundingClientRect();
                         const isAfter = (e.clientX - rect.left) > (rect.width / 2);
                         if (!isAfter) {
