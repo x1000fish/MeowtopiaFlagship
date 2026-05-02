@@ -110,21 +110,20 @@
         .anim-scroll { font-size: 24px; position: absolute; z-index: 2; margin-top: -40px; animation: scrollTextAnim 6s infinite; opacity: 0; }
 
         @keyframes mouseMoveAnim {
-            0%, 5% { transform: translate(40px, 40px) scale(1); opacity: 0; }
-            10% { opacity: 1; }
-            12%, 15% { transform: translate(0, 5px) scale(1); opacity: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
-            18% { transform: translate(0, 5px) scale(0.95); filter: drop-shadow(0 0 10px #FFB7C5); } 
-            24%, 40% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
-            45%, 60% { transform: translate(0, 5px) scale(1); } 
-            72% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
-            75% { transform: translate(0, 5px) scale(0.95); filter: drop-shadow(0 0 10px #99C44D); } 
-            85% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); opacity: 1; }
-            95%, 100% { transform: translate(40px, 40px) scale(1); opacity: 0; }
+            0% {  opacity: 0; }
+            0%, 5% { transform: translate(0, 5px) scale(1); opacity: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
+            8% { transform: translate(0, 5px) scale(0.95); filter: drop-shadow(0 0 10px #FFB7C5); } 
+            15%, 20% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
+            20%, 60% { transform: translate(0, 5px) scale(1); } 
+            74% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
+            77% { transform: translate(0, 5px) scale(0.95); filter: drop-shadow(0 0 10px #99C44D); } 
+            87% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); opacity: 1; }
+            90%, 100% { transform: translate(0, 5px) scale(1); opacity: 0; }
         }
         @keyframes leftClickAnim {
-            0%, 17% { background: #fff; }
-            18%, 24% { background: #FFB7C5; }
-            25%, 100% { background: #fff; }
+            0%, 18% { background: #fff; }
+            18%, 20% { background: #FFB7C5; }
+            20%, 100% { background: #fff; }
         }
         @keyframes rightClickAnim {
             0%, 74% { background: #fff; }
@@ -132,8 +131,8 @@
             86%, 100% { background: #fff; }
         }
         @keyframes wheelAnim {
-            0%, 40% { transform: translateY(0); background: #463438; }
-            45%, 60% { background: #629eed; transform: translateY(-4px); }
+            0%, 30% { transform: translateY(0); background: #463438; }
+            31%, 60% { background: #629eed; transform: translateY(-4px); }
             65%, 100% { transform: translateY(0); background: #463438; }
         }
         @keyframes scrollTextAnim {
@@ -142,10 +141,11 @@
             65%, 100% { opacity: 0; transform: translateY(-10px); }
         }
 
-        .anim-phone { font-size: 45px; position: absolute; z-index: 3; animation: phoneAnim 6s infinite; }
-        .anim-phone-still { font-size: 35px; position: absolute; z-index: 3; }
+        .anim-phone { font-size: 50px; position: absolute; z-index: 3; animation: phoneAnim 6s infinite; }
+        .anim-phone-still { font-size: 50px; position: absolute; z-index: 3; animation: anim-phone-still 6s infinite;}
         .anim-finger-swipe { position: absolute; z-index: 5; font-size: 30px; animation: fingerSwipeAnim 6s infinite; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.3)); top: 45%; left: 50%; margin-top: 0px; margin-left: -15px; }
 
+        /* 更新的手機版動畫：點擊 -> 動作 -> 雙指點擊 */
         .anim-tap { width: 25px; height: 25px; background: rgba(255, 183, 197, 0.8); border: 2px solid #463438; border-radius: 50%; position: absolute; z-index: 4; opacity: 0; }
         .anim-tap.center { margin-left: 0px; margin-top: 0px; }
         .anim-tap.left { margin-left: -30px; margin-top: 0px; }
@@ -166,25 +166,30 @@
         }
 
         @keyframes phoneAnim {
-            0%, 15% { opacity: 0; transform: rotate(0deg) scale(0.5); }
-            20%, 30% { opacity: 1; transform: rotate(0deg) scale(0.7); }
-            40% { transform: rotate(-25deg) scale(0.7); opacity: 1;} 
-            60% { transform: rotate(25deg) scale(0.7); opacity: 1;}  
-            70%, 85% { opacity: 1; transform: rotate(0deg) scale(0.7); filter: drop-shadow(0 0 10px #FFB7C5); }
-            90%, 100% { opacity: 0; transform: rotate(0deg) scale(0.5); }
+            0%, 15% { opacity: 1; transform: rotate(0deg); }
+            20%, 30% { opacity: 1; transform: rotate(0deg); }
+            30% { transform: rotate(-25deg); opacity: 1;} 
+            60% { transform: rotate(25deg); opacity: 1;}  
+            70%, 85% { opacity: 1; transform: rotate(0deg); filter: drop-shadow(0 0 10px #FFB7C5); }
+            90%, 100% { opacity: 0; transform: rotate(0deg); }
+        }
+        @keyframes anim-phone-still {
+            0%, 15% { opacity: 1; transform: rotate(0deg); }
+            70%, 85% { opacity: 1; transform: rotate(0deg); filter: drop-shadow(0 0 10px #FFB7C5); }
+            90%, 100% { opacity: 0; transform: rotate(0deg); }
         }
         @keyframes fingerSwipeAnim {
             0%, 15% { transform: translate(0, 30px); opacity: 0; }
             20% { transform: translate(0, 0); opacity: 1; }
             40% { transform: translate(-25px, 0); opacity: 1; }
             60% { transform: translate(25px, 0); opacity: 1; }
-            70%, 85% { transform: translate(0, 0); opacity: 1; filter: drop-shadow(0 0 10px #FFB7C5); }
+            70%, 85% { transform: translate(0, 0); opacity: 0; filter: drop-shadow(0 0 10px #FFB7C5); }
             90%, 100% { transform: translate(0, 30px); opacity: 0; }
         }
 
         #ios-indicator { position: absolute; top: 0; left: 0; transform: translate(-50%, -120%) scale(0.8); background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(15px); border-radius: 50px; padding: 6px 18px; display: flex; align-items: center; box-shadow: 0 8px 24px rgba(70,52,56,0.12); opacity: 0; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000; pointer-events: none; border: 1px solid rgba(70,52,56,0.35); }
         #ios-indicator.active { opacity: 1; transform: translate(-50%, -120%) scale(1); }
-        .ind-fraction { color: #463438; font-size: 16px; font-weight: 900; white-space: nowrap; }
+        .ind-fraction { color: #463438; font-size: 16px; font-weight: 900; }
         
         .gate-btn-v2 { position: relative; height: 75px; width: 60px; display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid #463438; border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 6px rgba(0,0,0,0.1); background-size: 60% 1.5px; background-repeat: no-repeat; background-position: center 18px, center 36.5px, center 55px; margin: auto;}
         .gate-btn-v2:hover { background-color: #FFB7C5 !important; filter: brightness(1.05); transform: scale(1.05); z-index: 10; }
@@ -312,30 +317,30 @@
                     </ol>
                 </div>
                 
-                <div class="flex-1 bg-white p-4 border-4 border-[#463438] rounded-2xl relative mt-6 md:mt-0 flex flex-col justify-between">
+                <div class="flex-1 bg-white p-4 border-4 border-[#463438] rounded-2xl relative mt-4 md:mt-0 flex flex-col">
                     <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#FFB7C5] text-white px-4 py-1 rounded-full border-4 border-[#463438] whitespace-nowrap">
                         📱 Mobile
                     </div>
-                    <div class="flex gap-2 mb-2 mt-2">
-                        <div class="tut-anim-box flex-1 m-0 flex-col relative" style="height: 100px;">
+                    <div class="flex gap-2 mt-4"> 
+                        <div class="tut-anim-box flex-1 m-0 flex-col relative" style="height: 110px;">
                             <div class="text-[10px] font-black absolute top-1" style="color:#463438;">TILT</div>
                             <div class="tut-anim-line"></div>
-                            <div class="anim-phone">📱</div>
+                            <div class="anim-phone mt-3">📱</div>
                             <div class="anim-tap center seq-tap"></div>
                             <div class="anim-tap left seq-dtap"></div>
                             <div class="anim-tap right seq-dtap"></div>
                         </div>
-                        <div class="tut-anim-box flex-1 m-0 flex-col relative" style="height: 100px;">
+                        <div class="tut-anim-box flex-1 m-0 flex-col relative" style="height: 110px;">
                             <div class="text-[10px] font-black absolute top-1" style="color:#463438;">SWIPE</div>
                             <div class="tut-anim-line"></div>
-                            <div class="anim-phone-still">📱</div>
+                            <div class="anim-phone-still mt-3">📱</div>
                             <div class="anim-finger-swipe">👆🏻</div>
                             <div class="anim-tap center seq-tap"></div>
                             <div class="anim-tap left seq-dtap"></div>
                             <div class="anim-tap right seq-dtap"></div>
                         </div>
                     </div>
-                    <ol class="list-decimal pl-5 text-sm space-y-1" style="color: #463438;">
+                    <ol class="list-decimal pl-5 text-sm space-y-2 mt-4" style="color: #463438;">
                         <li><b>Tap</b> a line to select.</li>
                         <li><b>Tilt</b> or <b>Swipe</b> L/R to switch.</li>
                         <li><b>2-Finger Tap</b> to confirm.</li>
