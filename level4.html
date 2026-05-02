@@ -88,10 +88,10 @@
         .pro-active #fish-0, .pro-active #fish-2 { left: 95px; }
         .pro-active #fish-1, .pro-active #fish-3 { left: 435px; }
         
-        #circuit-area { width: 900px; height: 0; opacity: 0; background: #ffffff; border: 0px solid #463438; border-radius: 30px; margin-top: 20px; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); position: relative; padding: 0 15px; overflow: hidden; }
+        #circuit-area { width: 900px; height: 0; opacity: 0; background: #ffffff; border: 0px solid #463438; border-radius: 30px; margin-top: 20px; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); position: relative; padding: 0 15px; overflow: hidden; touch-action: pan-x; overscroll-behavior-y: none; }
         .pro-active #circuit-area { height: 170px; opacity: 1; border: 8px solid #463438; padding: 15px; box-shadow: 10px 10px 0px #FFB7C5; }
         .circuit-title { text-align: center; font-weight: 900; font-size: 1.25rem; margin-bottom: 7px; color: #463438; }
-        #circuit-content-wrapper { position: relative; height: 130px; overflow-x: auto !important; overflow-y: hidden; margin-left: 30px; padding-top: 4px; scroll-behavior: auto; }
+        #circuit-content-wrapper { position: relative; height: 130px; overflow-x: auto !important; overflow-y: hidden; margin-left: 30px; padding-top: 4px; scroll-behavior: auto; touch-action: pan-x; overscroll-behavior-y: none; }
         #circuit-content-wrapper::-webkit-scrollbar { display: none; }
         #circuit-content { display: flex; height: 100%; padding: 0 7px; min-width: 100%; width: max-content; position: relative; background-image: linear-gradient(#463438, #463438), linear-gradient(#463438, #463438); background-size: 100% 3px; background-repeat: no-repeat; background-position: 0 20px, 0 60px; }
         
@@ -125,15 +125,9 @@
         #canvas-bottom-btns { position: absolute; bottom: 20px; right: 30px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
         #canvas-bottom-btns .func-btn { margin-top: 0; width: 90px; font-size: 14px; padding: 8px 5px; text-transform: uppercase; border-width: 3px; }
         .pro-active #canvas-bottom-btns { display: none !important; }
-        .dragging #circuit-content {
-            background-image: none !important;
-        }
-        .circuit-unit.is-dragging {
-            background-color: var(--bg-hover) !important;
-        }
-        .circuit-unit.is-dragging .circuit-target::after {
-            display: none !important;
-        }
+        .dragging #circuit-content { background-image: none !important; }
+        .circuit-unit.is-dragging { background-color: var(--bg-hover) !important; }
+        .circuit-unit.is-dragging .circuit-target::after { display: none !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4 mini-mode" id="body-root">
@@ -244,19 +238,27 @@
             const wrapper = document.getElementById('circuit-content-wrapper');
             if (!wrapper) return;
             const rect = wrapper.getBoundingClientRect();
-            const edgeThreshold = 120; 
-            const maxSpeed = 15; 
+            const edgeThreshold = 150;
+            const maxSpeed = 5;
 
-            if (clientX - rect.left < edgeThreshold) {
-                let intensity = 1 - Math.max(0, clientX - rect.left) / edgeThreshold;
-                scrollSpeed = -(maxSpeed * Math.pow(intensity, 1.5));
+            if (clientX < rect.left + edgeThreshold || clientX < edgeThreshold) {
+                scrollSpeed = -maxSpeed;
                 if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
-            } else if (rect.right - clientX < edgeThreshold) {
-                let intensity = 1 - Math.max(0, rect.right - clientX) / edgeThreshold;
-                scrollSpeed = maxSpeed * Math.pow(intensity, 1.5);
+            } else if (clientX > rect.right - edgeThreshold || clientX > window.innerWidth - edgeThreshold) {
+                scrollSpeed = maxSpeed;
                 if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
             } else {
                 scrollSpeed = 0;
+            }
+        }
+
+        function scrollLoop() {
+            const wrapper = document.getElementById('circuit-content-wrapper');
+            if (scrollSpeed !== 0) {
+                wrapper.scrollLeft += scrollSpeed;
+                autoScrollRAF = requestAnimationFrame(scrollLoop);
+            } else {
+                autoScrollRAF = null;
             }
         }
 
@@ -287,7 +289,20 @@
             circuitWrapper.addEventListener('mousemove', (e) => {
                 updateScrollSpeed(e.clientX);
             });
-            circuitWrapper.addEventListener('mouseleave', () => { scrollSpeed = 0; });
+
+            circuitWrapper.addEventListener('mouseleave', () => { 
+                if (draggedIndex === null) scrollSpeed = 0; 
+            });
+
+            document.addEventListener('dragover', (e) => {
+                if (draggedIndex !== null) {
+                    updateScrollSpeed(e.clientX);
+                }
+            });
+
+            document.addEventListener('dragend', () => {
+                scrollSpeed = 0;
+            });
         };
         
         function updateLabels() {
@@ -296,16 +311,6 @@
             document.getElementById('circuit-title-text').innerText = isCube ? 'Paths' : 'Circuit Diagram';
             document.getElementById('q-label-0').innerText = isCube ? 'd1' : 'q0';
             document.getElementById('q-label-1').innerText = isCube ? 'd2' : 'q1';
-        }
-        
-        function scrollLoop() {
-            const wrapper = document.getElementById('circuit-content-wrapper');
-            if (scrollSpeed !== 0) {
-                wrapper.scrollLeft += scrollSpeed;
-                autoScrollRAF = requestAnimationFrame(scrollLoop);
-            } else {
-                autoScrollRAF = null;
-            }
         }
         
         function getRgba(hex, alpha) {
