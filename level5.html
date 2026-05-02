@@ -139,7 +139,7 @@
         }
 
         .anim-phone { font-size: 55px; position: absolute; z-index: 3; animation: phoneAnim 6s infinite; }
-        .anim-finger { position: absolute; z-index: 5; font-size: 40px; animation: fingerTapAnim 6s infinite; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.3)); left: 44%; top: 52%; margin-left: -5px; margin-top: -15px;}
+        .anim-finger { position: absolute; z-index: 5; font-size: 40px; animation: fingerTapAnim 6s infinite; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.3)); left: 42%; top: 52%; margin-left: -5px; margin-top: -15px;}
         .anim-tap { width: 25px; height: 25px; background: rgba(255, 183, 197, 0.8); border: 2px solid #463438; border-radius: 50%; position: absolute; z-index: 4; opacity: 0; }
         .anim-tap.center { animation: centerTapAnim 6s infinite; }
         .anim-tap.left { margin-left: -30px; margin-top: -10px; animation: doubleTapAnim 6s infinite; }
@@ -313,7 +313,7 @@
                     </div>
                     <ol class="list-decimal pl-5 text-sm space-y-2" style="color: #463438;">
                         <li><b>Tap</b> a line to select.</li>
-                        <li><b>Tilt</b> phone L/R to switch.</li>
+                        <li><b>Tilt/Swipe</b> L/R to switch.</li>
                         <li><b>2-Finger Tap</b> to confirm.</li>
                     </ol>
                 </div>
@@ -609,8 +609,17 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                 }
             });
 
-            window.addEventListener('touchstart', (e) => {
-                if (lockedLineId && e.touches.length >= 2) {
+            // Handle touch swipe for canvas lock logic
+            let canvasTouchStartX = 0;
+            let lastCanvasX = 0;
+            let isCanvasSwiping = false;
+
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    canvasTouchStartX = e.touches[0].clientX;
+                    lastCanvasX = canvasTouchStartX;
+                    isCanvasSwiping = false;
+                } else if (lockedLineId && e.touches.length >= 2) {
                     e.preventDefault();
                     if (lineMode === 4 && hoverLine) applyGate(`X${2 - hoverLine.dim}`);
                     else if (lineMode === 1 && hoverLine) applyGate(`SWAP_${hoverLine.i}_${hoverLine.j}`);
@@ -618,10 +627,35 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                 }
             }, { passive: false });
 
-            canvas.addEventListener('touchstart', (e) => {
+            canvas.addEventListener('touchmove', (e) => {
                 if (e.touches.length === 1 && lockedLineId) {
-                    if (!e.target.classList.contains('connection-line')) { cancelLock(); }
+                    let currentX = e.touches[0].clientX;
+                    let diff = currentX - lastCanvasX;
+                    if (Math.abs(currentX - canvasTouchStartX) > 10) {
+                        isCanvasSwiping = true;
+                        if (e.cancelable) e.preventDefault();
+                    }
+                    if (isCanvasSwiping && Math.abs(diff) > 30) {
+                        if (diff > 0) {
+                            currentOptionIndex = (currentOptionIndex + 1) % currentOptions.length;
+                        } else {
+                            currentOptionIndex = (currentOptionIndex - 1 + currentOptions.length) % currentOptions.length;
+                        }
+                        lastCanvasX = currentX;
+                        hasScrolled = true;
+                        showIndicatorScrolled();
+                    }
                 }
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', (e) => {
+                if (!isCanvasSwiping && lockedLineId && e.changedTouches.length === 1) {
+                    const target = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                    if (target && !target.classList.contains('connection-line')) {
+                        cancelLock();
+                    }
+                }
+                isCanvasSwiping = false;
             });
 
             canvas.addEventListener('mousemove', (e) => {
@@ -697,6 +731,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
             document.querySelectorAll('.gate-btn-v2').forEach(b=>b.classList.remove('btn-highlight'));
         }
 
+        // 修改：使用平滑滾動取代直接設定 scrollTop 的跳躍效果
         function highlightGateButton(type) {
             document.querySelectorAll('.gate-btn-v2').forEach(btn => btn.classList.remove('btn-highlight'));
             if(type) {
@@ -707,14 +742,17 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                     const btnRect = btn.getBoundingClientRect();
                     const containerRect = container.getBoundingClientRect();
                     
-                    if (btnRect.top < containerRect.top) {
-                        container.scrollTop -= (containerRect.top - btnRect.top + 10);
-                    } else if (btnRect.bottom > containerRect.bottom) {
-                        container.scrollTop += (btnRect.bottom - containerRect.bottom + 10);
+                    if (btnRect.top < containerRect.top || btnRect.bottom > containerRect.bottom) {
+                        const targetTop = container.scrollTop + (btnRect.top - containerRect.top) - (containerRect.height / 2) + (btnRect.height / 2);
+                        container.scrollTo({
+                            top: targetTop,
+                            behavior: 'smooth'
+                        });
                     }
                 }
             }
         }
+        
         window.highlightByGate = function(type) {
             highlightPairs(getHighlightPairsForGate(type));
             highlightGateButton(type);
@@ -992,7 +1030,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
         function showIndicatorLockedPrompt() {
             const pill = document.getElementById('ios-indicator');
             const frac = document.getElementById('ind-fraction');
-            frac.innerText = isTouchDevice ? `↔ TILT` : `↕ SCROLL & R-CLICK`;
+            frac.innerText = isTouchDevice ? `↔ TILT / SWIPE` : `↕ SCROLL & R-CLICK`;
             pill.classList.add('active');
             clearHighlight();
             highlightPairs([[hoverLine.i, hoverLine.j]]);
@@ -1167,19 +1205,101 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                 u.onmouseenter = () => highlightByGate(g);
                 u.onmouseleave = () => clearHighlight();
                 
+                // 修改：實作手機版真實驗證元素的拖移功能 (長按拖移、非截圖式)
                 let touchTimer = null;
                 let startX, startY;
+                let isDraggingElement = false;
+                let originalRect;
+
                 u.addEventListener('touchstart', (e) => {
                     if (isSolved || e.touches.length > 1) return;
                     startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-                    touchTimer = setTimeout(() => { touchTimer = null; }, 400);
+                    
+                    touchTimer = setTimeout(() => {
+                        touchTimer = null;
+                        mobileDragging = true;
+                        isDraggingElement = true;
+                        draggedIndex = idx;
+                        
+                        if ('vibrate' in navigator) navigator.vibrate(50);
+                        
+                        originalRect = u.getBoundingClientRect();
+                        
+                        // 建立 Placeholder 佔位，防止排版坍塌
+                        const placeholder = document.createElement('div');
+                        placeholder.className = u.className + ' placeholder-unit';
+                        placeholder.style.visibility = 'hidden';
+                        placeholder.id = 'drag-placeholder';
+                        placeholder.style.width = originalRect.width + 'px';
+                        placeholder.style.minWidth = originalRect.width + 'px';
+                        u.parentNode.insertBefore(placeholder, u);
+                        
+                        // 將原元素改成 Fixed 獨立出排版，直接跟隨手指 (不使用 screenshot/clone)
+                        u.style.position = 'fixed';
+                        u.style.zIndex = '1000';
+                        u.style.left = originalRect.left + 'px';
+                        u.style.top = originalRect.top + 'px';
+                        u.style.width = originalRect.width + 'px';
+                        u.style.height = originalRect.height + 'px';
+                        u.style.opacity = '0.95';
+                        u.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3)';
+                        u.style.pointerEvents = 'none';
+                        u.style.margin = '0';
+                        u.style.transition = 'none'; 
+                    }, 300);
                 }, { passive: true });
                 
                 u.addEventListener('touchmove', (e) => {
-                    if (mobileDragging) {
+                    if (isDraggingElement) {
+                        if (e.cancelable) e.preventDefault();
+                        const currentX = e.touches[0].clientX;
+                        const currentY = e.touches[0].clientY;
+
+                        // 更新元素位置，讓它跟隨手指中心點
+                        u.style.left = (currentX - originalRect.width / 2) + 'px';
+                        u.style.top = (currentY - originalRect.height / 2) + 'px';
+
+                        // 判斷下方的目標元素
+                        const elementsUnder = document.elementsFromPoint(currentX, currentY);
+                        let targetUnit = null;
+                        for (let el of elementsUnder) {
+                            if (el.classList.contains('circuit-unit') && el !== u && el.id !== 'drag-placeholder') {
+                                targetUnit = el;
+                                break;
+                            }
+                        }
+
+                        // 清除原有的紅線提示
+                        document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
+
+                        // 加上目標提示線
+                        if (targetUnit) {
+                            const rect = targetUnit.getBoundingClientRect();
+                            const isAfter = (currentX - rect.left) > (rect.width / 2);
+                            if (isAfter) {
+                                targetUnit.classList.add('drag-target', 'right');
+                            } else {
+                                targetUnit.classList.add('drag-target');
+                            }
+                        }
+
+                        // 拖曳到邊緣時自動捲動
+                        const wrapperRect = wrapper.getBoundingClientRect();
+                        if (currentX < wrapperRect.left + 50) {
+                            scrollSpeed = -5;
+                            if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
+                        } else if (currentX > wrapperRect.right - 50) {
+                            scrollSpeed = 5;
+                            if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
+                        } else {
+                            scrollSpeed = 0;
+                        }
+
                     } else if (touchTimer !== null || startY !== undefined) {
                         const dx = e.touches[0].clientX - startX, dy = e.touches[0].clientY - startY;
-                        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) { if(touchTimer) { clearTimeout(touchTimer); touchTimer = null; } }
+                        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) { 
+                            if(touchTimer) { clearTimeout(touchTimer); touchTimer = null; } 
+                        }
                         if (Math.abs(dy) > 30 && Math.abs(dy) > Math.abs(dx)) {
                             if (e.cancelable) e.preventDefault();
                             if (dy > 30) {
@@ -1197,7 +1317,68 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                     }
                 }, { passive: false });
                 
-                u.addEventListener('touchend', () => { if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } });
+                u.addEventListener('touchend', (e) => { 
+                    if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } 
+                    if (isDraggingElement) {
+                        isDraggingElement = false;
+                        mobileDragging = false;
+                        scrollSpeed = 0;
+
+                        // 恢復原樣
+                        u.style.position = '';
+                        u.style.zIndex = '';
+                        u.style.left = '';
+                        u.style.top = '';
+                        u.style.width = '';
+                        u.style.height = '';
+                        u.style.opacity = '';
+                        u.style.boxShadow = '';
+                        u.style.pointerEvents = '';
+                        u.style.margin = '';
+                        u.style.transition = '';
+
+                        const placeholder = document.getElementById('drag-placeholder');
+                        if (placeholder) placeholder.remove();
+
+                        const currentX = e.changedTouches[0].clientX;
+                        const currentY = e.changedTouches[0].clientY;
+
+                        const elementsUnder = document.elementsFromPoint(currentX, currentY);
+                        let targetUnit = null;
+                        for (let el of elementsUnder) {
+                            if (el.classList.contains('circuit-unit') && el !== u) {
+                                targetUnit = el;
+                                break;
+                            }
+                        }
+
+                        document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
+
+                        if (targetUnit) {
+                            const units = Array.from(document.querySelectorAll('.circuit-unit:not(.placeholder-unit)'));
+                            let targetIdx = units.indexOf(targetUnit);
+                            const rect = targetUnit.getBoundingClientRect();
+                            const isAfter = (currentX - rect.left) > (rect.width / 2);
+                            if (isAfter) targetIdx++;
+                            
+                            if (draggedIndex < targetIdx) targetIdx--;
+
+                            if (draggedIndex !== targetIdx && targetIdx >= 0 && targetIdx <= gateHistory.length) {
+                                pop.currentTime = 0; pop.play();
+                                const movedGate = gateHistory.splice(draggedIndex, 1)[0];
+                                gateHistory.splice(targetIdx, 0, movedGate);
+                                actionStack.push({ type: 'replace', index: 0, oldGates: [], newGate: null });
+                                selectedIndices = [];
+                                recalculate();
+                            } else {
+                                renderCircuit();
+                            }
+                        } else {
+                            renderCircuit();
+                        }
+                        draggedIndex = null;
+                    }
+                });
 
                 if (!isQuantumMode) {
                     u.innerHTML = getMiniHypercubeSVG(g);
