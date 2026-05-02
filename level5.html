@@ -112,8 +112,8 @@
             0% {  opacity: 0; }
             0%, 5% { transform: translate(0, 5px) scale(1); opacity: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
             8% { transform: translate(0, 5px) scale(0.95); filter: drop-shadow(0 0 10px #FFB7C5); } 
-            15%, 20% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
-            20%, 60% { transform: translate(0, 5px) scale(1); } 
+            18%, 24% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
+            24%, 60% { transform: translate(0, 5px) scale(1); } 
             74% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
             77% { transform: translate(0, 5px) scale(0.95); filter: drop-shadow(0 0 10px #99C44D); } 
             87% { transform: translate(0, 5px) scale(1); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); opacity: 1; }
@@ -1063,7 +1063,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
         function showIndicatorLockedPrompt() {
             const pill = document.getElementById('ios-indicator');
             const frac = document.getElementById('ind-fraction');
-            frac.innerText = isTouchDevice ? `↔ SWIPE & 2-FINGER TAP` : `↕ SCROLL & R-CLICK`;
+            frac.innerText = isTouchDevice ? `↔ TILT/SWIPE & 2-FINGER TAP` : `↕ SCROLL & R-CLICK`;
             pill.classList.add('active');
             clearHighlight();
             highlightPairs([[hoverLine.i, hoverLine.j]]);
@@ -1311,9 +1311,8 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHi
                         }
 
                         const wrapperRect = wrapper.getBoundingClientRect();
-                        // 【修改】加寬感應區到 80px，並允許碰到螢幕邊緣也觸發滾輪
                         if (currentX < wrapperRect.left + 80 || currentX < 80) {
-                            scrollSpeed = -10; // 稍微加快滾動速度
+                            scrollSpeed = -10;
                             if (!autoScrollRAF) autoScrollRAF = requestAnimationFrame(scrollLoop);
                         } else if (currentX > wrapperRect.right - 80 || currentX > window.innerWidth - 80) {
                             scrollSpeed = 10;
