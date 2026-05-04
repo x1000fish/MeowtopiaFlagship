@@ -499,7 +499,7 @@
             }, { passive: true });
 
             // 手機版雙指確認 Gate
-            window.addEventListener('touchstart', (e) => {
+            canvas.addEventListener('touchstart', (e) => {
                 if (lockedLineId && e.touches.length >= 2) {
                     e.preventDefault();
                     if (lineMode === 8 && hoverLine) applyGate(`X${3 - hoverLine.dim}`);
