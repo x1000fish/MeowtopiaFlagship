@@ -12,7 +12,24 @@
         .node img { width: 110px; height: auto; pointer-events: none; }
         .fixed-number { position: absolute; bottom: -5px; right: 50px; font-size: 22px; font-weight: 900; color: #463438; pointer-events: none; z-index: 25; }
         .connection-line { position: absolute; background: #463438; cursor: pointer; z-index: 10; transition: all 0.2s ease; opacity: 1; }
-	.connection-line::after { content: ''; position: absolute; top: -10px; bottom: -10px; left: 0; right: 0; background: transparent; z-index: 10; pointer-events: auto;  }
+	.line-h::after { 
+            content: ''; 
+            position: absolute; 
+            top: -10px; 
+            bottom: -10px; 
+            left: 0; 
+            right: 0; 
+            background-color: transparent; 
+        }
+	.line-v::after { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            bottom: 0; 
+            left: -10px; 
+            right: -10px; 
+            background-color: transparent; 
+        }
         .connection-line:hover { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8); z-index: 16; }
         .line-highlight { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; z-index: 15; }
         .line-h { height: 8px; width: 300px; }
@@ -945,8 +962,8 @@
                     // 2. 取消焦點，避免按鈕維持 CSS 的預設 hover/active 狀態
                     const btn = document.getElementById('gate-' + g.toLowerCase());
                     if (btn) btn.blur();
-                }, 500); 
-			}
+                }, 800); 
+            }
         }
 
         function getPermutationForGate(g) {
