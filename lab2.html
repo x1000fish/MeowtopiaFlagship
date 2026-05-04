@@ -106,11 +106,7 @@
         .nav-fab:active { transform: translateY(4px); box-shadow: 0 0px 0 #463438; }
         
         canvas, .game-canvas, .circuit-unit, .node { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
-        #shake-toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) scale(0.8); background: #99C44D; color: #463438; padding: 15px 40px; border-radius: 50px; font-weight: 900; font-size: 24px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; border: 4px solid #463438; box-shadow: 0 0 20px rgba(153, 196, 77, 0.6), 0 8px 0 #463438; }
-        #shake-toast.show { opacity: 1; transform: translateX(-50%) scale(1); }
-        @keyframes pulse-toast { 0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 20px rgba(153, 196, 77, 0.6), 0 8px 0 #463438; } 50% { transform: translateX(-50%) scale(1.1); box-shadow: 0 0 30px #99C44D, 0 8px 0 #463438; } }
-        .toast-highlight { animation: pulse-toast 1s infinite !important; background: #99C44D !important; color: white !important; }
-        
+               
         /* 拖曳提示紅線與推擠動畫 */
         .drag-target { margin-left: 25px !important; }
         .drag-target-right { margin-right: 25px !important; }
@@ -149,7 +145,6 @@
     </style>
 </head>
 <body id="body-root" class="pro-active mini-mode">
-    <div id="shake-toast">Ctrl Mode: ON</div>
     <button onclick="navWithSound('lab3.html')" class="nav-fab" title="Go to 3-Bit">3</button>
     <div id="quantum-toggle" class="mode-toggle-fixed" onclick="toggleQuantumMode()">⚛️</div>
     <div class="lab-shell">
@@ -244,8 +239,6 @@
         let mobileDragging = false;
         let mDragIndex = null;
         let dragGhost = null;
-        let isShakeCtrlActive = false; 
-        let lastShakeTime = 0;
         let gyroPermissionGranted = false;
         window.addEventListener('touchstart', () => { isTouchDevice = true; }, {once: true});
         
@@ -424,31 +417,7 @@
             });
         }
 
-        function handleMotion(event) {
-            const acc = event.accelerationIncludingGravity;
-            if (!acc) return;
-            const threshold = 20;
-            const delta = Math.sqrt(acc.x ** 2 + acc.y ** 2 + acc.z ** 2);
-            if (delta > threshold) {
-                const now = Date.now();
-                if (now - lastShakeTime > 1000) { 
-                    isShakeCtrlActive = !isShakeCtrlActive;
-                    lastShakeTime = now;
-                    if (navigator.vibrate) navigator.vibrate([100]); 
-                    const toast = document.getElementById('shake-toast');
-                    if (toast) {
-                        toast.style.background = isShakeCtrlActive ? "#99C44D" : "#FFB7C5";
-                        toast.style.color = isShakeCtrlActive ? "white" : "#463438";
-                        toast.innerText = isShakeCtrlActive ? "CTRL MODE: ON" : "CTRL MODE: OFF";
-                        toast.classList.add('show');
-                        setTimeout(() => { 
-                            if(typeof tutorialPhase !== 'undefined' && tutorialPhase !== 0.5) toast.classList.remove('show'); 
-                        }, 4000);
-                    }
-                }
-            }
-        }
-
+       
         window.onload = () => {
             initLabData();
             updateLabels();
@@ -617,12 +586,6 @@
                         if (permission === 'granted') gyroPermissionGranted = true;
                     } catch (error) { console.log("Gyro permission denied:", error); }
                 } else { gyroPermissionGranted = true; }
-                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                    try {
-                        const permission = await DeviceMotionEvent.requestPermission();
-                        if (permission === 'granted') window.addEventListener('devicemotion', handleMotion);
-                    } catch (e) { console.log("Motion permission denied:", e); }
-                } else { window.addEventListener('devicemotion', handleMotion); }
                 window.removeEventListener('click', requestPermissions);
                 window.removeEventListener('touchstart', requestPermissions);
             };
@@ -1177,43 +1140,96 @@
                 
                 let touchTimer = null;
                 let startX, startY;
+                let swipeActionTriggered = false; // 新增：防止一次滑動觸發多次動作
+
                 u.addEventListener('touchstart', (e) => {
-                    if (activeTraceInput !== null || e.touches.length > 1) return;
-                    u.draggable = false; 
-                    startX = e.touches[0].clientX;
+                    if (isSolved || e.touches.length > 1) return;
+                    startX = e.touches[0].clientX; 
                     startY = e.touches[0].clientY;
-                    touchTimer = setTimeout(() => {
-                        touchTimer = null;
-                        startMobileDrag(e.touches[0], u, idx);
-                    }, 300); 
-                }, {passive: true});
+                    swipeActionTriggered = false; // 重置觸發狀態
+                    touchTimer = setTimeout(() => { 
+                        touchTimer = null; 
+                        startMobileDrag(e.touches[0], u, idx); 
+                    }, 400);
+                }, { passive: true });
+                
                 u.addEventListener('touchmove', (e) => {
                     if (mobileDragging) {
                         if (e.cancelable) e.preventDefault();
                         moveMobileDrag(e.touches[0]);
-                    } else if (touchTimer) {
-                        let dx = e.touches[0].clientX - startX;
-                        let dy = e.touches[0].clientY - startY;
-                        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-                            clearTimeout(touchTimer);
-                            touchTimer = null;
+                        handleCircuitScroll(e.touches[0]);
+                        document.querySelectorAll('.circuit-unit').forEach(el => {
+                            el.classList.remove('drag-target', 'right');
+                        });
+                        const targetEl = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+                        if (targetEl) {
+                            const targetUnit = targetEl.closest('.circuit-unit');
+                            if (targetUnit) {
+                                const type = targetUnit.dataset.type;
+                                const isSelf = type === 'gate' && parseInt(targetUnit.dataset.idx) === idx;
+                                if (!isSelf) {
+                                    const info = getDropInfo(targetUnit, e.touches[0].clientX);
+                                    if (info.borderLeft) targetUnit.classList.add('drag-target');
+                                    if (info.borderRight) targetUnit.classList.add('right');
+                                }
+                            }
+                        }
+                    } else if (!swipeActionTriggered && (touchTimer !== null || startY !== undefined)) {
+                        const dx = e.touches[0].clientX - startX;
+                        const dy = e.touches[0].clientY - startY;
+                        
+                        // 判斷是否為滑動
+                        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) { 
+                            if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } 
+                        }
+                        
+                        // 主要判斷上下滑動
+                        if (Math.abs(dy) > 30 && Math.abs(dy) > Math.abs(dx)) {
+                            if (e.cancelable) e.preventDefault();
+                            
+                            if (dy > 30) {
+                                // 向下滑動：多重選取 (加入或移除 selectedIndices)
+                                const sIdx = selectedIndices.indexOf(idx);
+                                if (sIdx > -1) {
+                                    selectedIndices.splice(sIdx, 1);
+                                } else {
+                                    selectedIndices.push(idx);
+                                }
+                                renderCircuit(); 
+                                swipeActionTriggered = true; // 標記已觸發
+                                startY = undefined; 
+                            } else if (dy < -30) {
+                                // 向上滑動：刪除
+                                if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
+                                const removed = gateHistory[idx];
+                                actionStack.push({ type: 'delete', index: idx, oldGates: [removed] });
+                                gateHistory.splice(idx, 1);
+                                selectedIndices = []; 
+                                recalculate(); 
+                                swipeActionTriggered = true; // 標記已觸發
+                                startY = undefined;
+                            }
                         }
                     }
-                }, {passive: false});
-                u.addEventListener('touchend', (e) => {
-                    if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+                }, { passive: false });
+                
+                u.addEventListener('touchend', (e) => { 
+                    if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } 
                     if (mobileDragging) {
                         if (e.cancelable) e.preventDefault();
                         endMobileDrag(e.changedTouches[0]);
                     }
-                    if (activeTraceInput === null) setTimeout(() => { u.draggable = true; }, 100);
-                });
-                u.addEventListener('touchcancel', (e) => {
-                    if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
-                    if (mobileDragging) endMobileDrag(e.changedTouches[0]);
-                    if (activeTraceInput === null) setTimeout(() => { u.draggable = true; }, 100);
+                    swipeActionTriggered = false;
                 });
                 
+                u.addEventListener('touchcancel', (e) => {
+                    if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+                    if (mobileDragging) {
+                        const touch = (e.changedTouches && e.changedTouches[0]) || (e.touches && e.touches[0]); 
+                        if (touch) endMobileDrag(touch);
+                    }
+                    swipeActionTriggered = false;
+                });
                 u.onmouseover = () => syncGateHighlight(g, true);
                 u.onmouseout = () => syncGateHighlight(g, false);
                 
@@ -1316,4 +1332,3 @@
     </script>
 </body>
 </html>
-
