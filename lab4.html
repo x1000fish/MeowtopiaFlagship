@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -143,8 +144,8 @@
         .swap-active { background: var(--highlight-color) !important; box-shadow: 0 0 15px var(--highlight-color) !important; height: 8px !important; z-index: 15 !important; border-top: none !important; opacity: 1 !important; }
         .mini-mode.is-tracing .qubit-label { display: none !important; }
         .circuit-unit {transition: all 0.2s ease, margin 0.2s ease;}
-        .drag-target {margin-left: 25px; position: relative; }
-        .drag-target.right {margin-left: 0; margin-right: 25px;}
+        .drag-target { position: relative; }
+        .drag-target.right { margin-left: 0; margin-right: 0; }
         .drag-target::before {
             content: '';
             position: absolute;
@@ -189,8 +190,8 @@
                 <div id="tt-view-container" class="w-full flex-col hidden-el h-full flex" style="max-height: 100%; overflow: hidden;">
                     <div class="panel-section-title shrink-0 mt-2">Truth Table</div>
                     <div class="text-lg text-gray-400 text-center mb-2 font-bold flex justify-between px-8 shrink-0 border-b border-black-100 pb-2">
-                        <span class="w-1/2 text-left text-black">CAT</span>
-                        <span class="w-1/2 text-right text-black">FISH</span>
+                        <span class="w-1/2 text-left text-black">INPUT</span>
+                        <span class="w-1/2 text-right text-black">OUTPUT</span>
                     </div>
                     <div class="overflow-y-auto w-full flex-grow px-2 mb-2 custom-scrollbar" style="scrollbar-width: none;">
                         <table class="w-full text-center text-lg border-separate border-spacing-y-1">
@@ -850,8 +851,13 @@
                 const isSelf = type === 'gate' && parseInt(targetUnit.dataset.idx) === mDragIndex;
                 if (!isSelf) {
                     const info = getDropInfo(targetUnit, touch.clientX);
-                    let finalIdx = info.insertIdx;
-                    if (mDragIndex < finalIdx) finalIdx--;
+                    if (isNoopDrop(targetUnit, info.insertIdx, mDragIndex)) {
+                        mobileDragging = false;
+                        mDragIndex = null;
+                        targetScrollSpeed = 0;
+                        return;
+                    }
+                    let finalIdx = getAdjustedDropIndex(info.insertIdx, mDragIndex);
                     if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
                     const oldHistory = [...gateHistory];
                     const movedItem = gateHistory.splice(mDragIndex, 1)[0];
@@ -1330,6 +1336,15 @@
             
             return { insertIdx, borderLeft, borderRight };
         }
+        function getAdjustedDropIndex(insertIdx, sourceIdx) {
+            return sourceIdx < insertIdx ? insertIdx - 1 : insertIdx;
+        }
+        function isNoopDrop(unit, insertIdx, sourceIdx) {
+            if (sourceIdx === null) return true;
+            const type = unit.dataset.type;
+            if (type === 'gate' && parseInt(unit.dataset.idx) === sourceIdx) return true;
+            return getAdjustedDropIndex(insertIdx, sourceIdx) === sourceIdx;
+        }
         function updateFishUI() {
             for (let nI = 0; nI < 16; nI++) {
                 const f = document.getElementById(`fish-${fishAtNode[nI]}`);
@@ -1391,13 +1406,14 @@
                     }
                     e.dataTransfer.dropEffect = 'move';
                     const type = unit.dataset.type;
-                    if (type === 'gate' && parseInt(unit.dataset.idx) === draggedIndex) return;
                     document.querySelectorAll('.circuit-unit').forEach(el => {
                         el.classList.remove('drag-target', 'right');
                     });
                     const info = getDropInfo(unit, e.clientX);
-                    if (info.borderLeft) unit.classList.add('drag-target');
-                    if (info.borderRight) unit.classList.add('right');
+                    if (!isNoopDrop(unit, info.insertIdx, draggedIndex)) {
+                        if (info.borderLeft || info.borderRight) unit.classList.add('drag-target');
+                        if (info.borderRight) unit.classList.add('right');
+                    }
                     if (typeof handleCircuitScroll === 'function') handleCircuitScroll(e);
                 });
 
@@ -1415,11 +1431,10 @@
 
                     if (draggedIndex === null) return;
                     const type = unit.dataset.type;
-                    if (type === 'gate' && parseInt(unit.dataset.idx) === draggedIndex) return;
 
                     const info = getDropInfo(unit, e.clientX);
-                    let finalIdx = info.insertIdx;
-                    if (draggedIndex < finalIdx) finalIdx--;
+                    if (isNoopDrop(unit, info.insertIdx, draggedIndex)) return;
+                    let finalIdx = getAdjustedDropIndex(info.insertIdx, draggedIndex);
 
                     if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(e=>{}); }
 
@@ -1531,8 +1546,10 @@
                                 const isSelf = type === 'gate' && parseInt(targetUnit.dataset.idx) === idx;
                                 if (!isSelf) {
                                     const info = getDropInfo(targetUnit, e.touches[0].clientX);
-                                    if (info.borderLeft) targetUnit.classList.add('drag-target');
-                                    if (info.borderRight) targetUnit.classList.add('right');
+                                    if (!isNoopDrop(targetUnit, info.insertIdx, idx)) {
+                                        if (info.borderLeft || info.borderRight) targetUnit.classList.add('drag-target');
+                                        if (info.borderRight) targetUnit.classList.add('right');
+                                    }
                                 }
                             }
                         }
