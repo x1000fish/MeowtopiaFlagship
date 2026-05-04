@@ -263,6 +263,9 @@
         let touchStartY = 0;
         let lastSwipeTime = 0;
         let lastTiltDirection = 0;
+        let canvasTouchStartX = 0, canvasTouchStartY = 0;
+        let lastCanvasX = 0, lastCanvasY = 0;
+        let isCanvasSwiping = false;
         const TILT_THRESHOLD = 15;
         const RETURN_THRESHOLD = 10;
         let gyroPermissionGranted = false;
@@ -486,10 +489,14 @@
 
             // 手機版取消鎖定
             canvas.addEventListener('touchstart', (e) => {
-                if (e.touches.length === 1 && lockedLineId) {
-                    if (!e.target.classList.contains('connection-line')) { cancelLock(); }
+                if (e.touches.length === 1) {
+                    canvasTouchStartX = e.touches[0].clientX;
+                    canvasTouchStartY = e.touches[0].clientY;
+                    lastCanvasX = canvasTouchStartX;
+                    lastCanvasY = canvasTouchStartY;
+                    isCanvasSwiping = false;
                 }
-            });
+            }, { passive: true });
 
             // 手機版雙指確認 Gate
             window.addEventListener('touchstart', (e) => {
@@ -497,9 +504,53 @@
                     e.preventDefault();
                     if (lineMode === 8 && hoverLine) applyGate(`X${3 - hoverLine.dim}`);
                     else if (lineMode === 1 && hoverLine) applyGate(`SWAP_${hoverLine.i}_${hoverLine.j}`);
-                    else if (hasScrolled && currentOptions[currentOptionIndex]) applyGate(currentOptions[currentOptionIndex].gateType);
+                    else if (currentOptions[currentOptionIndex]) applyGate(currentOptions[currentOptionIndex].gateType);
                 }
             }, { passive: false });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1 && lockedLineId && lineMode !== 1 && lineMode !== 8) {
+                    const currentX = e.touches[0].clientX;
+                    const currentY = e.touches[0].clientY;
+                    const diffX = currentX - lastCanvasX;
+                    const diffY = currentY - lastCanvasY;
+                    if (Math.abs(currentX - canvasTouchStartX) > 8 || Math.abs(currentY - canvasTouchStartY) > 8) {
+                        isCanvasSwiping = true;
+                        if (e.cancelable) e.preventDefault();
+                    }
+                    if (isCanvasSwiping && currentOptions.length > 0) {
+                        if (Math.abs(diffX) > Math.abs(diffY)) {
+                            const steps = Math.floor(Math.abs(diffX) / 80);
+                            if (steps > 0) {
+                                const dir = diffX > 0 ? 1 : -1;
+                                const shift = (dir * steps) % currentOptions.length;
+                                currentOptionIndex = (((currentOptionIndex + shift) % currentOptions.length) + currentOptions.length) % currentOptions.length;
+                                lastCanvasX += dir * steps * 80;
+                                hasScrolled = true;
+                                showIndicatorScrolled();
+                            }
+                        } else {
+                            const steps = Math.floor(Math.abs(diffY) / 80);
+                            if (steps > 0) {
+                                const dir = diffY > 0 ? 1 : -1;
+                                const shift = (dir * steps) % currentOptions.length;
+                                currentOptionIndex = (((currentOptionIndex + shift) % currentOptions.length) + currentOptions.length) % currentOptions.length;
+                                lastCanvasY += dir * steps * 80;
+                                hasScrolled = true;
+                                showIndicatorScrolled();
+                            }
+                        }
+                    }
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', (e) => {
+                if (!isCanvasSwiping && lockedLineId && e.changedTouches.length === 1) {
+                    const target = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                    if (target && !target.classList.contains('connection-line')) cancelLock();
+                }
+                isCanvasSwiping = false;
+            });
 
             canvas.addEventListener('mousemove', (e) => {
                 if (indicator.classList.contains('active') && !isTouchDevice) {
@@ -1156,10 +1207,16 @@
         function showIndicatorLockedPrompt() {
             const pill = document.getElementById('ios-indicator');
             const frac = document.getElementById('ind-fraction');
-            frac.innerText = isTouchDevice ? `↔ TILT` : `↕ SCROLL & R-CLICK`;
+            frac.innerText = isTouchDevice ? `↔ TILT/SWIPE & 2-FINGERS` : `↕ SCROLL & R-CLICK`;
             pill.classList.add('active');
             clearHighlight();
-            highlightPairs([[hoverLine.i, hoverLine.j]]);
+            const opt = currentOptions[currentOptionIndex];
+            if (opt) {
+                highlightPairs(opt.highlightPairs);
+                highlightGateButton(opt.gateType);
+            } else {
+                highlightPairs([[hoverLine.i, hoverLine.j]]);
+            }
         }
         
         function showIndicatorScrolled() {
