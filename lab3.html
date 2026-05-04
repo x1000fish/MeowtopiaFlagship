@@ -230,6 +230,9 @@
         let touchStartY = 0;
         let lastSwipeTime = 0;
         let lastTiltDirection = 0;
+        let canvasTouchStartX = 0, canvasTouchStartY = 0;
+        let lastCanvasX = 0, lastCanvasY = 0;
+        let isCanvasSwiping = false;
         const TILT_THRESHOLD = 15;
         const RETURN_THRESHOLD = 10;
         let gyroPermissionGranted = false;
@@ -436,12 +439,14 @@
                 currentOptionIndex = (currentOptionIndex + 1) % currentOptions.length;
                 lastTiltDirection = 1;
                 lastSwipeTime = now;
+                hasScrolled = true;
                 showIndicator();
                 if ('vibrate' in navigator) navigator.vibrate(20);
             } else if (tilt < -TILT_THRESHOLD && lastTiltDirection >= 0) {
                 currentOptionIndex = (currentOptionIndex - 1 + currentOptions.length) % currentOptions.length;
                 lastTiltDirection = -1;
                 lastSwipeTime = now;
+                hasScrolled = true;
                 showIndicator();
                 if ('vibrate' in navigator) navigator.vibrate(20);
             } else if (Math.abs(tilt) < RETURN_THRESHOLD) {
@@ -500,9 +505,57 @@
             }, { passive: false });
 
             canvas.addEventListener('touchstart', (e) => {
-                if (e.touches.length === 1 && lockedLineId) {
-                    if (!e.target.classList.contains('connection-line')) { cancelLock(); }
+                if (e.touches.length === 1) {
+                    canvasTouchStartX = e.touches[0].clientX;
+                    canvasTouchStartY = e.touches[0].clientY;
+                    lastCanvasX = canvasTouchStartX;
+                    lastCanvasY = canvasTouchStartY;
+                    isCanvasSwiping = false;
                 }
+            }, { passive: true });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1 && lockedLineId && lineMode !== 1) {
+                    const currentX = e.touches[0].clientX;
+                    const currentY = e.touches[0].clientY;
+                    const diffX = currentX - lastCanvasX;
+                    const diffY = currentY - lastCanvasY;
+                    if (Math.abs(currentX - canvasTouchStartX) > 8 || Math.abs(currentY - canvasTouchStartY) > 8) {
+                        isCanvasSwiping = true;
+                        if (e.cancelable) e.preventDefault();
+                    }
+                    if (isCanvasSwiping && currentOptions.length > 0) {
+                        if (Math.abs(diffX) > Math.abs(diffY)) {
+                            const steps = Math.floor(Math.abs(diffX) / 80);
+                            if (steps > 0) {
+                                const dir = diffX > 0 ? 1 : -1;
+                                const shift = (dir * steps) % currentOptions.length;
+                                currentOptionIndex = (((currentOptionIndex + shift) % currentOptions.length) + currentOptions.length) % currentOptions.length;
+                                lastCanvasX += dir * steps * 80;
+                                hasScrolled = true;
+                                showIndicator();
+                            }
+                        } else {
+                            const steps = Math.floor(Math.abs(diffY) / 80);
+                            if (steps > 0) {
+                                const dir = diffY > 0 ? 1 : -1;
+                                const shift = (dir * steps) % currentOptions.length;
+                                currentOptionIndex = (((currentOptionIndex + shift) % currentOptions.length) + currentOptions.length) % currentOptions.length;
+                                lastCanvasY += dir * steps * 80;
+                                hasScrolled = true;
+                                showIndicator();
+                            }
+                        }
+                    }
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', (e) => {
+                if (!isCanvasSwiping && lockedLineId && e.changedTouches.length === 1) {
+                    const target = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                    if (target && !target.classList.contains('connection-line')) cancelLock();
+                }
+                isCanvasSwiping = false;
             });
 
             document.getElementById('circuit-content-wrapper').addEventListener('wheel', e => {
@@ -890,8 +943,15 @@
                 if(btn) {
                     btn.classList.add('btn-highlight');
                     // 只允許電腦版自動捲動，手機版不捲動避免畫面亂跑
-                    if (!isTouchDevice) {
-                        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    const container = document.getElementById('gate-scroll-area');
+                    if (container) {
+                        const btnRect = btn.getBoundingClientRect();
+                        const containerRect = container.getBoundingClientRect();
+                        if (btnRect.top < containerRect.top) {
+                            container.scrollTop -= (containerRect.top - btnRect.top + 10);
+                        } else if (btnRect.bottom > containerRect.bottom) {
+                            container.scrollTop += (btnRect.bottom - containerRect.bottom + 10);
+                        }
                     }
                 }
             }
@@ -980,7 +1040,7 @@
             const pill = document.getElementById('ios-indicator');
             const frac = document.getElementById('ind-fraction');
             const label = document.getElementById('ind-label');
-            frac.innerText = isTouchDevice ? `↔ TILT & 2-FINGERS` : `↕ SCROLL & R-CLICK`;
+            frac.innerText = isTouchDevice ? `↔ TILT/SWIPE & 2-FINGERS` : `↕ SCROLL & R-CLICK`;
             label.innerText = ''; 
             label.style.display = 'none';
             pill.classList.add('active');
@@ -1056,7 +1116,7 @@
                     return;
                 }
 
-                if (lineMode === 4) {
+                if (lineMode === 4 && !isTouchDevice) {
                     const targetBit = 2 - dim;
                     applyGate(`X_${targetBit}`);
                     return;
