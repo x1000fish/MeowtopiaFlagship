@@ -945,8 +945,8 @@
                     // 2. 取消焦點，避免按鈕維持 CSS 的預設 hover/active 狀態
                     const btn = document.getElementById('gate-' + g.toLowerCase());
                     if (btn) btn.blur();
-                }, 200); // 200 毫秒的延遲，讓玩家能看到短暫亮起的視覺回饋
-            }
+                }, 800); 
+			}
         }
 
         function getPermutationForGate(g) {
