@@ -12,6 +12,7 @@
         .node img { width: 110px; height: auto; pointer-events: none; }
         .fixed-number { position: absolute; bottom: -5px; right: 50px; font-size: 22px; font-weight: 900; color: #463438; pointer-events: none; z-index: 25; }
         .connection-line { position: absolute; background: #463438; cursor: pointer; z-index: 10; transition: all 0.2s ease; opacity: 1; }
+	.connection-line::after { content: ''; position: absolute; top: -10px; bottom: -10px; left: 0; right: 0; background: transparent; z-index: 10; pointer-events: auto;  }
         .connection-line:hover { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8); z-index: 16; }
         .line-highlight { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; z-index: 15; }
         .line-h { height: 8px; width: 300px; }
@@ -460,54 +461,66 @@
 
             // --- 統一在 circuit-area 處理 dragover，徹底消滅禁止符號 ---
             if (circuitArea) {
-                circuitArea.addEventListener('dragover', (e) => {
-                    e.preventDefault(); // 允許在此區域放置
-                    e.dataTransfer.dropEffect = 'move';
-                    updateScrollSpeed(e.clientX);
-                    if (draggedIndex === null) return;
+               circuitArea.addEventListener('dragover', (e) => {
+    e.preventDefault(); // 允許在此區域處理拖放
+    updateScrollSpeed(e.clientX);
+    if (draggedIndex === null) return;
 
-                    // 全局清掃舊紅線，避免產生雙線
-                    document.querySelectorAll('.circuit-unit').forEach(el => {
-                        el.classList.remove('drag-target', 'drag-target-right');
-                    });
+    // 全局清掃舊紅線，避免產生雙線
+    document.querySelectorAll('.circuit-unit').forEach(el => {
+        el.classList.remove('drag-target', 'right');
+    });
 
-                    // 找出滑鼠底下最靠近的 Gate
-                    const units = Array.from(document.querySelectorAll('.circuit-unit'));
-                    let closestUnit = null;
-                    let minDx = Infinity;
-                    
-                    for (let u of units) {
-                        if (u.offsetParent === null) continue; // 略過隱藏的元素
-                        const rect = u.getBoundingClientRect();
-                        const cx = rect.left + rect.width / 2;
-                        const dx = Math.abs(e.clientX - cx);
-                        if (dx < minDx) {
-                            minDx = dx;
-                            closestUnit = u;
-                        }
-                    }
+    // --- 核心修改：判斷是否在禁止區域 (左側 d1, d2 標籤區) ---
+    const wrapper = document.getElementById('circuit-content-wrapper');
+    const wrapperRect = wrapper.getBoundingClientRect();
+    
+    // 如果滑鼠在 wrapper 的左側（標籤區），或是直接指在標籤上
+    if (e.clientX < wrapperRect.left || e.target.classList.contains('qubit-label')) {
+        e.dataTransfer.dropEffect = 'none'; // 顯示禁止符號
+        return; // 直接結束，這樣就不會畫出紅線，兩者不會同時出現
+    }
 
-                    if (closestUnit) {
-                        // 若最靠近的剛好是正在拖移的自己，則不顯示紅線
-                        if (closestUnit.dataset.type === 'gate' && parseInt(closestUnit.dataset.idx) === draggedIndex) {
-                            // Do nothing
-                        } else {
-                            const rect = closestUnit.getBoundingClientRect();
-                            const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                            
-                            if (closestUnit.dataset.type === 'start') {
-                                closestUnit.classList.add('drag-target-right');
-                            } else if (closestUnit.dataset.type === 'end') {
-                                closestUnit.classList.add('drag-target');
-                            } else {
-                                if (isAfter) closestUnit.classList.add('drag-target-right');
-                                else closestUnit.classList.add('drag-target');
-                            }
-                        }
-                    }
-                    
-                    
-                });
+    // 若滑鼠已經進入電路區塊，則正常顯示拖放圖示
+    e.dataTransfer.dropEffect = 'move'; 
+    // --------------------------------------------------------
+
+    // 找出滑鼠底下最靠近的 Gate
+    const units = Array.from(document.querySelectorAll('.circuit-unit'));
+    let closestUnit = null;
+    let minDx = Infinity;
+    
+    for (let u of units) {
+        if (u.offsetParent === null) continue; // 略過隱藏的元素
+        const rect = u.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const dx = Math.abs(e.clientX - cx);
+        if (dx < minDx) {
+            minDx = dx;
+            closestUnit = u;
+        }
+    }
+
+    if (closestUnit) {
+        // 若最靠近的剛好是正在拖移的自己，則不顯示紅線
+        if (closestUnit.dataset.type === 'gate' && parseInt(closestUnit.dataset.idx) === draggedIndex) {
+            // Do nothing
+        } else {
+            const rect = closestUnit.getBoundingClientRect();
+            const isAfter = (e.clientX - rect.left) > (rect.width / 2);
+            
+            // 照常顯示紅線
+            if (closestUnit.dataset.type === 'start') {
+                closestUnit.classList.add('drag-target', 'right');
+            } else if (closestUnit.dataset.type === 'end') {
+                closestUnit.classList.add('drag-target');
+            } else {
+                if (isAfter) closestUnit.classList.add('drag-target', 'right');
+                else closestUnit.classList.add('drag-target');
+            }
+        }
+    }
+});
 		// 新增：支援一般滑鼠移動到邊緣時也能自動滑動
         	circuitArea.addEventListener('mousemove', (e) => {
                        updateScrollSpeed(e.clientX);
@@ -521,62 +534,73 @@
                 });
 
                 // 統一處理放置 (Drop) 邏輯
-                circuitArea.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    scrollSpeed = 0;
-                    document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'drag-target-right'));
+               circuitArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    scrollSpeed = 0;
+    document.querySelectorAll('.circuit-unit').forEach(el => el.classList.remove('drag-target', 'right'));
 
-                    if (draggedIndex === null) return;
+    if (draggedIndex === null) return;
 
-                    const units = Array.from(document.querySelectorAll('.circuit-unit'));
-                    let closestUnit = null;
-                    let minDx = Infinity;
-                    
-                    for (let u of units) {
-                        if (u.offsetParent === null) continue;
-                        const rect = u.getBoundingClientRect();
-                        const cx = rect.left + rect.width / 2;
-                        const dx = Math.abs(e.clientX - cx);
-                        if (dx < minDx) {
-                            minDx = dx;
-                            closestUnit = u;
-                        }
-                    }
+    // --- 核心修改：防止放置在左側標籤區 ---
+    const wrapper = document.getElementById('circuit-content-wrapper');
+    const wrapperRect = wrapper.getBoundingClientRect();
+    if (e.clientX < wrapperRect.left || e.target.classList.contains('qubit-label')) {
+        draggedIndex = null;
+        return;
+    }
+    // -------------------------------------
 
-                    if (closestUnit) {
-                        // 若放置在自己身上，忽略
-                        if (closestUnit.dataset.type === 'gate' && parseInt(closestUnit.dataset.idx) === draggedIndex) {
-                            draggedIndex = null;
-                            return;
-                        }
-                        
-                        const rect = closestUnit.getBoundingClientRect();
-                        const isAfter = (e.clientX - rect.left) > (rect.width / 2);
-                        let finalIdx;
-                        
-                        if (closestUnit.dataset.type === 'start') {
-                            finalIdx = 0;
-                        } else if (closestUnit.dataset.type === 'end') {
-                            finalIdx = gateHistory.length;
-                        } else {
-                            const idx = parseInt(closestUnit.dataset.idx);
-                            finalIdx = isAfter ? idx + 1 : idx;
-                        }
+    const units = Array.from(document.querySelectorAll('.circuit-unit'));
+    let closestUnit = null;
+    let minDx = Infinity;
+    
+    for (let u of units) {
+        if (u.offsetParent === null) continue;
+        const rect = u.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const dx = Math.abs(e.clientX - cx);
+        if (dx < minDx) {
+            minDx = dx;
+            closestUnit = u;
+        }
+    }
 
-                        if (draggedIndex < finalIdx) finalIdx--;
-                        
-                        if (draggedIndex !== finalIdx) {
-                            if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(err=>{}); }
-                            const movedGate = gateHistory.splice(draggedIndex, 1)[0];
-                            gateHistory.splice(finalIdx, 0, movedGate);
-                            pushHistory();
-                            selectedIndices = [];
-                            recalculatePositions();
-                            finishMove();
-                        }
-                    }
-                    draggedIndex = null;
-                });
+    if (closestUnit) {
+        // 若放置在自己身上，忽略
+        if (closestUnit.dataset.type === 'gate' && parseInt(closestUnit.dataset.idx) === draggedIndex) {
+            draggedIndex = null;
+            return;
+        }
+        
+        const rect = closestUnit.getBoundingClientRect();
+        const isAfter = (e.clientX - rect.left) > (rect.width / 2);
+        let finalIdx;
+        
+        if (closestUnit.dataset.type === 'start') {
+            finalIdx = 0;
+        } else if (closestUnit.dataset.type === 'end') {
+            finalIdx = gateHistory.length;
+        } else {
+            const idx = parseInt(closestUnit.dataset.idx);
+            finalIdx = isAfter ? idx + 1 : idx;
+        }
+
+        if (draggedIndex < finalIdx) finalIdx--;
+        
+        if (draggedIndex !== finalIdx) {
+            if (typeof pop !== 'undefined' && pop.play) { pop.currentTime = 0; pop.play().catch(err=>{}); }
+            const oldHistory = [...gateHistory];
+            const movedItem = gateHistory.splice(draggedIndex, 1)[0];
+            gateHistory.splice(finalIdx, 0, movedItem);
+            
+            actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
+            selectedIndices = [];
+            if (desktopDragGhost) { desktopDragGhost.remove(); desktopDragGhost = null; }
+            recalculate();
+        }
+    }
+    draggedIndex = null;
+});
             }
 
             cw.addEventListener('wheel', (e) => {
@@ -1292,3 +1316,4 @@
     </script>
 </body>
 </html>
+
