@@ -92,10 +92,6 @@
         .game-canvas, .node, .gate-btn-v2 { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation;transition: all 0.2s ease, margin 0.2s ease; }
         .circuit-unit { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; }
         .swap-active { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; height: 8px !important; z-index: 15 !important; border-top: none !important; opacity: 1 !important; }
-        #shake-toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) scale(0.8); background: #99C44D; color: #463438; padding: 15px 40px; border-radius: 50px; font-weight: 900; font-size: 24px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; border: 4px solid #463438; box-shadow: 0 0 20px rgba(153, 196, 77, 0.6), 0 8px 0 #463438; }
-        #shake-toast.show { opacity: 1; transform: translateX(-50%) scale(1); }
-        @keyframes pulse-toast { 0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 20px rgba(153, 196, 77, 0.6), 0 8px 0 #463438; } 50% { transform: translateX(-50%) scale(1.1); box-shadow: 0 0 30px #99C44D, 0 8px 0 #463438; } }
-        .toast-highlight { animation: pulse-toast 1s infinite !important; background: #99C44D !important; color: white !important; }
         .mode-toggle-fixed { position: fixed; top: 20px; right: 20px; width: 70px; height: 70px; background: #fff; border: 5px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; box-shadow: 0 4px 0 #463438; z-index: 500; transition: all 0.1s; }
         .mode-toggle-fixed:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #463438; }
         .mode-toggle-fixed:active { transform: translateY(2px); box-shadow: 0 2px 0 #463438; }
@@ -136,7 +132,6 @@
 </head>
 <body id="body-root" class="mini-mode">
     <div id="quantum-toggle" class="mode-toggle-fixed" onclick="toggleQuantumMode()" style="top: 105px; right: 25px; font-size: 26px;">⚛️</div>
-    <div id="shake-toast">Ctrl Mode: ON</div>
     <button onclick="navWithSound('lab4.html')" class="nav-fab" title="Go to 4-Bit">4</button>
     <div class="w-full max-w-5xl">
         <div class="flex w-full px-4 mb-4 items-center">
@@ -219,8 +214,6 @@
         let lineMode = 1, hoverLine = null;
         let lockedLineId = null;
         let currentOptionIndex = 0, currentOptions = [], draggedIndex = null;
-        let isShakeCtrlActive = false;
-        let lastShakeTime = 0;
         let mobileDragging = false;
         let mDragIndex = null;
         let dragGhost = null;
@@ -383,45 +376,6 @@
         document.addEventListener('drop', () => {
             clearCircuitDragState();
         });
-        function handleMotion(event) {
-            const acc = event.accelerationIncludingGravity;
-            if (!acc) return;
-            const threshold = 20;
-            const delta = Math.sqrt(acc.x ** 2 + acc.y ** 2 + acc.z ** 2);
-            if (delta > threshold) {
-                const now = Date.now();
-                if (now - lastShakeTime > 1000) {
-                    isShakeCtrlActive = !isShakeCtrlActive;
-                    lastShakeTime = now;
-                    if (navigator.vibrate) navigator.vibrate([100]);
-                    const toast = document.getElementById('shake-toast');
-                    if (toast) {
-                        toast.style.background = isShakeCtrlActive ? "#99C44D" : "#FFB7C5";
-                        toast.style.color = isShakeCtrlActive ? "white" : "#463438";
-                        toast.innerText = isShakeCtrlActive ? "CTRL MODE: ON" : "CTRL MODE: OFF";
-                        toast.classList.add('show');
-                        setTimeout(() => { 
-                            if(typeof tutorialPhase !== 'undefined' && tutorialPhase !== 0.5) toast.classList.remove('show'); 
-                        }, 4000);
-                    }
-                }
-            }
-        }
-
-        function requestShakePermission() {
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                DeviceMotionEvent.requestPermission()
-                    .then(state => {
-                        if (state === 'granted') {
-                            window.addEventListener('devicemotion', handleMotion);
-                        }
-                    })
-                    .catch(console.error);
-            } else {
-                window.addEventListener('devicemotion', handleMotion);
-            }
-        }
-
         function handleOrientation(event) {
             if (!lockedLineId || lineMode === 1 || lineMode === 4) return;
             let tilt = event.gamma; 
@@ -466,7 +420,6 @@
                         if (permission === 'granted') gyroPermissionGranted = true;
                     } catch (error) { console.log("Gyro permission denied:", error); }
                 } else { gyroPermissionGranted = true; }
-                requestShakePermission();
                 window.removeEventListener('click', requestPermissions);
                 window.removeEventListener('touchstart', requestPermissions);
             };
@@ -1147,7 +1100,6 @@
         function cycleLineMode() {
             pop.currentTime = 0;
             pop.play();
-            requestShakePermission();
             const modes = [1, 2, 4];
             lineMode = modes[(modes.indexOf(lineMode) + 1) % modes.length];
             const btn = document.getElementById('mode-btn');
@@ -1696,7 +1648,7 @@
                 u.onmouseleave = () => { if (typeof clearHighlight === 'function') clearHighlight(); };
                 u.onclick = e => {
                     if (mobileDragging || activeTraceInput !== null) return;
-                    if (e.ctrlKey || e.metaKey || isShakeCtrlActive) {
+                    if (e.ctrlKey || e.metaKey) {
                         const sIdx = selectedIndices.indexOf(idx);
                         if (sIdx > -1) selectedIndices.splice(sIdx, 1);
                         else selectedIndices.push(idx);
