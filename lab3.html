@@ -14,6 +14,7 @@
         .node img { width: 100px; height: auto; pointer-events: none; }
         .fixed-number { position: absolute; bottom: -4px; right: 41px; font-size: 20px; font-weight: 900; color: #463438; pointer-events: none; z-index: 25; }
         .connection-line { position: absolute; background: #463438; z-index: 10; cursor: pointer; transition: all 0.2s ease; opacity: 1; }
+        .connection-line::after { content: ''; position: absolute; top: -18px; bottom: -18px; left: -18px; right: -18px; background: transparent; pointer-events: auto; }
         @media (hover: hover) {.connection-line:hover { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8); height: 10px !important; z-index: 16; }}
         .line-highlight { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; height: 8px !important; z-index: 15; }
         .fish-wrapper { position: absolute; width: 80px; pointer-events: none; z-index: 30; display: flex; flex-direction: column; align-items: center; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -129,14 +130,8 @@
             z-index: 200;
             pointer-events: none;
         }
-        .drag-target {
-            margin-left: 25px;
-            position: relative;
-        }
-        .drag-target.right {
-            margin-left: 0;
-            margin-right: 25px;
-        }
+        .drag-target { position: relative; }
+        .drag-target.right { margin-left: 0; margin-right: 0; }
     </style>
 </head>
 <body id="body-root" class="mini-mode">
@@ -168,8 +163,8 @@
                 <div id="tt-view-container" class="w-full flex-col hidden-el h-full flex" style="max-height: 100%; overflow: hidden;">
                     <div class="panel-section-title shrink-0 mt-2">Truth Table</div>
                     <div class="text-lg text-gray-400 text-center mb-2 font-bold flex justify-between px-8 shrink-0 border-b border-black-100 pb-2">
-                        <span class="w-1/2 text-left text-black">CAT</span>
-                        <span class="w-1/2 text-right text-black">FISH</span>
+                        <span class="w-1/2 text-left text-black">INPUT</span>
+                        <span class="w-1/2 text-right text-black">OUTPUT</span>
                     </div>
                     <div class="overflow-y-auto w-full flex-grow px-2 mb-2 custom-scrollbar" style="scrollbar-width: none;">
                         <table class="w-full text-center text-lg border-separate border-spacing-y-1">
@@ -242,7 +237,6 @@
         const baseOffsetY = 130;
         const side = 220;
         const offsetPro = 165;
-
         const nodePositions = Array.from({ length: 8 }, (_, i) => {
             let x = (i & 1) ? side : 0;
             let y = (i & 2) ? side : 0;
@@ -259,6 +253,11 @@
         let autoScrollWrapper = null;
         let lastTouchX = 0;
         let lastTouchY = 0;
+        let circuitEdgeScrollRAF = null;
+        let circuitEdgeScrollDirection = 0;
+        let circuitEdgeScrollWrapper = null;
+        const CIRCUIT_EDGE_THRESHOLD = 85;
+        const CIRCUIT_EDGE_SCROLL_SPEED = 4;
         function handleAutoScroll() {
             if (!autoScrollWrapper || scrollDirection === 0) {
                 autoScrollRAF = null;
@@ -279,11 +278,83 @@
             }
             autoScrollRAF = requestAnimationFrame(handleAutoScroll);
         }
+        function runCircuitEdgeScroll() {
+            if (!circuitEdgeScrollWrapper || circuitEdgeScrollDirection === 0) {
+                circuitEdgeScrollRAF = null;
+                return;
+            }
+            const maxScroll = circuitEdgeScrollWrapper.scrollWidth - circuitEdgeScrollWrapper.clientWidth;
+            if (maxScroll <= 0) {
+                stopCircuitEdgeScroll();
+                return;
+            }
+            const before = circuitEdgeScrollWrapper.scrollLeft;
+            circuitEdgeScrollWrapper.scrollLeft = Math.max(
+                0,
+                Math.min(maxScroll, before + circuitEdgeScrollDirection * CIRCUIT_EDGE_SCROLL_SPEED)
+            );
+            circuitEdgeScrollRAF = requestAnimationFrame(runCircuitEdgeScroll);
+        }
+
+        function startCircuitEdgeScroll(direction) {
+            const wrapper = document.getElementById('circuit-content-wrapper');
+            if (!wrapper) return;
+            circuitEdgeScrollWrapper = wrapper;
+            circuitEdgeScrollDirection = direction;
+            if (!circuitEdgeScrollRAF) {
+                circuitEdgeScrollRAF = requestAnimationFrame(runCircuitEdgeScroll);
+            }
+        }
+        function stopCircuitEdgeScroll() {
+            circuitEdgeScrollDirection = 0;
+            circuitEdgeScrollWrapper = null;
+            if (circuitEdgeScrollRAF) {
+                cancelAnimationFrame(circuitEdgeScrollRAF);
+                circuitEdgeScrollRAF = null;
+            }
+        }
+        function clearCircuitDragState() {
+            scrollDirection = 0;
+            autoScrollWrapper = null;
+            if (autoScrollRAF) {
+                cancelAnimationFrame(autoScrollRAF);
+                autoScrollRAF = null;
+            }
+            draggedIndex = null;
+            document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
+            document.querySelectorAll('.gate-visuals').forEach(v => v.style.opacity = '1');
+            document.querySelectorAll('.circuit-unit').forEach(u => { u.style.opacity = '1'; });
+        }
+        function updateCircuitEdgeScroll(e) {
+            if (mobileDragging || draggedIndex !== null) return;
+            const area = document.getElementById('circuit-area');
+            if (!area) return;
+            const rect = area.getBoundingClientRect();
+            if (e.clientX < rect.left + CIRCUIT_EDGE_THRESHOLD) {
+                startCircuitEdgeScroll(-1);
+            } else if (e.clientX > rect.right - CIRCUIT_EDGE_THRESHOLD) {
+                startCircuitEdgeScroll(1);
+            } else {
+                stopCircuitEdgeScroll();
+            }
+        }
+        function initCircuitEdgeAutoScroll() {
+            const area = document.getElementById('circuit-area');
+            if (!area) return;
+            area.addEventListener('mousemove', updateCircuitEdgeScroll);
+            area.addEventListener('mouseenter', updateCircuitEdgeScroll);
+            area.addEventListener('mouseleave', stopCircuitEdgeScroll);
+            window.addEventListener('blur', stopCircuitEdgeScroll);
+        }
         document.addEventListener('dragover', (e) => {
             if (draggedIndex === null) return; // 只有在拖曳 Gate 時才觸發
+            const wrapper = document.getElementById('circuit-content-wrapper');
+            if (wrapper && wrapper.contains(e.target)) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            }
             lastTouchX = e.clientX;
             lastTouchY = e.clientY;
-            const wrapper = document.getElementById('circuit-content-wrapper');
             if (!wrapper) return;
             const wrapperRect = wrapper.getBoundingClientRect();
             const threshold = 60; // 滑鼠距離邊緣 60px 觸發捲動
@@ -304,12 +375,10 @@
             }
         });
         document.addEventListener('dragend', () => {
-            scrollDirection = 0;
-            if (autoScrollRAF) { cancelAnimationFrame(autoScrollRAF); autoScrollRAF = null; }
+            clearCircuitDragState();
         });
         document.addEventListener('drop', () => {
-            scrollDirection = 0;
-            if (autoScrollRAF) { cancelAnimationFrame(autoScrollRAF); autoScrollRAF = null; }
+            clearCircuitDragState();
         });
         function handleMotion(event) {
             const acc = event.accelerationIncludingGravity;
@@ -352,10 +421,8 @@
 
         function handleOrientation(event) {
             if (!lockedLineId || lineMode === 1 || lineMode === 4) return;
-            
             let tilt = event.gamma; 
             const orientation = (screen.orientation || {}).type || window.orientation;
-            
             if (orientation === 90 || orientation === "landscape-primary") {
                 tilt = event.beta;
             } else if (orientation === -90 || orientation === "landscape-secondary") {
@@ -363,10 +430,8 @@
             } else if (orientation === 180 || orientation === "portrait-secondary") {
                 tilt = -event.gamma;
             }
-
             const now = Date.now();
             if (now - lastSwipeTime < 400) return;
-
             if (tilt > TILT_THRESHOLD && lastTiltDirection <= 0) {
                 currentOptionIndex = (currentOptionIndex + 1) % currentOptions.length;
                 lastTiltDirection = 1;
@@ -383,7 +448,6 @@
                 lastTiltDirection = 0;
             }
         }
-
         window.onload = () => {
             initLabData();
             initGameLayout();
@@ -445,7 +509,7 @@
                 e.preventDefault();
                 e.currentTarget.scrollLeft += e.deltaY;
             });
-            
+            initCircuitEdgeAutoScroll();
             document.addEventListener('wheel', e => {
                 if (!lockedLineId || lineMode !== 2 || isTouchDevice) return;
                 const target = e.target;
@@ -1315,23 +1379,26 @@
 
             if (!isTouchDevice && activeTraceInput === null) {
                 startU.ondragover = (e) => {
-                    if (draggedIndex === null || draggedIndex === idx) return;
+                    if (draggedIndex === null) return;
                     e.preventDefault();
                     e.dataTransfer.dropEffect = 'move';
                     document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
-                    u.classList.add('drag-target');
+                    if (draggedIndex !== 0) startU.classList.add('drag-target');
                     return false;
                 };
                 startU.ondragleave = () => startU.classList.remove('drag-target');
-                startU.ondrop = () => {
-                    startU.classList.remove('drag-target');
-                    if (draggedIndex === null) return;
+                startU.ondrop = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const sourceIdx = draggedIndex;
+                    clearCircuitDragState();
+                    if (sourceIdx === null || sourceIdx === 0) return;
                     pop.currentTime = 0; pop.play();
                     const oldHistory = [...gateHistory];
-                    const movedGate = gateHistory.splice(draggedIndex, 1)[0];
+                    const movedGate = gateHistory.splice(sourceIdx, 1)[0];
                     gateHistory.splice(0, 0, movedGate); 
                     actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
-                    selectedIndices = []; recalculate(); draggedIndex = null;
+                    selectedIndices = []; recalculate();
                 };
             }
             c.appendChild(startU);
@@ -1437,20 +1504,21 @@
                     };
                     u.ondragleave = (e) => { u.classList.remove('drag-target'); };
                     u.ondrop = (e) => {
-                        u.classList.remove('drag-target');
-                        if (draggedIndex === null || draggedIndex === idx) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const sourceIdx = draggedIndex;
+                        clearCircuitDragState();
+                        if (sourceIdx === null || sourceIdx === idx) return;
                         pop.currentTime = 0; pop.play();
                         const oldHistory = [...gateHistory];
-                        const movedGate = gateHistory.splice(draggedIndex, 1)[0];
+                        const movedGate = gateHistory.splice(sourceIdx, 1)[0];
                         gateHistory.splice(idx, 0, movedGate);
                         actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
-                        selectedIndices = []; recalculate(); draggedIndex = null;
+                        selectedIndices = []; recalculate();
                     };
                     u.ondragend = (e) => { 
                         if (dragClone && document.body.contains(dragClone)) dragClone.remove();
-                        visuals.style.opacity = '1';
-                        draggedIndex = null; 
-                        document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
+                        clearCircuitDragState();
                     };
                 }
 
@@ -1607,23 +1675,26 @@
             drawWires(endPad, states.length > 0 ? states.length - 1 : 0);
             if (!isTouchDevice && activeTraceInput === null) {
                 endPad.ondragover = (e) => {
-                    if (draggedIndex === null || draggedIndex === gateHistory.length - 1) return;
+                    if (draggedIndex === null) return;
                     e.preventDefault();
                     e.dataTransfer.dropEffect = 'move';
                     document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
-                    endPad.classList.add('drag-target');
+                    if (draggedIndex !== gateHistory.length - 1) endPad.classList.add('drag-target');
                     return false;
                 };
                 endPad.ondragleave = () => endPad.classList.remove('drag-target');
-                endPad.ondrop = () => {
-                    endPad.classList.remove('drag-target');
-                    if (draggedIndex === null || draggedIndex === gateHistory.length - 1) return;
+                endPad.ondrop = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const sourceIdx = draggedIndex;
+                    clearCircuitDragState();
+                    if (sourceIdx === null || sourceIdx === gateHistory.length - 1) return;
                     pop.currentTime = 0; pop.play();
                     const oldHistory = [...gateHistory];
-                    const movedGate = gateHistory.splice(draggedIndex, 1)[0];
+                    const movedGate = gateHistory.splice(sourceIdx, 1)[0];
                     gateHistory.splice(gateHistory.length, 0, movedGate); 
                     actionStack.push({ type: 'replace', index: 0, oldGates: oldHistory, newGate: null });
-                    selectedIndices = []; recalculate(); draggedIndex = null;
+                    selectedIndices = []; recalculate();
                 };
             }
             c.appendChild(endPad);
