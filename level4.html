@@ -20,63 +20,84 @@
         .bookmark-tab {position: absolute;right: -45px;  top: 40px; width: 45px; height: 130px;background: #463438;border: 5px solid #463438; border-left: none; border-radius: 0 15px 15px 0; cursor: pointer; display: flex; align-items: center;justify-content: center;transition: background 0.2s, right 0.2s, width 0.2s; z-index: 1;}
         .bookmark-tab:hover { background: #FFB7C5; width: 55px; right: -55px;}
         .bookmark-text { writing-mode: vertical-lr;  color: white;font-weight: 900;font-size: 20px;text-shadow: 2px 2px 0 #463438;letter-spacing: 4px;user-select: none;}
+        #rankList { padding-top: 10px; }
         #rankList::-webkit-scrollbar { width: 6px; }
         #rankList::-webkit-scrollbar-thumb { background-color: #FFB7C5; border-radius: 10px; }
         .rank-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 2px solid #fce4ec; font-weight: 900; font-size: 14px; color: #463438; }
         .rank-tab { flex: 1; padding: 4px; font-size: 12px; font-weight: 900; border: 3px solid #463438; border-radius: 12px; cursor: pointer; transition: all 0.1s; text-align: center; background: #fff; color: #463438; }
         .rank-tab.active { background: #463438; color: #fff; }
+        .rank-avatar-sm { width: 28px; height: 28px; flex: 0 0 28px; border: 2px solid #463438; border-radius: 50%; background: #fff9f0; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 0.9rem; }
+        .rank-avatar-sm img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .rank-player-main { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; }
+        .rank-number { width: 22px; flex: 0 0 22px; text-align: right; font-weight: 900; color: #463438; }
+        .rank-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+        .rank-avatar-wrap { position: relative; width: 28px; height: 28px; flex: 0 0 28px; }
+        .rank-avatar-wrap .rank-avatar-sm { width: 100%; height: 100%; }
+        .rank-champion-toast .rank-avatar-wrap { width: 58px; height: 58px; flex: 0 0 58px; }
+        .rank-item.rank-champion .rank-avatar-sm { border-color: #f4c542; box-shadow: 0 0 0 3px rgba(244,197,66,0.32); }
+        .rank-crown { position: absolute; top: -12px; left: 50%; transform: translateX(-50%) rotate(-8deg); font-size: 18px; line-height: 1; filter: drop-shadow(0 2px 0 rgba(70,52,56,0.35)); pointer-events: none; }
+        .rank-champion-backdrop { position: fixed; inset: 0; background: rgba(255, 249, 240, 0.46); opacity: 0; z-index: 120; pointer-events: none; transition: opacity 0.2s ease; }
+        .rank-champion-backdrop.show { opacity: 1; }
+        .rank-champion-toast { position: fixed; left: 12px; top: 108px; transform: translate(0, -50%) scale(0.82); opacity: 0; z-index: 3000; background: #fffaf5; border: 6px solid #463438; border-radius: 22px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 0 #FFB7C5; color: #463438; pointer-events: none; transform-origin: left center; box-sizing: border-box; overflow: hidden; }
+        .rank-champion-toast.show { animation: rankChampionPop 1.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .rank-champion-toast .rank-avatar-sm { width: 58px; height: 58px; flex-basis: 58px; border-width: 4px; }
+        .rank-champion-text { display: flex; flex-direction: column; line-height: 1.05; min-width: 0; flex: 1 1 auto; overflow: hidden; }
+        .rank-champion-label { font-size: 12px; font-weight: 900; color: #5ba4cf; letter-spacing: 0; }
+        .rank-champion-name { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 24px; font-weight: 900; }
+        @keyframes rankChampionPop { 0% { opacity: 0; transform: translate(0, -50%) scale(0.82); } 20% { opacity: 1; transform: translate(0, -62%) scale(1.05); } 68% { opacity: 1; transform: translate(0, -62%) scale(1); } 100% { opacity: 0; transform: translate(0, -50%) scale(0.82); } }
         .node { width: 140px; height: 140px; background: white; border: 6px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; box-shadow: 3px 3px 0 #463438; z-index: 20; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         .node img { width: 110px; height: auto; pointer-events: none; }
-        .fixed-number { position: absolute; bottom: -5px; right: 50px; font-size: 22px; font-weight: 900; color: #463438; pointer-events: none; z-index: 25; }
-        
+        .fixed-number { position: absolute; bottom: -3px; right: 50px; font-size: 22px; font-weight: 900; color: #463438; pointer-events: none; z-index: 25; }       
         .connection-line { position: absolute; background: #463438; cursor: pointer; z-index: 10; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
         .connection-line:hover { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; z-index: 16 !important; }
         .connection-line::after { content: ''; position: absolute; top: -15px; bottom: -15px; left: -15px; right: -15px; background-color: transparent; }
-        
         .line-highlight { background: #99C44D !important; box-shadow: 0 0 15px rgba(153, 196, 77, 0.8) !important; z-index: 15 !important; }
         .line-h { height: 8px; width: 300px; }
         .line-v { width: 8px; height: 250px; }
-
-        .fish-wrapper { position: absolute; width: 80px; pointer-events: none; z-index: 30; display: none; flex-direction: column; align-items: center; }
+        .fish-wrapper { position: absolute; width: 80px; pointer-events: none; z-index: 30; display: none; flex-direction: column; align-items: center;  height: 80px; justify-content: center; transform: translate(-50%, -50%);}
         .fish-ready { display: flex; }
         .fish-animate { transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-        
         .fish-wrapper img { width: 70px; height: auto; }
+        .node.node-correct { background: #ebceff; }
+        .fish-wrapper::before { content: none; }
+        .fish-wrapper.fish-correct::before { opacity: 0; }
         .fish-label { background: rgba(70, 52, 56, 0.8); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; margin-bottom: -47px; z-index: 5; position: relative; top: -10px; }
         .game-btn { cursor: pointer; border: 5px solid #463438; border-radius: 60px; padding: 12px; font-size: 26px; font-weight: 900; color: white; text-shadow: 2px 2px 0 #463438; box-shadow: 0 6px 0 #463438; position: relative; transition: all 0.1s; display: inline-block; }
         .game-btn:active { top: 6px; box-shadow: 0 2px 0 #463438; }
         .btn-red { background: #FFB7C5; }
         .btn-green { background: #99C44D; }
+        .btn-blue { background: #5BA4CF; }
+        .victory-actions, .victory-progress-actions { display: flex; gap: 14px; align-items: center; justify-content: center; }
+        .victory-actions { margin-bottom: 16px; }
+        .victory-progress-actions .keep-going-btn { flex: 1; margin: 0; }
+        .home-btn { width: 150px; border-radius: 60px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
+        .keep-going-btn { max-width: 280px; white-space: nowrap; }
+        .replay-btn { width: 78px; height: 78px; flex: 0 0 78px; border-radius: 50%; padding: 0; display: inline-flex; align-items: center; justify-content: center; margin: 0; }
+        .replay-btn svg { width: 38px; height: 38px; filter: drop-shadow(2px 2px 0 #463438); }
         .multi-toggle-btn { background: #e2de6e; border: 4px solid #463438; border-radius: 20px; padding: 5px 15px; font-weight: 900; font-size: 20px; color: white; cursor: pointer; box-shadow: 0 4px 0 #463438; transition: all 0.1s; min-width: 140px; text-shadow: 2px 2px 0 #463438; }
         .multi-toggle-btn.active-mode { background: #629eed; }
         .multi-toggle-btn:hover,
         .game-btn:hover,
         .mode-toggle-fixed:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #463438;}
         .multi-toggle-btn:active,
-        .mode-toggle-fixed:active { transform: translateY(2px); box-shadow: 0 2px 0 #463438;}
-        
+        .mode-toggle-fixed:active { transform: translateY(2px); box-shadow: 0 2px 0 #463438;} 
         .gate-btn-v2 { position: relative; height: 76px; width: 72px; display: flex; align-items: center; justify-content: center; padding: 0; border: 2.5px solid #463438; border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 6px rgba(0,0,0,0.1); margin: auto; background-color: transparent;}
-        
         .btn-not { background-color: rgba(226, 222, 110, 0.35) !important; }
         .btn-cnot { background-color: rgba(98, 158, 237, 0.35) !important; }
-        
         .gate-btn-v2:hover { background-color: #FFB7C5 !important; filter: brightness(1.05); transform: scale(1.05); z-index: 10; border-color: #463438; }
         .btn-highlight { transform: scale(1.15) !important; box-shadow: 0 0 10px rgba(0,0,0,0.3) !important; border: 4px solid #99C44D !important; z-index: 10 !important; filter: brightness(1.1) !important; background-color: #FFB7C5 !important; }
-        
         .hyper-line { stroke: #463438; stroke-width: 2; opacity: 0.3; }
         .hyper-line-hi { stroke: #FFB7C5; stroke-width: 4.5; opacity: 1; transition: stroke 0.2s; }
         .gate-btn-v2 .hyper-line-hi { stroke: #f78790; }
         .gate-btn-v2:hover .hyper-line-hi { stroke: #ffffff !important; }
         .btn-highlight .hyper-line-hi { stroke: #ffffff !important; }
         .circuit-unit:hover .hyper-line-hi, .circuit-unit.selected .hyper-line-hi { stroke: #99C44D !important; }
-
         .func-btn { width: 100%; margin-top: 5px; padding: 10px; border-radius: 35px; font-weight: 900; font-size: 16px; border: 2.5px solid #463438; cursor: pointer; box-shadow: 0 4px 0 rgba(70,52,56,0.1); }
         .btn-reset { background: #FFF9F0; color: #463438; }
         .btn-undo { background: #FFB7C5 !important; color: #fff !important; border: 2.5px solid #463438 !important; opacity: 0.6; cursor: not-allowed; }
         .btn-undo.active { background: #FFB7C5 !important; border-color: #463438 !important; color: #fff !important; opacity: 1; cursor: pointer; box-shadow: 0 4px 0 #463438; }
         .btn-undo.active:hover { background-color: #ff9fb2 !important; transform: translateY(-2px); box-shadow: 0 6px 0 #463438; animation: pulse-red-undo 1.2s infinite ease-in-out !important; }
-        .func-btn:hover { background-color: #FFB7C5 !important; color: #fff !important; border-color: #463438 !important; box-shadow: 0 3px 0 #463438 !important; transform: translateY(-2px); } 
-        
+        .func-btn:hover { background-color: #FFB7C5 !important; color: #fff !important; border-color: #463438 !important; box-shadow: 0 3px 0 #463438 !important; transform: translateY(-2px); }   
         #pro-panel { width: 0; opacity: 0; height: 500px; overflow: hidden; background: #ffffff; border: 0px solid #463438; border-radius: 40px; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; align-items: center; gap: 3px; }
         .pro-active #pro-panel { width: 320px; opacity: 1; border: 8px solid #463438; padding: 12px 20px 20px 20px; box-shadow: 10px 10px 0px #99C44D; }
         .panel-section-title { font-weight: 900; font-size: 18px; margin-bottom: 6px; margin-top: 6px; color: #463438; text-align: center; white-space: nowrap; overflow: hidden; }
@@ -86,41 +107,31 @@
         .pro-active .line-v:nth-of-type(3) { left: 130px !important; }
         .pro-active .line-v:nth-of-type(4) { left: 470px !important; }
         .pro-active #fish-0, .pro-active #fish-2 { left: 95px; }
-        .pro-active #fish-1, .pro-active #fish-3 { left: 435px; }
-        
+        .pro-active #fish-1, .pro-active #fish-3 { left: 435px; }  
         #circuit-area { width: 900px; height: 0; opacity: 0; background: #ffffff; border: 0px solid #463438; border-radius: 30px; margin-top: 20px; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); position: relative; padding: 0 15px; overflow: hidden; touch-action: pan-x; overscroll-behavior-y: none; }
         .pro-active #circuit-area { height: 170px; opacity: 1; border: 8px solid #463438; padding: 15px; box-shadow: 10px 10px 0px #FFB7C5; }
         .circuit-title { text-align: center; font-weight: 900; font-size: 1.25rem; margin-bottom: 7px; color: #463438; }
         #circuit-content-wrapper { position: relative; height: 130px; overflow-x: auto !important; overflow-y: hidden; margin-left: 30px; padding-top: 4px; scroll-behavior: auto; touch-action: pan-x; overscroll-behavior-y: none; }
         #circuit-content-wrapper::-webkit-scrollbar { display: none; }
-        #circuit-content { display: flex; height: 100%; padding: 0 7px; min-width: 100%; width: max-content; position: relative; background-image: linear-gradient(#463438, #463438), linear-gradient(#463438, #463438); background-size: 100% 3px; background-repeat: no-repeat; background-position: 0 20px, 0 60px; }
-        
+        #circuit-content { display: flex; height: 100%; padding: 0 7px; min-width: 100%; width: max-content; position: relative; background-image: linear-gradient(#463438, #463438), linear-gradient(#463438, #463438); background-size: 100% 3px; background-repeat: no-repeat; background-position: 0 20px, 0 60px; }  
         .mini-mode #circuit-content { background-image: none !important; }
         .mini-mode .circuit-unit { min-width: 85px !important; width: 85px !important; max-width: 85px !important; flex: 0 0 85px !important; padding: 0 !important; }
-
         .qubit-label { position: absolute; left: 12px; font-weight: 900; font-size: 16px; color: #463438; z-index: 5; }
-        
         .circuit-unit { min-width: 60px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: grab; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s, border 0.2s; touch-action: none; box-sizing: border-box; background-color: transparent !important; border: 3px solid transparent; border-radius: 12px; }
         .circuit-unit:active { cursor: grabbing; }
         .circuit-unit:hover { background-color: var(--bg-hover) !important; border-radius: 12px; }
         .circuit-unit.selected { background-color: var(--bg-hover) !important; border: 3px solid var(--border-color) !important; border-radius: 12px; }
         .circuit-unit > * { position: absolute; left: 50% !important; transform: translateX(-50%); }
-        
         .circuit-target { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2.5px solid #463438; display: flex; align-items: center; justify-content: center; z-index: 15; transform: translate(-50%, -50%); overflow: hidden; }
-        
         .drop-hint-left::before { content: ''; position: absolute; left: -3px; top: 10px; bottom: 10px; width: 4px; background-color: #f78790; border-radius: 4px; z-index: 200; pointer-events: none; }
         .drop-hint-right::after { content: ''; position: absolute; right: -3px; top: 10px; bottom: 10px; width: 4px; background-color: #f78790; border-radius: 4px; z-index: 200; pointer-events: none; }
-
         .control-dot { width: 14px; height: 14px; background: #463438; border-radius: 50%; position: absolute; z-index: 5; }
         .connection-v-line { position: absolute; width: 2.5px; background: #463438; z-index: 3; }
-        
         .modal-overlay { position: fixed; inset: 0; background: rgba(70, 52, 56, 0.7); display: none; align-items: center; justify-content: center; z-index: 1100; }
         .modal-content { background: #FFF9F0; border: 8px solid #463438; border-radius: 40px; padding: 30px; text-align: center; width: 380px; box-shadow: 0 10px 0 #FFB7C5; color: #463438; }
-        .no-fish-anim .fish-wrapper, .no-fish-anim .node { transition: none !important; }
-        
+        .no-fish-anim .fish-wrapper, .no-fish-anim .node { transition: none !important; } 
         .mode-toggle-fixed { position: fixed; top: 20px; right: 20px; width: 70px; height: 70px; background: white; border: 5px solid #463438; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; box-shadow: 0 4px 0 #463438; z-index: 500; }
-        @keyframes pulse-red-undo { 0%, 100% { transform: scale(1); box-shadow: 0 4px 0 #463438; } 50% { transform: scale(1.05); box-shadow: 0 0 20px #FFB7C5, 0 4px 0 #463438; } }
-        
+        @keyframes pulse-red-undo { 0%, 100% { transform: scale(1); box-shadow: 0 4px 0 #463438; } 50% { transform: scale(1.05); box-shadow: 0 0 20px #FFB7C5, 0 4px 0 #463438; } }  
         .wire-container { position: relative; width: 60%; max-width: 50px; height: 100%; background-image: linear-gradient(#463438, #463438), linear-gradient(#463438, #463438); background-size: 100% 3px; background-repeat: no-repeat; background-position: center 24px, center 52px; pointer-events: none; }
         #canvas-bottom-btns { position: absolute; bottom: 20px; right: 30px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
         #canvas-bottom-btns .func-btn { margin-top: 0; width: 90px; font-size: 14px; padding: 8px 5px; text-transform: uppercase; border-width: 3px; }
@@ -128,36 +139,174 @@
         .dragging #circuit-content { background-image: none !important; }
         .circuit-unit.is-dragging { background-color: var(--bg-hover) !important; }
         .circuit-unit.is-dragging .circuit-target::after { display: none !important; }
-    </style>
+        .mode-toggle-inline { width: 44px; height: 44px; background: #ffffff; border: 3px solid #463438; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; box-shadow: 0 3px 0 #463438; transition: all 0.1s; margin-left: 10px; color: #463438; text-shadow: none; padding: 0; }
+        .mode-toggle-inline:hover { transform: translateY(-2px); box-shadow: 0 5px 0 #463438; }
+        .mode-toggle-inline:active { transform: translateY(2px); box-shadow: 0 1px 0 #463438; }
+        .fixed-number, .fish-label { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .hide-labels .fixed-number, .hide-labels .fish-label { opacity: 0; transform: translateY(1px); pointer-events: none; }
+        .node img, .fish-wrapper img, .hat-img { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        body:not(.hide-labels) .node > img.encoded-img:not(.hat-img), body:not(.hide-labels) .node > img.skin-cat, body:not(.hide-labels) .node > img:not(.hat-img) { transform: translate(-2px, -7px) scale(0.94); }
+        body:not(.hide-labels) .fish-wrapper > img.fish-img, body:not(.hide-labels) .fish-wrapper > img.fish-bg-shape, body:not(.hide-labels) .fish-wrapper > img:not(.hat-img) { transform: scale(0.94) translateY(1px); }
+        body.skin-poto:not(.hide-labels) .node > img.skin-cat { transform: translateY(-7px) translateX(-2px) scale(0.94); }
+        body.skin-poto.hide-labels .node > img.skin-cat { transform: translateY(0px) translateX(-2px) scale(1); }
+        body.skin-mj:not(.hide-labels) .node > img.skin-cat { transform: translateX(-3px) translateY(-8px) scale(0.94); }
+        body.skin-rip:not(.hide-labels) .node > img.skin-cat { transform: translateX(0px) translateY(-8px) scale(0.94); }
+        body.skin-poto:not(.hide-labels) .fish-wrapper > img.fish-img, body.skin-poto:not(.hide-labels) .fish-wrapper > img.fish-bg-shape { transform: translateY(-5px) translateX(2px) scale(1); }
+        body.skin-mj:not(.hide-labels) .fish-wrapper > img.fish-img, body.skin-mj:not(.hide-labels) .fish-wrapper > img.fish-bg-shape { transform: translateY(6px) translateX(4px) scale(0.95); }
+        body.skin-rip:not(.hide-labels) .fish-wrapper > img.fish-img, body.skin-rip:not(.hide-labels) .fish-wrapper > img.fish-bg-shape { transform: translateY(-20px) translateX(2px) scale(1); }
+        .side-leaderboard-content { height: 450px; max-height: calc(100vh - 90px); }
+        .bookmark-tab.rank-bookmark { top: 40px; background: #514749; }
+        .bookmark-tab.skin-bookmark { top: 170px; height: 118px; background: #7d6961; }
+        #leaderboard-wrapper.expanded .bookmark-tab.active { background: #FFB7C5; }
+        .skin-gallery { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; align-content: start; gap: 10px; overflow-y: auto; padding: 2px 2px 8px 0; }
+        .skin-card { min-height: 120px; border: 3px solid #463438; border-radius: 12px; background: #fffaf5; color: #463438; cursor: pointer; font-size: 12px; font-weight: 900; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; box-shadow: 0 4px 0 rgba(70,52,56,0.18); transition: transform 0.12s, background 0.12s, box-shadow 0.12s; }
+        .skin-card:hover { background: #fce4ec; transform: translateY(-2px); box-shadow: 0 6px 0 rgba(70,52,56,0.22); }
+        .skin-card.active { background: #FFB7C5; color: #fff; box-shadow: 0 4px 0 #463438; }
+        .skin-preview { width: 70px; height: 70px; border: 3px solid #463438; border-radius: 50%; background: #fff; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .skin-preview img.preview-cat { max-width: 58px; max-height: 58px; object-fit: contain; pointer-events: none; }
+        .skin-preview img.preview-cat-mj { max-width: 63px; max-height: 68px; transform: scale(1.12); }
+        .skin-preview img.preview-hat { position: absolute; width: 24px; top: 8px; left: 35px; transform: translateX(-50%); z-index: 2; pointer-events: none; }
+        .skin-card.active .skin-preview { border-color: #fff; }
+        .node img.skin-cat, .fish-wrapper img.fish-img, .fish-wrapper img.fish-bg-shape { object-fit: contain; }
+        .skin-rip .node img.skin-cat { width: 115px; transform: translateY(-4px);}
+        .skin-rip .fish-wrapper img.fish-img { width: 86px; }
+        .skin-poto .node img.skin-cat { width: 120px; transform: translateX(-4px); }
+        .skin-poto .fish-wrapper img.fish-img { width: 120px; transform:scale(1.1) translateY(4px) translateX(1px); }
+        .skin-mj .node img.skin-cat { width: 122px; transform: translateX(-3px) translateY(-2px); }
+        .fish-wrapper img.fish-bg-shape { display: block; position: absolute; z-index: 1; filter: brightness(0) invert(1); opacity: 1; }
+        .fish-wrapper img.fish-img { position: absolute; z-index: 2; }
+        .bit-faded { filter: grayscale(1) saturate(0) brightness(0.95) contrast(0.72); }
+        .progress-bar-wrapper { flex: 1; height: 32px; background: #fffaf5; border: 4px solid #463438; border-radius: 20px; position: relative; box-shadow: inset 0 3px 5px rgba(0,0,0,0.1), 3px 3px 0 #FFB7C5; display: flex; align-items: center; justify-content: center; }
+        .progress-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background-color: #99C44D; border-radius: 16px; transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.5s; overflow: hidden; border-right: 3px solid #463438; }
+        .progress-bar-fill::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: linear-gradient(45deg, rgba(255,255,255,0.25) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.25) 75%, transparent 75%, transparent); background-size: 30px 30px; animation: stripeMove 1s linear infinite; }
+        @keyframes stripeMove { 0% { background-position: 0 0; } 100% { background-position: 30px 0; } }
+                .rank-item { gap: 8px; align-items: center; }
+        .rank-player-main { flex: 1 1 0; overflow: hidden; }
+        .rank-value { flex: 0 0 auto; max-width: 62px; text-align: right; color: #5ba4cf; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .feature-toggle-row .qubit-label { position: relative; left: auto; top: auto; font-weight: 900; font-size: 16px; color: #463438; transition: transform 0.2s; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; cursor: pointer; user-select: none; z-index: 5; }
+        .feature-toggle-row .qubit-label:hover { transform: translateY(-2px) scale(1.05); z-index: 50; }
+        .feature-toggle-row .qubit-label:active { transform: translateY(2px) scale(0.95); }
+        .feature-state-1 { border-color: #FFB800 !important; background-color: rgba(255, 184, 0, 0.2); box-shadow: 0 0 10px rgba(255, 184, 0, 0.8); transform: scale(1.1); transition: all 0.2s; }
+        .feature-state-0 { border-color: #463438 !important; background-color: rgba(70, 52, 56, 0.2); box-shadow: 0 0 8px rgba(70, 52, 56, 0.8); filter: grayscale(1) brightness(0.85); transform: scale(1.1); transition: all 0.2s; }
+        .node-dist-badge { position: absolute; top: -2px; right: -2px; background: #FFB800; color: #463438; width: 26px; height: 26px; border-radius: 50%; border: 3px solid #463438; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; box-shadow: 2px 2px 0 rgba(70,52,56,0.5); pointer-events: none; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 60; }
+        .node.feature-highlight { border-color: #FFB800 !important; box-shadow: 3px 3px 0 #FFB800 !important; z-index: 45 !important; }
+        .node.feature-dimmed { background-color: #fff !important; }
+        .node.feature-dimmed > img:not(.hat-bg-shape), .node.feature-dimmed > div:not(.node-dist-badge):not(.fixed-number) { opacity: 0.25 !important; }
+        .node.feature-dimmed > .fixed-number { opacity: 0 !important; visibility: hidden !important; }
+        .node.feature-dimmed > img.hat-bg-shape { opacity: 1 !important; }
+        .node.feature-dimmed > img.cat-bg-shape { opacity: 1 !important; }
+        .node img.cat-bg-shape { position: absolute; filter: brightness(0) invert(1); opacity: 1; z-index: 19; pointer-events: none; }
+        .node img.cat-bg-shape + img { position: relative; z-index: 20; }
+        .fish-wrapper.feature-highlight { z-index: 55 !important; }
+        .feature-filter-active #fishes-layer { z-index: 90 !important; }
+        .feature-filter-active .fish-wrapper { z-index: 90 !important; }
+        .fish-wrapper.feature-dimmed { opacity: 1 !important; }
+        .fish-wrapper.feature-dimmed img.fish-bg-shape { opacity: 1 !important; }
+        .fish-wrapper.feature-dimmed img.fish-img, .fish-wrapper.feature-dimmed img.hat-img:not(.hat-bg-shape), .fish-wrapper.feature-dimmed > img:not(.fish-bg-shape):not(.hat-bg-shape) { opacity: 0.25 !important; }
+        .fish-wrapper.feature-dimmed .fish-label { opacity: 0 !important; visibility: hidden !important; }
+        .progress-text { position: relative; z-index: 5; font-weight: 900; color: #463438; font-size: 14px; letter-spacing: 1px; }
+        .progress-thumb { position: absolute; top: 50%; left: 0%; transform: translate(-50%, -50%); width: 70px; height: auto; z-index: 5; transition: left 0.5s cubic-bezier(0.16, 1, 0.3, 1); filter: drop-shadow(2px 2px 0px rgba(70,52,56,0.5)); }
+        .progress-target { position: absolute; right: -12px; top: 50%; transform: translateY(-50%); width: 60px; height: auto; z-index: 15; filter: drop-shadow(2px 2px 0px rgba(70,52,56,0.3)); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .progress-win .progress-bar-fill { background-color: #FFB7C5; }
+        .progress-win .progress-target { animation: targetBounce 0.5s infinite alternate; }
+        @keyframes targetBounce { 0% { transform: translateY(-50%) scale(1); } 100% { transform: translateY(-50%) scale(1.25) rotate(12deg); } }
+        @media (min-width: 1024px) {body {zoom: 0.9;} }
+        .fish-label { width: 32px; height: 22px; border-radius: 10px; font-size: 11px; position: absolute; top: 8px; right: auto; margin-bottom: 0; pointer-events: none; }
+        body:not(.hide-labels) .fish-wrapper > img.fish-img, body:not(.hide-labels) .fish-wrapper > img.fish-bg-shape { transform: translateY(-50%); }
+        .hide-labels .fish-wrapper > img.fish-img, .hide-labels .fish-wrapper > img.fish-bg-shape { transform: translateY(-35%) translateX(4%) scale(1.05) !important; }
+        .skin-rip .fish-wrapper img.fish-bg-shape { width: 80px; }
+        body.skin-rip:not(.hide-labels) .fish-wrapper > img.fish-img, body.skin-rip:not(.hide-labels) .fish-wrapper > img.fish-bg-shape { transform: translateY(-40%) translateX(4%) scale(1.05); }
+        .skin-rip.hide-labels .fish-wrapper > img.fish-img, .skin-rip.hide-labels .fish-wrapper > img.fish-bg-shape { transform: translateY(-30%) translateX(4%) scale(1.15) !important; }
+        .skin-rip .fish-label { width: auto; padding: 2px 5px; height: 22px; border-radius: 10px; gap: 1px; font-size: 10px; top: 4px; right: 33px; }
+        body.skin-poto:not(.hide-labels) .fish-wrapper > img.fish-img, body.skin-poto:not(.hide-labels) .fish-wrapper > img.fish-bg-shape { transform: translateY(-36%) translateX(8%) scale(1.05); }
+        .skin-poto.hide-labels .fish-wrapper > img.fish-img, .skin-poto.hide-labels .fish-wrapper > img.fish-bg-shape { transform: translateY(-20%) translateX(10%) scale(1.15) !important; }
+        .skin-poto .fish-label { width: auto; padding: 2px 5px; height: 22px; border-radius: 10px; gap: 1px; font-size: 10px; top: 8px; right: 30px; }
+        body.skin-mj:not(.hide-labels) .fish-wrapper > img.fish-img, body.skin-mj:not(.hide-labels) .fish-wrapper > img.fish-bg-shape { transform: translate(2px, -42%); }
+        .skin-mj.hide-labels .fish-wrapper > img.fish-img, .skin-mj.hide-labels .fish-wrapper > img.fish-bg-shape { transform: translate(1px, -30%) scale(1.05) !important; }
+        .skin-mj .fish-wrapper.large-node > img.fish-img, .skin-mj .fish-wrapper.large-node > img.fish-bg-shape { transform: translate(14px, -30%) scale(0.92)!important; }
+        .skin-mj.hide-labels .fish-wrapper.large-node > img.fish-img, .skin-mj.hide-labels .fish-wrapper.large-node > img.fish-bg-shape { transform: translate(14px, -18%) scale(1) !important; }
+        .skin-mj .fish-label { width: auto; padding: 2px 5px; height: 22px; border-radius: 10px; gap: 1px; font-size: 10px; top: 13px; right: 18px; }
+</style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 mini-mode" id="body-root">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 mini-mode hide-labels" id="body-root">
     <div id="mode-toggle-container">
         <div id="mode-toggle" class="mode-toggle-fixed" onclick="togglePro()">👁️</div>
         <div id="quantum-toggle" class="mode-toggle-fixed hidden" onclick="toggleQuantumMode()" style="top: 100px; font-size: 26px;">⚛️</div>
     </div>
     <div id="leaderboard-wrapper">
         <div class="side-leaderboard-content">
-            <h2 class="text-xl font-black mb-3 text-center" style="color: #463438;">🏆 TOP CATS</h2>
-            <div class="flex gap-2 mb-3">
-                <button onclick="renderRank('steps')" id="tab-steps" class="rank-tab active">STEPS</button>
-                <button onclick="renderRank('time')" id="tab-time" class="rank-tab">TIME</button>
+            <div id="rank-panel" class="side-panel-view flex flex-col flex-grow min-h-0">
+                <h2 class="text-xl font-black mb-3 text-center" style="color: #463438;">TOP CATS</h2>
+                <div class="flex gap-2 mb-3">
+                    <button onclick="playPopSound(); renderRank('steps')" id="tab-steps" class="rank-tab active">STEPS</button>
+                    <button onclick="playPopSound(); renderRank('time')" id="tab-time" class="rank-tab">TIME</button>
+                </div>
+                <div id="rankList" class="flex-grow overflow-y-auto space-y-1 pr-1">
+                    <p class="text-center italic text-gray-400 mt-10 text-sm">Loading...</p>
+                </div>
             </div>
-            <div id="rankList" class="flex-grow overflow-y-auto space-y-1 pr-1">
-                <p class="text-center italic text-gray-400 mt-10 text-sm">Loading...</p>
+            <div id="skin-panel" class="side-panel-view hidden flex flex-col flex-grow min-h-0">
+                <h2 class="text-xl font-black mb-3 text-center" style="color: #463438;">SKINS</h2>
+                <div class="skin-gallery">
+                    <button id="skin-option-default" class="skin-card active" onclick="selectSkin('default')">
+                        <div class="skin-preview">
+                            <img src="./svg/hat-c.svg" class="preview-hat" alt="">
+                            <img src="./svg/011-c.svg" class="preview-cat" alt="Default cat">
+                        </div>
+                        <span>DEFAULT</span>
+                    </button>
+                    <button id="skin-option-rip" class="skin-card" onclick="selectSkin('rip')">
+                        <div class="skin-preview">
+                            <img src="./RIP/Cat16.png" class="preview-cat" alt="RIP cat">
+                        </div>
+                        <span>RIP</span>
+                    </button>
+                    <button id="skin-option-poto" class="skin-card" onclick="selectSkin('poto')">
+                        <div class="skin-preview">
+                            <img src="./poto/cat15.png" class="preview-cat" alt="POTO cat">
+                        </div>
+                        <span>POTO</span>
+                    </button>
+                    <button id="skin-option-mj" class="skin-card" onclick="selectSkin('mj')">
+                        <div class="skin-preview">
+                            <img src="./mj/Cat15.png" class="preview-cat preview-cat-mj" alt="MJ cat">
+                        </div>
+                        <span>MJ</span>
+                    </button>
+                </div>
+                    <h3 class="text-xl font-black text-center text-[#463438] mb-3">FEATURES</h3>
+                    <div class="feature-toggle-row flex justify-center gap-3 w-full pb-4">
+                        <div id="feat-toggle-0" class="qubit-label" onclick="toggleFeature(0)">d1</div>
+                        <div id="feat-toggle-1" class="qubit-label" onclick="toggleFeature(1)">d2</div>
+                    </div>
             </div>
         </div>
-        <div class="bookmark-tab" onclick="toggleLeaderboard()">
+        <div id="rank-bookmark" class="bookmark-tab rank-bookmark active" onclick="toggleSidePanel('rank')">
             <div class="bookmark-text">RANK</div>
+        </div>
+        <div id="skin-bookmark" class="bookmark-tab skin-bookmark" onclick="toggleSidePanel('skin')">
+            <div class="bookmark-text">SKIN</div>
         </div>
     </div>
     <div class="w-full max-w-4xl">
         <div class="flex justify-between w-full px-4 mb-4 items-center mt-6">
             <div class="text-3xl font-black" style="color: #463438;">STEPS: <span id="step-count">0</span> | TIME: <span id="timer">0</span>s</div>
-            <div class="flex items-center gap-12 ml-auto">
+            <div class="flex items-center gap-2 ml-auto">
+                <button id="label-toggle-btn" class="mode-toggle-inline" onclick="toggleLabels()" title="Toggle labels" aria-label="Toggle labels">&#127991;&#65039;</button>
                 <button id="mode-2-btn" class="multi-toggle-btn" onclick="toggleMode2()">Mode: 1</button>
-                <div class="text-3xl font-black" style="color: #7bc202;">LEVEL 4</div>
+                <div class="text-3xl font-black ml-6" style="color: #7bc202;">LEVEL 4</div>
             </div>
         </div>
+        <div class="flex w-full px-4 mt-6 mb-4 items-center justify-between gap-4 progress-row">
+            <div class="text-2xl font-black text-[#463438] shrink-0">MATCHED：</div>
+            <div class="progress-bar-wrapper">
+                <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                <div class="progress-text" id="progress-text">0 / 4</div>
+                <img id="progress-thumb" src="./svg/011-c.svg" class="progress-thumb" alt="cat">
+                <img id="progress-target" src="./svg/011-f.svg" class="progress-target" alt="fish">
+            </div>
+        </div>
+
         <div class="main-layout">
             <div id="pro-panel">
                 <div class="panel-section-title" id="panel-title-gates">Transformations</div>
@@ -184,14 +333,14 @@
                     onclick="handleLineClick(this.id)" onmouseover="syncHighlight(this.id, true)" onmouseout="syncHighlight(this.id, false)"></div>
                 <div id="line-v-1" class="connection-line line-v" style="top: 150px; left: 571px;"
                     onclick="handleLineClick(this.id)" onmouseover="syncHighlight(this.id, true)" onmouseout="syncHighlight(this.id, false)"></div>
-                <div class="node" id="node-0" style="top: 25px; left: 155px;"><div class="fixed-number">00</div><img src="./image/Cat1.svg"></div>
-                <div class="node" id="node-1" style="top: 25px; left: 505px;"><div class="fixed-number">01</div><img src="./image/Cat2.svg"></div>
-                <div class="node" id="node-2" style="bottom: 25px; left: 155px;"><div class="fixed-number">10</div><img src="./image/Cat3.svg"></div>
-                <div class="node" id="node-3" style="bottom: 25px; left: 505px;"><div class="fixed-number">11</div><img src="./image/Cat4.svg"></div>
-                <div id="fish-0" class="fish-wrapper"><div class="fish-label">00</div><img src="./image/Fish1.svg"></div>
-                <div id="fish-1" class="fish-wrapper"><div class="fish-label">01</div><img src="./image/Fish2.svg"></div>
-                <div id="fish-2" class="fish-wrapper"><div class="fish-label">10</div><img src="./image/Fish3.svg"></div>
-                <div id="fish-3" class="fish-wrapper"><div class="fish-label">11</div><img src="./image/Fish4.svg"></div>
+                <div class="node" id="node-0" style="top: 25px; left: 155px;"><div class="fixed-number">00</div><img src="./svg/000-c.svg" class="encoded-img cat-bg-shape" alt=""><img src="./svg/000-c.svg" class="encoded-img" alt="00 cat"></div>
+                <div class="node" id="node-1" style="top: 25px; left: 505px;"><div class="fixed-number">01</div><img src="./svg/001-c.svg" class="encoded-img cat-bg-shape" alt=""><img src="./svg/001-c.svg" class="encoded-img" alt="01 cat"></div>
+                <div class="node" id="node-2" style="bottom: 25px; left: 155px;"><div class="fixed-number">10</div><img src="./svg/010-c.svg" class="encoded-img cat-bg-shape" alt=""><img src="./svg/010-c.svg" class="encoded-img" alt="10 cat"></div>
+                <div class="node" id="node-3" style="bottom: 25px; left: 505px;"><div class="fixed-number">11</div><img src="./svg/011-c.svg" class="encoded-img cat-bg-shape" alt=""><img src="./svg/011-c.svg" class="encoded-img" alt="11 cat"></div>
+                <div id="fish-0" class="fish-wrapper"><div class="fish-label">00</div><img src="./svg/000-f.svg"></div>
+                <div id="fish-1" class="fish-wrapper"><div class="fish-label">01</div><img src="./svg/001-f.svg"></div>
+                <div id="fish-2" class="fish-wrapper"><div class="fish-label">10</div><img src="./svg/010-f.svg"></div>
+                <div id="fish-3" class="fish-wrapper"><div class="fish-label">11</div><img src="./svg/011-f.svg"></div>
                 <div id="canvas-bottom-btns">
                     <button class="func-btn btn-reset" onclick="resetCircuit()">RESET</button>
                     <button id="undo-btn-bottom" class="func-btn btn-undo" onclick="undo()">UNDO</button>
@@ -208,19 +357,215 @@
             <a href="index.html" class="game-btn btn-red px-16">GIVE UP</a>
         </div>
     </div>
-    <div id="victoryModal" class="modal-overlay">
-        <div class="modal-content">
+    <div id="victoryModal" class="modal-overlay" style="z-index: 3000;">
+        <div class="modal-content" style="width: 400px;">
             <h2 class="text-5xl font-black mb-4" style="color: #463438;">MEOW!</h2>
             <h2 class="text-5xl font-black mb-4" style="color: #463438;">🐾</h2>
             <p id="victoryMsg" class="text-xl font-bold mb-6"></p>
-            <button onclick="location.href='index.html'" class="game-btn btn-green w-full mb-4">KEEP GOING</button>
-            <button onclick="viewInLab().style.display='none'" class="game-btn btn-red w-full">VIEW CIRCUIT</button>
+            <div class="victory-actions">
+                <button onclick="location.href='index.html'" class="game-btn btn-blue home-btn" aria-label="Home" title="Home">HOME</button>
+                <button onclick="viewInLab().style.display='none'" class="game-btn btn-red" style="flex: 1; max-width: 150px;">LAB</button>
+            </div>
+            <div class="victory-progress-actions">
+                <button onclick="location.reload()" class="game-btn btn-green replay-btn" aria-label="Play again" title="Play again">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" fill="#fff">
+                        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4C7.58 4 4 7.58 4 12s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-3.06c-.77 1.76-2.54 3-4.67 3c-2.76 0-5-2.24-5-5s2.24-5 5-5c1.38 0 2.63.56 3.54 1.46L12 12h8V4z" />
+                    </svg>
+                </button>
+                <button onclick="location.href='level5.html'" class="game-btn btn-green keep-going-btn">KEEP GOING</button>
+            </div>
         </div>
     </div>
-
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR0J0VXyl5ayKwDXlHimc4WS1FjvGEb2-gTBMhum8APQKfDHxc5wsiWRkNqkxJrocMOw/exec';
+        let labelsOpen = false;
+        function toggleLabels() {
+            
+            if (typeof pop !== 'undefined') { pop.currentTime = 0; pop.play(); }
+            labelsOpen = !labelsOpen;
+            const root = document.getElementById('body-root') || document.body;
+            const btn = document.getElementById('label-toggle-btn');
+            root.classList.toggle('hide-labels', !labelsOpen);
+            if (btn) btn.innerHTML = labelsOpen ? '&#128683;' : '&#127991;&#65039;';
+            updateCircuitLabels();
+            updateFeatureToggleLabels();
+        }
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyv3aQZO44pLQ7rr10pv0cOeJs-vdZehlABjrcJhQNQi9AWsGUutM7KXNFKPbFliqjWLA/exec';
         let steps = 0, time = 0, isPro = false, fishAtNode = [3, 2, 1, 0], gateHistory = [], timerInterval, isSolved = false;
+        const PROGRESS_TOTAL = 4;
+        const PROGRESS_DEFAULT_CODE = '011';
+
+        const PROGRESS_BITS = Math.round(Math.log2(PROGRESS_TOTAL));
+        const PROGRESS_MAX_DISTANCE = PROGRESS_TOTAL * PROGRESS_BITS;
+        let featureStates = Array(PROGRESS_BITS).fill(null);
+        function getHammingDistance(a, b) {
+            const s1 = a.toString(2).padStart(PROGRESS_BITS, '0');
+            const s2 = b.toString(2).padStart(PROGRESS_BITS, '0');
+            let dist = 0;
+            for (let i = 0; i < PROGRESS_BITS; i++) {
+                if (s1[i] !== s2[i]) dist++;
+            }
+            return dist;
+        }
+        function getTotalHammingDistance() {
+            return fishAtNode.reduce((sum, fishId, nodeIndex) => sum + getHammingDistance(nodeIndex, fishId), 0);
+        }
+        function ensureDistanceBadges() {
+            for (let i = 0; i < PROGRESS_TOTAL; i++) {
+                const node = document.getElementById(`node-${i}`);
+                if (!node || document.getElementById(`dist-badge-${i}`)) continue;
+                node.insertAdjacentHTML('beforeend', `<div class="node-dist-badge hidden" id="dist-badge-${i}"></div>`);
+            }
+        }
+        function getFeatureImageIndex(index) {
+            return PROGRESS_BITS === 2 ? index + 2 : index + 1;
+        }
+        function getFeatureSkinFolder() {
+            if (typeof currentSkin === 'undefined') return './RIP/';
+            if (currentSkin === 'rip') return './RIP/';
+            if (currentSkin === 'poto') return './poto/';
+            if (currentSkin === 'mj') return './mj/';
+            return './RIP/';
+        }
+        function updateCircuitLabels() {
+            const folder = getFeatureSkinFolder();
+            for (let i = 0; i < PROGRESS_BITS; i++) {
+                const label = document.getElementById(`q${i}-label`) || document.getElementById(`q-label-${i}`);
+                if (!label) continue;
+                if (labelsOpen) {
+                    label.innerHTML = (typeof isQuantumMode !== 'undefined' && isQuantumMode) ? `q${i}` : `d${i + 1}`;
+                } else {
+                    const imgIndex = getFeatureImageIndex(i);
+                    label.innerHTML = `<img src="${folder}dif${imgIndex}.png" style="width: 36px; height: 36px; object-fit: contain; padding: 2px; transform: translateX(-8px);" alt="dif${imgIndex}">`;
+                }
+            }
+        }
+        function updateFeatureToggleLabels() {
+            for (let i = 0; i < PROGRESS_BITS; i++) {
+                const label = document.getElementById(`feat-toggle-${i}`);
+                if (!label) continue;
+                let badge = '';
+                let styleClass = '';
+                if (featureStates[i] === 1) {
+                    styleClass = 'feature-state-1';
+                    badge = `<div style="position:absolute; top:-6px; right:-6px; background:#FFB800; color:#fff; font-size:12px; font-weight:900; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; z-index:10; box-shadow: 1px 1px 0 rgba(70,52,56,0.3);">1</div>`;
+                } else if (featureStates[i] === 0) {
+                    styleClass = 'feature-state-0';
+                    badge = `<div style="position:absolute; top:-6px; right:-6px; background:#463438; color:#fff; font-size:12px; font-weight:900; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; z-index:10; box-shadow: 1px 1px 0 rgba(70,52,56,0.3);">0</div>`;
+                }
+                if (labelsOpen) {
+                    label.innerHTML = `<div style="position:relative;"><span class="${styleClass}" style="padding: 2px 6px; display: inline-block; border-radius: 6px; border:2px solid transparent;">${(typeof isQuantumMode !== 'undefined' && isQuantumMode) ? `q${i}` : `d${i + 1}`}</span>${badge}</div>`;
+                } else {
+                    const folder = getFeatureSkinFolder();
+                    label.innerHTML = `<div style="position:relative;"><img src="${folder}dif${getFeatureImageIndex(i)}.png" class="${styleClass}" style="width: 36px; height: 36px; object-fit: contain; border-radius: 8px; padding: 2px; border:3px solid transparent;" alt="dif${getFeatureImageIndex(i)}">${badge}</div>`;
+                }
+            }
+        }
+        function toggleFeature(qIndex) {
+            if (typeof pop !== 'undefined') { pop.currentTime = 0; pop.play(); }
+            if (featureStates[qIndex] === null) featureStates[qIndex] = 1;
+            else if (featureStates[qIndex] === 1) featureStates[qIndex] = 0;
+            else featureStates[qIndex] = null;
+            updateCircuitLabels();
+            updateFeatureToggleLabels();
+            updateFeatureHighlights();
+        }
+        function updateFeatureHighlights() {
+            ensureDistanceBadges();
+            const anyActive = featureStates.some(f => f !== null);
+            const root = document.getElementById('body-root') || document.body;
+            root.classList.toggle('feature-filter-active', anyActive);
+            for (let i = 0; i < PROGRESS_TOTAL; i++) {
+                const node = document.getElementById(`node-${i}`);
+                const fish = document.getElementById(`fish-${i}`);
+                const badge = document.getElementById(`dist-badge-${i}`);
+                if (!node) continue;
+                if (!anyActive) {
+                    node.classList.remove('feature-highlight', 'feature-dimmed');
+                    if (fish) fish.classList.remove('feature-highlight', 'feature-dimmed');
+                    if (badge) badge.classList.add('hidden');
+                    continue;
+                }
+                const bits = i.toString(2).padStart(PROGRESS_BITS, '0');
+                let match = true;
+                for (let q = 0; q < PROGRESS_BITS; q++) {
+                    if (featureStates[q] === 1 && bits[q] !== '1') match = false;
+                    if (featureStates[q] === 0 && bits[q] !== '0') match = false;
+                }
+                if (match) {
+                    node.classList.add('feature-highlight');
+                    node.classList.remove('feature-dimmed');
+                    if (fish) {
+                        fish.classList.add('feature-highlight');
+                        fish.classList.remove('feature-dimmed');
+                    }
+                    if (badge) {
+                        const trueFishPos = fishAtNode.indexOf(i);
+                        badge.innerText = getHammingDistance(i, trueFishPos);
+                        badge.classList.remove('hidden');
+                    }
+                } else {
+                    node.classList.remove('feature-highlight');
+                    node.classList.add('feature-dimmed');
+                    if (fish) {
+                        fish.classList.remove('feature-highlight');
+                        fish.classList.add('feature-dimmed');
+                    }
+                    if (badge) badge.classList.add('hidden');
+                }
+            }
+        }
+        function updateProgressImages() {
+            const skin = typeof currentSkin === 'undefined' ? 'default' : currentSkin;
+            const zeroBasedIndex = PROGRESS_TOTAL - 1;
+            let catSrc = `./svg/${PROGRESS_DEFAULT_CODE}-c.svg`;
+            let fishSrc = `./svg/${PROGRESS_DEFAULT_CODE}-f.svg`;
+            if (skin === 'rip') {
+                catSrc = `./RIP/Cat${PROGRESS_TOTAL}.png`;
+                fishSrc = `./RIP/Fish${PROGRESS_TOTAL}.png`;
+            } else if (skin === 'poto') {
+                catSrc = `./poto/cat${zeroBasedIndex}.png`;
+                fishSrc = `./poto/fish${zeroBasedIndex}.png`;
+            } else if (skin === 'mj') {
+                catSrc = `./mj/Cat${zeroBasedIndex}.png`;
+                fishSrc = `./mj/Fish${zeroBasedIndex}.png`;
+            }
+            const thumb = document.getElementById('progress-thumb');
+            const target = document.getElementById('progress-target');
+            if (thumb) thumb.src = catSrc;
+            if (target) target.src = fishSrc;
+        }
+
+        function updateProgressBar(dist) {
+            const fill = document.getElementById('progress-bar-fill');
+            const text = document.getElementById('progress-text');
+            const thumb = document.getElementById('progress-thumb');
+            const wrapper = document.querySelector('.progress-bar-wrapper');
+            if (!fill || !text || !thumb || !wrapper) return;
+            let percent = ((PROGRESS_MAX_DISTANCE - dist) / PROGRESS_MAX_DISTANCE) * 100;
+            if (percent < 0) percent = 0;
+            if (percent > 100) percent = 100;
+            fill.style.width = percent + '%';
+            thumb.style.left = percent + '%';
+            text.innerText = dist;
+            wrapper.classList.toggle('progress-win', dist === 0);
+        }
+
+        const originalProgressUpdateFishUI = updateFishUI;
+        updateFishUI = function() {
+            originalProgressUpdateFishUI.apply(this, arguments);
+            updateProgressBar(getTotalHammingDistance());
+            updateFeatureHighlights();
+        };
+
+        window.addEventListener('load', () => {
+            updateProgressImages();
+            updateCircuitLabels();
+            updateFeatureToggleLabels();
+            ensureDistanceBadges();
+            updateProgressBar(getTotalHammingDistance());
+            updateFeatureHighlights();
+        });
+
         let historyStack = [[]];
         let selectedIndices = [];
         let isMode2 = false;
@@ -230,10 +575,11 @@
         let isTouchDevice = ('ontouchstart' in window || navigator.maxTouchPoints > 0);
         let isQuantumMode = false;
         let autoScrollRAF = null;
-        let scrollSpeed = 0;
-        
+        let scrollSpeed = 0;       
         const pop = new Audio('pop.m4a'), meow = new Audio('meow.m4a');
-
+        function playPopSound() {
+            if (typeof pop !== 'undefined') { pop.currentTime = 0; pop.play(); }
+        }
         function updateScrollSpeed(clientX) {
             const wrapper = document.getElementById('circuit-content-wrapper');
             if (!wrapper) return;
@@ -251,7 +597,6 @@
                 scrollSpeed = 0;
             }
         }
-
         function scrollLoop() {
             const wrapper = document.getElementById('circuit-content-wrapper');
             if (scrollSpeed !== 0) {
@@ -261,56 +606,46 @@
                 autoScrollRAF = null;
             }
         }
-
         window.onload = () => {
             updateFishUI();
             const fishes = document.querySelectorAll('.fish-wrapper');
             fishes.forEach(fw => fw.classList.add('fish-ready'));
-            setTimeout(() => { fishes.forEach(fw => fw.classList.add('fish-animate')); }, 50);
-            
-            timerInterval = setInterval(() => { time++; document.getElementById('timer').innerText = time; }, 1000);
-            
+            setTimeout(() => { fishes.forEach(fw => fw.classList.add('fish-animate')); }, 50); 
+            timerInterval = setInterval(() => { time++; document.getElementById('timer').innerText = time; }, 1000);     
             document.getElementById('quantum-toggle').innerText = isQuantumMode ? "🧊" : "⚛️";
-            document.getElementById('body-root').classList.toggle('mini-mode', !isQuantumMode);
-            
+            document.getElementById('body-root').classList.toggle('mini-mode', !isQuantumMode);    
             updateLabels();
             updateGateButtonsUI();
             updateUndoStatus();
-            fetchLeaderboard();
-            
+            fetchLeaderboard();   
             const circuitWrapper = document.getElementById('circuit-content-wrapper');
             circuitWrapper.addEventListener('wheel', (e) => { 
                 if (Math.abs(e.deltaY) > 0) {
                     e.preventDefault(); 
                     circuitWrapper.scrollLeft += e.deltaY; 
                 }
-            }, { passive: false });
-            
+            }, { passive: false });    
             circuitWrapper.addEventListener('mousemove', (e) => {
                 updateScrollSpeed(e.clientX);
             });
-
             circuitWrapper.addEventListener('mouseleave', () => { 
                 if (draggedIndex === null) scrollSpeed = 0; 
             });
-
             document.addEventListener('dragover', (e) => {
                 if (draggedIndex !== null) {
                     updateScrollSpeed(e.clientX);
                 }
             });
-
             document.addEventListener('dragend', () => {
                 scrollSpeed = 0;
             });
         };
-        
         function updateLabels() {
             const isCube = !isQuantumMode;
             document.getElementById('panel-title-gates').innerText = isCube ? 'Transformations' : 'Quantum Gate';
             document.getElementById('circuit-title-text').innerText = isCube ? 'Paths' : 'Circuit Diagram';
-            document.getElementById('q-label-0').innerText = isCube ? 'd1' : 'q0';
-            document.getElementById('q-label-1').innerText = isCube ? 'd2' : 'q1';
+            updateCircuitLabels();
+            if (typeof updateFeatureToggleLabels === 'function') updateFeatureToggleLabels();
         }
         
         function getRgba(hex, alpha) {
@@ -318,23 +653,19 @@
             const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
-        
         function getGateColorMap(type) {
             if (type.startsWith('X')) return '#e2de6e'; 
             return '#629eed'; 
         }
-
         function toggleLeaderboard() {
             const wrapper = document.getElementById('leaderboard-wrapper');
             wrapper.classList.toggle('expanded');
         }
-
         function handleDragStart(e, index, el) {
             if (isSolved) return;
             draggedIndex = index;
             e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', index.toString());
-            
+            e.dataTransfer.setData('text/plain', index.toString());      
             if (currentDragGhost && currentDragGhost.parentNode) {
                 currentDragGhost.parentNode.removeChild(currentDragGhost);
             }
@@ -351,7 +682,6 @@
 
             setTimeout(() => { el.style.opacity = '0.01'; }, 0);
         }
-
         async function fetchLeaderboard() {
             const listArea = document.getElementById('rankList');
             try {
@@ -367,7 +697,6 @@
                 listArea.innerHTML = '<p class="text-center italic text-red-400 mt-10 text-sm">Load Error</p>';
             }
         }
-        
         function renderRank(type) {
             const tabSteps = document.getElementById('tab-steps');
             const tabTime = document.getElementById('tab-time');
@@ -386,19 +715,17 @@
                 const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1) + ".";
                 const displayName = item.username || item.name || 'Anonymous';
                 const displayValue = type === 'steps' ? item.steps + '🐾' : item.time + 's';
-                html += `<div class="rank-item"><span class="truncate" style="max-width: 90px;">${medal} ${displayName}</span><span class="text-blue-600">${displayValue}</span></div>`;
+                const av=item.photo?`<img src="${item.photo}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:${item.photoX||50}% ${item.photoY||50}%;transform-origin:${item.photoX||50}% ${item.photoY||50}%;transform:scale(${item.photoScale||1});">`:'🐱'; html += `<div class="rank-item"><div class="rank-avatar-sm">${av}</div><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${medal} ${displayName}</span><span class="rank-value">${displayValue}</span></div>`;
             });
             listArea.innerHTML = html;
         }
-        
         function toggleMode2() {
             pop.currentTime = 0; pop.play();
             isMode2 = !isMode2;
             const btn = document.getElementById('mode-2-btn');
             btn.innerText = isMode2 ? "Mode: 2" : "Mode: 1";
             btn.classList.toggle('active-mode', isMode2);
-        }
-        
+        }    
         function toggleQuantumMode() {
             pop.currentTime = 0; pop.play();
             isQuantumMode = !isQuantumMode;
@@ -408,7 +735,6 @@
             updateGateButtonsUI();
             renderCircuit();
         }
-        
         const gateLineMap = {
             X0: ['line-v-0', 'line-v-1'],
             X1: ['line-h-0', 'line-h-1'],
@@ -417,11 +743,9 @@
             C0X10: ['line-v-0'],
             CX10: ['line-v-1']
         };
-        
         function toggleLineHighlight(lineIds, isOn) {
             lineIds.forEach(id => document.getElementById(id)?.classList.toggle('line-highlight', isOn));
         }
-        
         function getGateForLine(lineId) {
             if (isMode2) {
                 if (lineId.includes('h')) return 'X1';
@@ -434,7 +758,6 @@
             }
             return null;
         }
-
         function syncHighlight(lineId, isOn) {
             const gate = getGateForLine(lineId);
             if (!gate) return;
@@ -445,7 +768,6 @@
                 else btn.classList.remove('btn-highlight');
             }
         }
-        
         function syncGateHighlight(gate, isOn) {
             toggleLineHighlight(gateLineMap[gate] || [], isOn);
             const btn = document.getElementById('gate-' + gate.toLowerCase());
@@ -454,31 +776,26 @@
                 else btn.classList.remove('btn-highlight');
             }
         }
-        
         function handleLineClick(lineId) {
             if (isSolved) return;
             const gate = getGateForLine(lineId);
             if (gate) applyGate(gate);
         }
-        
         function togglePro() {
             pop.currentTime = 0; pop.play();
             isPro = !isPro; 
             const b = document.getElementById('body-root');
             b.classList.add('no-fish-anim'); 
-            b.classList.toggle('pro-active', isPro);
-            
+            b.classList.toggle('pro-active', isPro);       
             const qToggle = document.getElementById('quantum-toggle');
             if (isPro) qToggle.classList.remove('hidden');
             else qToggle.classList.add('hidden');
 
             updateFishUI(); 
             setTimeout(() => b.classList.remove('no-fish-anim'), 50);
-            document.getElementById('mode-toggle').innerText = isPro ? "⚡️" : "👁️";
+            document.getElementById('mode-toggle').innerText = isPro ? "⚡" : "👁️";
         }
-        
         function pushHistory() { historyStack.push([...gateHistory]); }
-        
         function applyGate(g) {
             if (isSolved) return;
             pop.currentTime = 0; pop.play();
@@ -494,7 +811,6 @@
                 pushHistory(); recalculatePositions(); finishMove();
             } else { executeGateLogic(g); }
         }
-        
         function getPermutation(g) {
             return [0, 1, 2, 3].map(pos => {
                 let q0 = Math.floor(pos / 2), q1 = pos % 2;
@@ -507,7 +823,6 @@
                 return q0 * 2 + q1;
             });
         }
-        
         function executeGateLogic(g) {
             const permutation = getPermutation(g);
             fishAtNode = fishAtNode.map(pos => permutation[pos]);
@@ -515,8 +830,7 @@
             pushHistory();
             steps = gateHistory.length;
             finishMove();
-        }
-        
+        } 
         function recalculatePositions() {
             fishAtNode = gateHistory.reduce((currentPositions, gate) => {
                 const permutation = getPermutation(gate);
@@ -524,16 +838,20 @@
             }, [3, 2, 1, 0]);
             steps = gateHistory.length;
         }
-        
-        function finishMove() { document.getElementById('step-count').innerText = steps; updateFishUI(); renderCircuit(); checkWin(); }
-        
+        function finishMove() { document.getElementById('step-count').innerText = steps; updateFishUI(); renderCircuit(); checkWin(); }   
         function updateFishUI() {
             for(let i=0; i<4; i++) {
-                const f = document.getElementById(`fish-${i}`), n = document.getElementById(`node-${fishAtNode[i]}`);
-                if(f && n) { f.style.top = (n.offsetTop + 90) + "px"; f.style.left = (n.offsetLeft + 30) + "px"; }
+                const nodeIndex = fishAtNode[i];
+                const f = document.getElementById(`fish-${i}`), n = document.getElementById(`node-${nodeIndex}`);
+                if(f && n) {
+                    f.style.top = (n.offsetTop + (nodeIndex < 2 ? 100 : 104)) + "px";
+                    f.style.left = (n.offsetLeft + 65) + "px";
+                    f.classList.remove('fish-correct');
+                }
+                const nodeEl = document.getElementById(`node-${i}`);
+                if (nodeEl) nodeEl.classList.toggle('node-correct', nodeIndex === i);
             }
         }
-        
         function getHighlightPairsForGate(type) {
             let pairs = [];
             if (type === 'X0') pairs = [[0,2], [1,3]];
@@ -544,7 +862,6 @@
             else if (type === 'C0X10') pairs = [[0,2]];
             return pairs;
         }
-
         function getMiniSquareSVG(type) {
             let pairs = getHighlightPairsForGate(type);
             const miniNodes = [
@@ -568,12 +885,10 @@
             }
             svg += `</svg>`;
             return svg;
-        }
-        
+        }       
         function updateGateButtonsUI() {
             const gates = ['X0', 'X1', 'CX10', 'CX01', 'C0X10', 'C0X01'];
             const targetInner = '<div style="position:absolute; width:2.5px; height:100%; background-color:#463438;"></div><div style="position:absolute; width:100%; height:2.5px; background-color:#463438;"></div>';
-
             gates.forEach(g => {
                 const btn = document.getElementById('gate-' + g.toLowerCase());
                 if (!btn) return;
@@ -599,21 +914,17 @@
                 }
             });
         }
-
         function renderCircuit() {
             const c = document.getElementById('circuit-content'); 
             const wrapper = document.getElementById('circuit-content-wrapper');
             c.innerHTML = '';
             gateHistory.forEach((g, idx) => {
                 const u = document.createElement('div');
-                u.className = 'circuit-unit' + (selectedIndices.includes(idx) ? ' selected' : '');
-                
+                u.className = 'circuit-unit' + (selectedIndices.includes(idx) ? ' selected' : '');             
                 const hex = getGateColorMap(g);
                 u.style.setProperty('--bg-hover', getRgba(hex, 0.35));
-                u.style.setProperty('--border-color', getRgba(hex, 1)); 
-                
-                u.draggable = !isSolved;
-                
+                u.style.setProperty('--border-color', getRgba(hex, 1));                
+                u.draggable = !isSolved;        
                 u.ondragstart = (e) => {
                     if (isVerticalSwipe || isSolved) {
                         e.preventDefault();
@@ -637,8 +948,7 @@
                     
                     e.dataTransfer.setDragImage(currentDragGhost, u.offsetWidth / 2, u.offsetHeight / 2);
                     setTimeout(() => { u.style.opacity = '0.01'; }, 0);
-                };
-                
+                };         
                 u.ondragend = (e) => { 
                     e.target.style.opacity = '1'; 
                     draggedIndex = null; 
@@ -646,17 +956,14 @@
                     Array.from(document.querySelectorAll('.circuit-unit')).forEach(el => {
                         el.classList.remove('drop-hint-left', 'drop-hint-right');
                         el.style.transform = '';
-                    });
-                    
+                    });               
                     if (currentDragGhost && currentDragGhost.parentNode) {
                         currentDragGhost.parentNode.removeChild(currentDragGhost);
                         currentDragGhost = null;
                     }
-                };
-                
+                };          
                 u.onmouseover = () => syncGateHighlight(g, true);
-                u.onmouseout = () => syncGateHighlight(g, false);
-                
+                u.onmouseout = () => syncGateHighlight(g, false);            
                 u.oncontextmenu = (e) => {
                     e.preventDefault();
                     if (isSolved) return;
@@ -664,11 +971,9 @@
                     else selectedIndices.push(idx);
                     renderCircuit();
                 };
-
                 let startY, startX;
                 let isVerticalSwipe = false;
                 let swipeDirectionLocked = false;
-
                 u.addEventListener('touchstart', (e) => {
                     if (e.touches.length === 1) {
                         startY = e.touches[0].clientY;
@@ -676,14 +981,11 @@
                         isVerticalSwipe = false;
                         swipeDirectionLocked = false;
                     }
-                }, { passive: true });
-                
+                }, { passive: true });            
                 u.addEventListener('touchmove', (e) => {
                     if (startY === undefined) return;
-
                     const dy = e.touches[0].clientY - startY;
-                    const dx = e.touches[0].clientX - startX;
-                    
+                    const dx = e.touches[0].clientX - startX;        
                     if (!swipeDirectionLocked && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
                         swipeDirectionLocked = true;
                         if (Math.abs(dy) > Math.abs(dx)) {
@@ -693,15 +995,12 @@
                             return;
                         }
                     }
-
                     if (isVerticalSwipe) {
-                        try { if (e.cancelable) e.preventDefault(); } catch(err) {}
-                        
+                        try { if (e.cancelable) e.preventDefault(); } catch(err) {}                
                         if (Math.abs(dy) > 40) {
                             const triggerDy = dy;
                             startY = undefined;
-                            isVerticalSwipe = false;
-                            
+                            isVerticalSwipe = false;               
                             if (triggerDy > 40) {
                                 const sIdx = selectedIndices.indexOf(idx);
                                 if (sIdx > -1) selectedIndices.splice(sIdx, 1);
@@ -715,13 +1014,11 @@
                         }
                     }
                 }, { passive: false });
-
                 u.addEventListener('touchend', (e) => {
                     startY = undefined;
                     isVerticalSwipe = false;
                     swipeDirectionLocked = false;
                 });
-
                 if (!isTouchDevice) {
                     u.onclick = (e) => {
                         if (isSolved) return;
@@ -730,7 +1027,6 @@
                         deleteGate(idx);
                     };
                 }
-
                 if (!isQuantumMode) {
                     u.innerHTML = getMiniSquareSVG(g);
                 } else {
@@ -752,44 +1048,36 @@
                 }
                 c.appendChild(u);
             });
-
             c.ondragover = (e) => {
                 e.preventDefault();
                 updateScrollSpeed(e.clientX);
                 if (draggedIndex === null || isSolved) return;
-
                 const units = Array.from(c.querySelectorAll('.circuit-unit'));
                 const cRect = c.getBoundingClientRect();
                 const mouseX = e.clientX - cRect.left;
-
                 let currentX = units.length > 0 ? units[0].offsetLeft : 7;
                 let visualMids = [];
-                let mapping = [];
-                
+                let mapping = [];         
                 for (let i = 0; i < units.length; i++) {
                     if (i === draggedIndex) continue;
                     visualMids.push(currentX + units[i].offsetWidth / 2);
                     mapping.push(i);
                     currentX += units[i].offsetWidth;
                 }
-
                 let insertVisualIdx = visualMids.length;
                 for (let v = 0; v < visualMids.length; v++) {
                     if (mouseX < visualMids[v]) {
                         insertVisualIdx = v;
                         break;
                     }
-                }
-                
+                }          
                 let insertIdx = insertVisualIdx < mapping.length ? mapping[insertVisualIdx] : units.length;
-
                 units.forEach(el => el.classList.remove('drop-hint-left', 'drop-hint-right'));
                 if (insertIdx < units.length) {
                     units[insertIdx].classList.add('drop-hint-left');
                 } else if (units.length > 0) {
                     units[units.length - 1].classList.add('drop-hint-right');
                 }
-
                 const gap = (units[0] ? units[0].offsetWidth : 60) * 0.25;
                 units.forEach((unit, i) => {
                     if (i === draggedIndex) {
@@ -802,50 +1090,39 @@
                     unit.style.transform = `translateX(${shift}px)`;
                 });
             };
-
             c.ondrop = (e) => {
                 e.preventDefault();
                 scrollSpeed = 0;
-                const units = Array.from(c.querySelectorAll('.circuit-unit'));
-                
+                const units = Array.from(c.querySelectorAll('.circuit-unit'));           
                 units.forEach(el => {
                     el.classList.remove('drop-hint-left', 'drop-hint-right');
                     el.style.transform = ''; 
-                });
-                
+                });          
                 if (isSolved || draggedIndex === null) return;
-
                 const cRect = c.getBoundingClientRect();
                 const mouseX = e.clientX - cRect.left;
-
                 let currentX = units.length > 0 ? units[0].offsetLeft : 7;
                 let visualMids = [];
-                let mapping = [];
-                
+                let mapping = [];        
                 for (let i = 0; i < units.length; i++) {
                     if (i === draggedIndex) continue;
                     visualMids.push(currentX + units[i].offsetWidth / 2);
                     mapping.push(i);
                     currentX += units[i].offsetWidth;
                 }
-
                 let insertVisualIdx = visualMids.length;
                 for (let v = 0; v < visualMids.length; v++) {
                     if (mouseX < visualMids[v]) {
                         insertVisualIdx = v;
                         break;
                     }
-                }
-                
+                }     
                 let insertIdx = insertVisualIdx < mapping.length ? mapping[insertVisualIdx] : units.length;
-
                 pop.currentTime = 0; pop.play();
-                const movedGate = gateHistory.splice(draggedIndex, 1)[0];
-                
+                const movedGate = gateHistory.splice(draggedIndex, 1)[0];   
                 if (insertIdx > draggedIndex) {
                     insertIdx--;
-                }
-                
+                }   
                 gateHistory.splice(insertIdx, 0, movedGate);
                 pushHistory();
                 selectedIndices = [];
@@ -853,11 +1130,9 @@
                 finishMove();
                 draggedIndex = null;
             };
-
             updateUndoStatus(); 
             setTimeout(() => { if(wrapper) wrapper.scrollTo({ left: wrapper.scrollWidth, behavior: 'smooth' }); }, 100);
         }
-        
         function undo() {
             if (isSolved || historyStack.length <= 1) return;
             pop.currentTime = 0; pop.play();
@@ -865,19 +1140,16 @@
             gateHistory = [...historyStack[historyStack.length - 1]];
             selectedIndices = []; recalculatePositions(); finishMove();
         }
-        
         function resetCircuit() {
             if (isSolved) return;
             pop.currentTime=0; pop.play();
             fishAtNode=[3, 2, 1, 0]; gateHistory=[]; historyStack = [[]]; selectedIndices = []; steps=0; finishMove();
         }
-        
         function deleteGate(idx) {
             if (isSolved) return;
             pop.currentTime=0; pop.play();
             gateHistory.splice(idx,1); pushHistory(); recalculatePositions(); finishMove();
         }
-        
         function updateUndoStatus() {
             const isActive = (historyStack.length > 1 && !isSolved);
             const ub = document.getElementById('undo-btn');
@@ -891,7 +1163,6 @@
                 else { bottomUndo.classList.remove('active'); bottomUndo.style.pointerEvents="none"; }
             }
         }
-        
         async function checkWin() {
             if (fishAtNode.every((pos, i) => pos === i)) {
                 isSolved = true;
@@ -909,7 +1180,7 @@
                     document.getElementById('victoryMsg').innerText = `STEP：${st} | TIME：${ft}s`;
                     document.getElementById('victoryModal').style.display = 'flex';
                 }, 800);
-                if (u) {
+                if (u && sessionStorage.getItem('isGuest') !== 'true') {
                     fetch(SCRIPT_URL, {
                         method: 'POST',
                         mode: 'no-cors',
@@ -936,6 +1207,227 @@
             const labUrl = `lab2.html?circuit=${encodeURIComponent(circuitData)}`;
             window.location.href = labUrl;
         }
-    </script>
+            var activeRankType = 'steps';
+        var rankChampionTimers = [];
+        function rankDisplayName(item) { return item.username || item.name || 'Anonymous'; }
+        function rankAvatarHtml(item) {
+            return item && item.photo ? `<img src="${item.photo}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:${item.photoX||50}% ${item.photoY||50}%;transform-origin:${item.photoX||50}% ${item.photoY||50}%;transform:scale(${item.photoScale||1});">` : '🐱';
+        }
+        function sortedRankData(type) {
+            if (!leaderboardData || leaderboardData.length === 0) return [];
+            const secondary = type === 'steps' ? 'time' : 'steps';
+            return [...leaderboardData].sort((a, b) => {
+                const primaryDiff = Number(a[type] ?? Infinity) - Number(b[type] ?? Infinity);
+                if (primaryDiff !== 0) return primaryDiff;
+                return Number(a[secondary] ?? Infinity) - Number(b[secondary] ?? Infinity);
+            });
+        }
+        function toggleLeaderboard() { const wrapper = document.getElementById('leaderboard-wrapper'); if (!wrapper) return; wrapper.classList.toggle('expanded'); if (wrapper.classList.contains('expanded')) setTimeout(() => showRankChampion(activeRankType), 380); }
+        async function fetchLeaderboard() {
+            const listArea = document.getElementById('rankList');
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getLeaderboard&level=4`);
+                const data = await response.json();
+                leaderboardData = Array.isArray(data) ? data : [];
+                if (leaderboardData.length > 0) renderRank(activeRankType, !(document.getElementById('leaderboard-wrapper')?.classList.contains('expanded')));
+                else if (listArea) listArea.innerHTML = '<p class="text-center italic text-gray-400 mt-10 text-sm">No records yet</p>';
+            } catch (e) {
+                if (listArea) listArea.innerHTML = '<p class="text-center italic text-red-400 mt-10 text-sm">Load Error</p>';
+            }
+        }
+        function renderRank(type, silent) {
+            activeRankType = type === 'time' ? 'time' : 'steps';
+            const tabSteps = document.getElementById('tab-steps'), tabTime = document.getElementById('tab-time'), listArea = document.getElementById('rankList');
+            if (tabSteps && tabTime) {
+                tabSteps.className = activeRankType === 'steps' ? 'rank-tab active' : 'rank-tab bg-gray-100';
+                tabTime.className = activeRankType === 'time' ? 'rank-tab active' : 'rank-tab bg-gray-100';
+            }
+            const sorted = sortedRankData(activeRankType);
+            if (!listArea) return;
+            if (sorted.length === 0) { listArea.innerHTML = '<p class="text-center italic text-gray-400 mt-10 text-sm">No records yet</p>'; return; }
+            let html = '';
+            sorted.slice(0, 10).forEach((item, index) => {
+                const displayValue = activeRankType === 'steps' ? item.steps + '🐾' : item.time + 's';
+                const crown = index === 0 ? '<span class="rank-crown">👑</span>' : '';
+                html += `<div class="rank-item ${index === 0 ? 'rank-champion' : ''}"><div class="rank-player-main"><span class="rank-number">${index + 1}.</span><div class="rank-avatar-wrap">${crown}<div class="rank-avatar-sm">${rankAvatarHtml(item)}</div></div><span class="rank-name">${rankDisplayName(item)}</span></div><span class="rank-value">${displayValue}</span></div>`;
+            });
+            listArea.innerHTML = html;
+            if (!silent) showRankChampion(activeRankType);
+        }
+        function showRankChampion(type) {
+            if (currentSidePanel !== 'rank') return;
+            const wrapper = document.getElementById('leaderboard-wrapper');
+            if (wrapper && !wrapper.classList.contains('expanded')) return;
+            const champion = sortedRankData(type)[0];
+            if (!champion) return;
+            rankChampionTimers.forEach(id => clearTimeout(id));
+            rankChampionTimers = [];
+            let backdrop = document.getElementById('rankChampionBackdrop');
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.id = 'rankChampionBackdrop';
+                backdrop.className = 'rank-champion-backdrop';
+                document.body.appendChild(backdrop);
+            }
+            let toast = document.getElementById('rankChampionToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'rankChampionToast';
+                toast.className = 'rank-champion-toast';
+                document.body.appendChild(toast);
+            }
+            const label = type === 'time' ? 'TIME CHAMPION' : 'STEPS CHAMPION';
+            const anchor = document.querySelector('#rankList .rank-item.rank-champion') || document.querySelector('#rankList .rank-item');
+            const rect = anchor ? anchor.getBoundingClientRect() : { left: 12, top: 110, width: 210, height: 42 };
+            toast.style.left = Math.round(rect.left + 8) + 'px';
+            toast.style.top = Math.round(rect.top + rect.height / 2) + 'px';
+            toast.style.maxWidth = Math.max(220, Math.round(rect.width + 28)) + 'px';
+            backdrop.classList.remove('show');
+            toast.className = 'rank-champion-toast';
+            toast.innerHTML = `<div class="rank-avatar-wrap"><span class="rank-crown">👑</span><div class="rank-avatar-sm">${rankAvatarHtml(champion)}</div></div><div class="rank-champion-text"><span class="rank-champion-label">${label}</span><span class="rank-champion-name">${rankDisplayName(champion)}</span></div>`;
+            void toast.offsetWidth;
+            backdrop.classList.add('show');
+            toast.classList.add('show');
+            rankChampionTimers.push(setTimeout(() => { toast.classList.remove('show'); backdrop.classList.remove('show'); }, 1450));
+        }
+            function replayCurrentLevel() {
+            window.location.reload();
+        }    
+        const SKIN_STORAGE_KEY = 'meowtopiaSkin';
+        const AVAILABLE_SKINS = ['default', 'rip', 'poto', 'mj'];
+        let currentSkin = AVAILABLE_SKINS.includes(sessionStorage.getItem(SKIN_STORAGE_KEY)) ? sessionStorage.getItem(SKIN_STORAGE_KEY) : 'default';
+        let currentSidePanel = 'rank';
+        function getSkinSpriteCount() {
+            return Math.max(
+                document.querySelectorAll('.node[id^="node-"]').length,
+                document.querySelectorAll('.fish-wrapper[id^="fish-"]').length
+            );
+        }
+        function getSkinBits(index, count) {
+            return index.toString(2).padStart(count > 8 ? 4 : count > 4 ? 3 : 2, '0');
+        }
+        function defaultSkinCode(index, count) {
+            const bits = getSkinBits(index, count);
+            if (count > 8) return '0' + bits.slice(2);
+            if (count > 4) return bits;
+            return '0' + bits;
+        }
+        function defaultSkinHat(kind, index, count) {
+            if (count <= 8) return '';
+            const bits = getSkinBits(index, count);
+            if (bits[1] !== '1') return '';
+            const asset = kind === 'cat' ? 'hat-c' : 'hat-f';
+            const cls = kind === 'cat' ? 'cat-hat' : 'fish-hat';
+            return '<img src="./svg/' + asset + '.svg" class="hat-img ' + cls + ' hat-bg-shape" alt=""><img src="./svg/' + asset + '.svg" class="hat-img ' + cls + '" alt="">';
+        }
+        function defaultSkinFaded(index, count) {
+            return count > 8 && getSkinBits(index, count)[0] === '1' ? ' bit-faded' : '';
+        }
+        function catLayerHtml(src, className, alt) {
+            return '<img src="' + src + '" class="' + className + ' cat-bg-shape" alt=""><img src="' + src + '" class="' + className + '" alt="' + alt + '">';
+        }
+        function fishLayerHtml(src, faded, alt) {
+            return '<img src="' + src + '" class="fish-bg-shape encoded-img' + faded + '" alt=""><img src="' + src + '" class="fish-img encoded-img' + faded + '" alt="' + alt + '">';
+        }
+        function skinAssetHtml(kind, index, count, label) {
+            const text = label || getSkinBits(index, count);
+            if (currentSkin === 'rip') {
+                const src = './RIP/' + (kind === 'cat' ? 'Cat' : 'Fish') + (index + 1) + '.png';
+                return kind === 'cat' ? catLayerHtml(src, 'skin-cat encoded-img', text + ' cat') : fishLayerHtml(src, '', text + ' fish');
+            }
+            if (currentSkin === 'poto') {
+                const src = './poto/' + (kind === 'cat' ? 'cat' : 'fish') + index + '.png';
+                return kind === 'cat' ? catLayerHtml(src, 'skin-cat encoded-img', text + ' cat') : fishLayerHtml(src, '', text + ' fish');
+            }
+            if (currentSkin === 'mj') {
+                const src = './mj/' + (kind === 'cat' ? 'Cat' : 'Fish') + index + '.png';
+                return kind === 'cat' ? catLayerHtml(src, 'skin-cat encoded-img', text + ' cat') : fishLayerHtml(src, '', text + ' fish');
+            }
+            const code = defaultSkinCode(index, count);
+            const faded = defaultSkinFaded(index, count);
+            if (kind === 'cat') {
+                return defaultSkinHat('cat', index, count) + catLayerHtml('./svg/' + code + '-c.svg', 'skin-cat encoded-img' + faded, text + ' cat');
+            }
+            return defaultSkinHat('fish', index, count) + fishLayerHtml('./svg/' + code + '-f.svg', faded, text + ' fish');
+        }
+        function applySkinClass() {
+            const root = document.getElementById('body-root') || document.body;
+            root.classList.toggle('skin-rip', currentSkin === 'rip');
+            root.classList.toggle('skin-poto', currentSkin === 'poto');
+            root.classList.toggle('skin-mj', currentSkin === 'mj');
+            ['default', 'rip', 'poto', 'mj'].forEach(skin => {
+                const option = document.getElementById('skin-option-' + skin);
+                if (option) option.classList.toggle('active', currentSkin === skin);
+            });
+        }
+        function refreshSkinAssets() {
+            applySkinClass();
+            const count = getSkinSpriteCount();
+            for (let i = 0; i < count; i++) {
+                const node = document.getElementById('node-' + i);
+                const fish = document.getElementById('fish-' + i);
+                const isMjLarge = currentSkin === 'mj' && i % 2 === 1;
+                if (node) node.classList.toggle('large-node', isMjLarge);
+                if (fish) fish.classList.toggle('large-node', isMjLarge);
+                const nodeLabel = (node && node.querySelector('.fixed-number') && node.querySelector('.fixed-number').textContent) || getSkinBits(i, count);
+                const fishLabel = (fish && fish.querySelector('.fish-label') && fish.querySelector('.fish-label').textContent) || getSkinBits(i, count);
+                if (node) {
+                    node.innerHTML = '<div class="fixed-number">' + nodeLabel + '</div>' + skinAssetHtml('cat', i, count, nodeLabel);
+                }
+                if (fish) {
+                    fish.innerHTML = '<div class="fish-label">' + fishLabel + '</div>' + skinAssetHtml('fish', i, count, fishLabel);
+                }
+            }
+        }
+        function setSidePanel(panel) {
+            if (!['rank', 'skin'].includes(panel)) panel = 'rank';
+            currentSidePanel = panel;
+            const rankPanel = document.getElementById('rank-panel');
+            const skinPanel = document.getElementById('skin-panel');
+            const rankBookmark = document.getElementById('rank-bookmark');
+            const skinBookmark = document.getElementById('skin-bookmark');
+            if (rankPanel) rankPanel.classList.toggle('hidden', panel !== 'rank');
+            if (skinPanel) skinPanel.classList.toggle('hidden', panel !== 'skin');
+            if (rankBookmark) rankBookmark.classList.toggle('active', panel === 'rank');
+            if (skinBookmark) skinBookmark.classList.toggle('active', panel === 'skin');
+        }
+        function toggleSidePanel(panel) {
+            playPopSound();
+            const wrapper = document.getElementById('leaderboard-wrapper');
+            if (!wrapper) return;
+            const isExpanded = wrapper.classList.contains('expanded');
+            if (currentSidePanel === panel && isExpanded) {
+                wrapper.classList.remove('expanded');
+                return;
+            }
+            setSidePanel(panel);
+            wrapper.classList.add('expanded');
+            if (panel === 'rank' && typeof showRankChampion === 'function') {
+                window.setTimeout(() => showRankChampion(typeof activeRankType === 'undefined' ? 'steps' : activeRankType), 380);
+            }
+        }
+        function toggleLeaderboard() {
+            toggleSidePanel('rank');
+        }
+        function selectSkin(skin) {
+            playPopSound();
+            if (!AVAILABLE_SKINS.includes(skin)) skin = 'default';
+            currentSkin = skin;
+            sessionStorage.setItem(SKIN_STORAGE_KEY, skin);
+            if (typeof updateProgressImages === 'function') updateProgressImages();
+            refreshSkinAssets(); updateCircuitLabels();
+            if (typeof updateFeatureToggleLabels === 'function') updateFeatureToggleLabels();
+            if (typeof updateFishUI === 'function') updateFishUI();
+        }
+        (function wrapSkinOnload() {
+            const originalOnload = window.onload;
+            window.onload = function (event) {
+                if (typeof originalOnload === 'function') originalOnload.call(window, event);
+                refreshSkinAssets(); updateCircuitLabels();
+                if (typeof updateFeatureToggleLabels === 'function') updateFeatureToggleLabels();
+            if (typeof updateFishUI === 'function') updateFishUI();
+            };
+        })();
+</script>
 </body>
 </html>
